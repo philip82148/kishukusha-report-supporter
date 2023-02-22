@@ -1,0 +1,13 @@
+GitHub URL: https://github.com/philip82148/kishukusha-form-supporter
+※このURLも参考にしてください。
+
+サーバー移動の際はLINE BOT側の変更が必要なので佐々木に連絡してください。
+
+LINE BOTを新たに用意する場合は自分で行うことができます。
+その場合は、LINE BOTのWebhook URLにindex.phpのURLを設定する必要があるのと、
+config.phpの変更(サーバー情報とMySQLアカウントの設定)とcronの設定が必要です。
+
+サーバーはSSL(https)を設定し、PHPのバージョンは8以上でないと動きません。
+
+cronはphpを定期実行するもので、諸行事届の画像の削除に使われています。
+delete-shogyoji-images.phpを一日1回稼働させるように設定してください。

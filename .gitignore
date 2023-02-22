@@ -1,0 +1,4 @@
+.vscode/
+vendor/
+config.php
+credentials.json

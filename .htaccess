@@ -1,0 +1,5 @@
+order allow,deny
+# phpとjpgのみアクセス可とする
+<Files ~ "\.(php|jpg)$">
+allow from all
+</Files>
