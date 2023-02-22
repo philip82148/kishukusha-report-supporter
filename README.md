@@ -11,9 +11,9 @@
 ### 元サーバーからコピーする場合(コマンドラインが使えない場合)
 kishukusha-form-supporter/フォルダを元サーバーからダウンロード、新サーバーのpublic_html/配下のどこかに配置する。
 
-### git cloneから行う場合(元サーバーのファイルが壊れている場合等)
+### git cloneする場合(元サーバーのファイルが壊れている場合等)
 ```
-git clone kishukusha-form-supporter
+git clone https://github.com/philip82148/kishukusha-form-supporter
 cd kishukusha-form-supporter
 composer require google/apiclient:^2.0
 ```
@@ -31,4 +31,4 @@ config-sample.phpをconfig.phpとリネームし、各値を設定する。
 
 ## 4.cronの設定
 サーバーにcronというサービスがあるので、それを使ってdelete-shogyoji-images.phpを一日1回稼働させるようする。  
-すると、諸行事届の画像の削除が定期的に行われるようになる。
+これにより諸行事届の画像の削除が定期的に行われるようになる。
