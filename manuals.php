@@ -46,13 +46,10 @@ https://github.com/philip82148/kishukusha-form-supporter
 ここで、分かりやすいように具体例を上げると、次のようになっています。
 現在のwebhook.phpのURL: " . WEBHOOK_PARENT_URL . "webhook.php
 現在のkishukusha-form-supporter/のサーバー内のファイルパス: " . __DIR__ . "/
-現在のWebhook.phpのサーバー内のファイルパス: " . __DIR__ . "/webhook.php
+現在のwebhook.phpのサーバー内のファイルパス: " . __DIR__ . "/webhook.php
 
-また、登場人物のそれぞれの現在の所有者は次の通りです。
-LINE BOT アカウント、Google サービスアカウント:佐々木の LINE/Google アカウントで登録してあり、佐々木が所有している。
-プログラムファイル:サーバー上に保存されている。
-MySQL データベース:日吉寄宿舎の HP の WordPress が使っているものと同じものが使われている。
-サーバー:日吉寄宿舎の HP と同じものが使われている。
+webhook.phpのURLのドメイン({$_SERVER['SERVER_NAME']})が寄宿舎のHPと違う場合は寄宿舎のHPのサーバーにはもう一つドメインがある可能性があります。
+サーバー管理画面を参照してください。
 
 分からない場合は佐々木のメアド(" . SSK_EMAIL . ")に連絡してください。"
 );

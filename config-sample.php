@@ -1,7 +1,7 @@
 <?php
 
 // ↓サーバー移動の際はこの項目の変更が必要
-// webhook.phpが配置されている親フォルダのURL
+// webhook.phpが配置されている親フォルダのURL(https://...で始まること)
 // (WEBHOOK_PARENT_URL/webhook.phpとしてブラウザでアクセスすると
 // 「ここが webhook.php です」と表示されるURL)
 define('WEBHOOK_PARENT_URL', 'https://.../kishukusha-form-supporter/');
