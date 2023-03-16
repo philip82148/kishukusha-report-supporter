@@ -1298,7 +1298,7 @@ VERSION\n", true);
 
     private function restoreStorage(): void
     {
-        $storageKey = $this->getStorageKey();
+        $storageKey = self::getStorageKey($this->userId);
         $storage = $this->database->restore($storageKey) ?? [];
         $this->storage = [
             'displayName' => $storage['displayName'] ?? '', // なおこれはログ用であり、プログラム中で使うことはない
@@ -1325,7 +1325,7 @@ VERSION\n", true);
         // deleteStorage()されていなければ保存
         if ($this->storage !== []) {
             $this->storage['lastVersion'] = self::VERSION;
-            $storageKey = $this->getStorageKey();
+            $storageKey = self::getStorageKey($this->userId);
             $this->database->store($storageKey, $this->storage);
         }
     }
@@ -1350,20 +1350,20 @@ VERSION\n", true);
         // 一時ファイル削除
         $this->resetStorage();
 
-        $storageKey = $this->getStorageKey();
+        $storageKey = self::getStorageKey($this->userId);
         $this->database->delete($storageKey);
         $this->storage = [];
     }
 
     private function getLastStorageUpdatedTime(): int
     {
-        $storageKey = $this->getStorageKey();
+        $storageKey = self::getStorageKey($this->userId);
         return $this->database->getUpdatedTime($storageKey);
     }
 
-    private function getStorageKey(): string
+    public static function getStorageKey(string $userId): string
     {
-        return 'storage' . $this->userId;
+        return 'storage' . $userId;
     }
 
     public function storeConfig(): void

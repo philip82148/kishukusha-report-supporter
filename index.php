@@ -31,14 +31,23 @@ foreach ($events as $event) {
     // 設定取得、なければデフォルトで作成
     $config = $database->restore('config');
     if (!isset($config)) {
-        $database->store('config', DEFAULT_CONFIG);
         $config = DEFAULT_CONFIG;
+        $database->store('config', $config);
+    }
+
+    $userId = $event['source']['userId'];
+
+    //  管理者が存在していなければ、このユーザーを管理者にする
+    $storageKey = KishukushaFormSupporter::getStorageKey($config['adminId']);
+    if ($database->restore($storageKey) === null) {
+        $config['adminId'] = $userId;
+        $database->store('config', $config);
     }
 
     // 管理者用意
     $adminSupporter = new KishukushaFormSupporter($config['adminId'], $config, $database);
 
-    $userId = $event['source']['userId'];
+    // イベント処理
     try {
         if ($userId === $config['adminId']) {
             // 管理者である
