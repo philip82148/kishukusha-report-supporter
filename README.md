@@ -65,26 +65,26 @@ WordPress が載った **サーバー**なら**MySQL データベース**も付�
 
 FTP で kishukusha-form-supporter/フォルダを元サーバーからダウンロードし、新サーバーの public_html/配下のどこかにアップロードする。
 
-### 2.**MySQL データベース**と**LINE BOT アカウント**を**PHP プログラム**が使えるようにする
-
-kishukusha-form-supporter/フォルダの中に config.php があるので、それを FTP でダウンロードし、
-
-- WEBHOOK_PARENT_URL
-- DB\_...(**MySQL データベース**の認証情報)
-- CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET(**LINE BOT アカウント**から取得したチャネルアクセストークンとチャネルシークレット)
-
-を書き換えて、FTP で同じ場所にアップロードして上書きする。
-
-### 3.**Google サービスアカウント**を**PHP プログラム**が使えるようにする
+### 2.**Google サービスアカウント**を**PHP プログラム**が使えるようにする
 
 ※前のものを流用する場合はこのステップは飛ばす。  
 認証情報を含んだ json ファイルを credentials.json という名前にして kishukusha-form-supporter/配下に FTP でアップロードする(して、前のものがある場合は上書きする)。
 
-### 4.**LINE BOT アカウント**に**PHP プログラム**と**サーバー**の場所を教える
+### 3.**LINE BOT アカウント**に**PHP プログラム**と**サーバー**の場所を教える
 
-**LINE BOT アカウント**の設定画面から Webhook URL に webhook.php の URL※を設定する。  
+**LINE BOT アカウント**の設定画面から Webhook URL に kishukusha-form-supporter/フォルダ内の webhook.php の URL※を設定する。  
 ※ブラウザでアクセスすると「ここが webhook.php です」と表示される URL。  
 設定する際は「https://...」で始まるようにする(して、**サーバー**も SSL の設定が必要)。
+
+### 4.**MySQL データベース**と**LINE BOT アカウント**を**PHP プログラム**が使えるようにする
+
+kishukusha-form-supporter/フォルダの中に config.php があるので、それを FTP でダウンロードし、
+
+- WEBHOOK_PARENT_URL(webhook.php が配置されている親フォルダの URL)
+- DB\_...(**MySQL データベース**の認証情報)
+- CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET(**LINE BOT アカウント**から取得したチャネルアクセストークンとチャネルシークレット)
+
+を書き換えて、FTP で同じ場所にアップロードして上書きする。
 
 ### 5.諸行事届の画像を一日 1 回行う設定
 

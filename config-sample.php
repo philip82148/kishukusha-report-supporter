@@ -1,7 +1,9 @@
 <?php
 
-// ↓サーバー移動の際はこの項目の変更が必要(サーバー移動の時読んでください.txt参照)
-// webhook.phpが配置されているURL
+// ↓サーバー移動の際はこの項目の変更が必要
+// webhook.phpが配置されている親フォルダのURL
+// (WEBHOOK_PARENT_URL/webhook.phpとしてブラウザでアクセスすると
+// 「ここが webhook.php です」と表示されるURL)
 define('WEBHOOK_PARENT_URL', 'https://.../kishukusha-form-supporter/');
 // MySQLデータベースの設定
 define('DB_HOST', '...');
@@ -29,7 +31,7 @@ define('IMAGE_FOLDER_PATH', __DIR__ . '/image/');
 define('IMAGE_FOLDER_URL', WEBHOOK_PARENT_URL . 'image/');
 
 // Googleドライブへアップロードできるかを試すテスト画像
-define('TEST_IMAGE_FILENAME', 'test.jpg');
+define('TEST_IMAGE_FILENAME', 'user-manual.jpg');
 
 // 佐々木の情報
 define('SSK_ID', '...');
