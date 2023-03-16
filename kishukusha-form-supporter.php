@@ -15,7 +15,7 @@ require_once __DIR__ . '/forms/user-manual.php';
 
 class KishukushaFormSupporter
 {
-    public const VERSION = '7.8.2';
+    public const VERSION = '7.8.3';
 
     /* 届出を追加する際はここの編集とformsフォルダへのファイルの追加、
        上のrequire_once文の追加が必要 */
@@ -1287,7 +1287,7 @@ VERSION\n", true);
     private function doesThisExist(): bool
     {
         // profile取得
-        $ch = curl_init("https://api.line.me/v2/bot/profile/{$userId}");
+        $ch = curl_init("https://api.line.me/v2/bot/profile/{$this->userId}");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Authorization: Bearer ' . CHANNEL_ACCESS_TOKEN
