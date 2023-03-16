@@ -372,6 +372,7 @@ VERSION\n", true);
         $this->pushMessage('管理者が変更されました。');
         $this->pushMessage(ADMIN_MANUAL);
         $this->pushMessage(SERVER_MANUAL);
+        $this->pushMessage('これらのマニュアルは「管理者設定」>「管理者用マニュアル表示」からいつでも確認できます。');
         $this->pushOptions(['OK']);
 
         // adminPhaseの移動(なおここで$this->adminは元管理者)
