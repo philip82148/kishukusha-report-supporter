@@ -367,8 +367,11 @@ VERSION\n", true);
             }
         }
 
-        // 新管理者への通知
+        // 新管理者への通知とマニュアルの表示
+        require_once __DIR__ . '/manuals.php';
         $this->pushMessage('管理者が変更されました。');
+        $this->pushMessage(ADMIN_MANUAL);
+        $this->pushMessage(SERVER_MANUAL);
         $this->pushOptions(['OK']);
 
         // adminPhaseの移動(なおここで$this->adminは元管理者)
