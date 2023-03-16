@@ -532,7 +532,7 @@ VERSION\n", true);
         }
     }
 
-    private function appendToResultSheets(string $formType, array $row, $spreadsheet_service, string $resultSheets_id = NULL)
+    private function appendToResultSheets(string $formType, array $row, $spreadsheet_service, string $resultSheets_id = null)
     {
         if (!isset($resultSheets_id))
             $resultSheets_id = $this->config['resultSheets'];
@@ -618,7 +618,7 @@ VERSION\n", true);
             if ($sheet['properties']['title'] !== $sheetName) continue;
             return $sheet['properties']['sheetId'];
         }
-        return NULL;
+        return null;
     }
 
     private function notifyAppliedForm(self $supporter, array $answers, string $timeStamp, string $checkboxRange): string
@@ -1461,7 +1461,7 @@ VERSION\n", true);
 
     public function insertToAssociativeArray(array &$array, int $offset, array $values): void
     {
-        $array = array_slice($array, 0, $offset, true) + $values + array_slice($array, $offset, NULL, true);
+        $array = array_slice($array, 0, $offset, true) + $values + array_slice($array, $offset, null, true);
     }
 
     public function getEventInfo(): string

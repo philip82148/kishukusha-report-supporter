@@ -22,10 +22,10 @@ class JsonDatabase
         mysqli_query(
             $this->link,
             "CREATE TABLE IF NOT EXISTS `{$tableName}` (
-                `key` varchar(200) NOT NULL,
-                `object_json` varchar(21640) NOT NULL,
-                `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                `key` varchar(200) NOT null,
+                `object_json` varchar(21640) NOT null,
+                `created_at` datetime NOT null DEFAULT CURRENT_TIMESTAMP,
+                `updated_at` datetime NOT null DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 UNIQUE KEY (`key`)
             ) DEFAULT CHARSET=" . DB_CHARSET . ";"
         );
@@ -39,7 +39,7 @@ class JsonDatabase
         $row = mysqli_fetch_assoc($result);
         if ($row)
             return json_decode($row['object_json'], true);
-        return NULL;
+        return null;
     }
 
     public function store(string $key, mixed $object): void
