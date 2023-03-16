@@ -6,7 +6,10 @@ require_once __DIR__ . '/kishukusha-form-supporter.php';
 
 // 署名確認
 $requestBody = file_get_contents('php://input');
-if (!checkSignature($requestBody)) exit;
+if (!checkSignature($requestBody)) {
+    echo 'ここがwebhook.phpです';
+    exit;
+}
 
 // コネクション切断→既読?
 set_time_limit(20); // 永遠に稼働しないようにする

@@ -24,22 +24,24 @@ composer require google/apiclient:^2.0
 ```
 
 git と composer(と php)を適宜インストールし、上記を実行する。  
-サーバー上で実行するか、ローカルで 4.config.php の設定 まで行って、kishukusha-form-supporter/ごとサーバーにアップロードする。  
+サーバー上で実行するか、ローカルで 3.config.php の設定 まで行って、kishukusha-form-supporter/ごとサーバーにアップロードする。  
 この操作により vendor/というフォルダができる。
 
-## 2.LINE BOT アカウントの設定
-
-LINE BOT の Webhook URL は webhook.php の URL にする。
-
-## 3.Google API の設定
+## 2.Google API の設定
 
 認証情報を含んだ json ファイルを credentials.json という名前にして kishukusha-form-supporter/配下に配置する。  
 元サーバーから引き継ぐ場合は元サーバーの credentials.json をダウンロードして配置する。
 
-## 4.config.php の設定
+## 3.config.php の設定
 
 config-sample.php を config.php とリネームし、各値を設定する。  
 ※ここまでの操作をローカルで行った場合はここでサーバーにアップロードする。
+
+## 4.LINE BOT アカウントの設定
+
+LINE BOT の Webhook URL は webhook.php の URL にする。  
+※ブラウザでアクセスすると「ここが webhook.php です」と表示されるページ。  
+設定する際は「https://...」で始まるようにする(して、サーバーも SSL の設定が必要)。
 
 ## 5.cron の設定
 
