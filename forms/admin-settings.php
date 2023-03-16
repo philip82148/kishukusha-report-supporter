@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../form-template.php';
 
-class AdminSettings extends FormTemplate
+class AdminSettings extends FormTemplateBasic
 {
     public function form(array $message): void
     {
@@ -159,16 +159,7 @@ class AdminSettings extends FormTemplate
         }
     }
 
-    protected function applyForm(): void
-    {
-    }
-
-    public function pushAdminMessages(string $displayName, array $answers, string $timeStamp, string $receiptNo): bool
-    {
-        return false;
-    }
-
-    protected function storeOrAskAgain(string $type, string|array $message): bool|string|array
+    protected function storeOrAskAgain(string $type, string|array $message): bool
     {
         switch ($type) {
             case '設定項目':

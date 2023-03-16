@@ -1,7 +1,6 @@
 <?php
 
 require_once __DIR__ . '/functions.php';
-require_once __DIR__ . '/forms/ask-name.php';
 require_once __DIR__ . '/forms/tamokuteki.php';
 require_once __DIR__ . '/forms/gaiburaihousha.php';
 require_once __DIR__ . '/forms/chokigaihaku.php';
@@ -9,6 +8,8 @@ require_once __DIR__ . '/forms/shogyoji.php';
 require_once __DIR__ . '/forms/odoriba.php';
 require_once __DIR__ . '/forms/haibi309.php';
 require_once __DIR__ . '/forms/bikes.php';
+require_once __DIR__ . '/forms/nyuryokurireki.php';
+require_once __DIR__ . '/forms/ask-name.php';
 require_once __DIR__ . '/forms/admin-settings.php';
 
 class KishukushaFormSupporter
@@ -24,7 +25,9 @@ class KishukushaFormSupporter
         '舎生大会・諸行事届' => Shogyoji::class,
         '踊り場私物配備届' => Odoriba::class,
         '309私物配備届' => Haibi309::class,
-        '自転車・バイク配備届' => Bikes::class
+        '自転車・バイク配備届' => Bikes::class,
+        '入力履歴を削除する' => Nyuryokurireki::class,
+        '自分の名前を変更する' => AskName::class
     ];
 
     public const MAX_PREVIOUS_ANSWERS = 5;
@@ -164,20 +167,10 @@ class KishukushaFormSupporter
             case '回答を始める':
                 $this->pushMessage('申請するものを選んでください。', true);
                 $this->pushOptions(array_keys(self::FORMS), true);
-                $this->pushOptions([
-                    '入力履歴を削除する',
-                    '自分の名前を変更する'
-                ], true);
                 if ($this->isThisAdmin())
                     $this->pushOptions(['管理者設定'], true);
                 $this->pushOptions(['キャンセル']);
                 $this->resetStorage();
-                break;
-            case '入力履歴を削除する':
-                $this->nyuryokurireki($message);
-                break;
-            case '自分の名前を変更する':
-                (new AskName($this))->form($message);
                 break;
             case '管理者設定':
                 if ($this->isThisAdmin()) {
@@ -210,39 +203,6 @@ class KishukushaFormSupporter
 
 VERSION\n", true);
         $this->pushOptions(['回答を始める']);
-    }
-
-    private function nyuryokurireki(array $message): void
-    {
-        if ($message['type'] !== 'text') {
-            $this->askAgainBecauseWrongReply();
-            return;
-        }
-        $message = $message['text'];
-
-        // 一番最初
-        if (count($this->storage['phases']) === 0) {
-            // 質問文送信
-            $this->pushMessage("ボットに保存された入力履歴を削除します。\nよろしいですか？", true);
-
-            // 選択肢表示
-            $this->pushOptions(['はい', 'キャンセル']);
-
-            $this->storage['phases'][] = 'confirming';
-            return;
-        }
-
-        // 確認
-        switch ($message) {
-            case 'はい':
-                $this->storage['previousAnswers'] = [];
-                $this->pushMessage("入力履歴を削除しました。");
-                $this->resetForm();
-                break;
-            default:
-                $this->askAgainBecauseWrongReply();
-                break;
-        }
     }
 
     // 管理者、届出承認用

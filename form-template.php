@@ -2,21 +2,20 @@
 
 require_once __DIR__ . '/kishukusha-form-supporter.php';
 
-abstract class FormTemplate
+abstract class FormTemplateBasic
 {
-    protected KishukushaFormSupporter $supporter;
-
-    public function __construct(KishukushaFormSupporter $supporter)
+    public function __construct(protected KishukushaFormSupporter $supporter)
     {
-        $this->supporter = $supporter;
     }
-
     abstract public function form(array $message): void;
-    abstract protected function storeOrAskAgain(string $type, string|array $message): bool|string|array;
+}
+
+abstract class FormTemplate extends FormTemplateBasic
+{
     abstract protected function applyForm(): void;
     abstract public function pushAdminMessages(string $displayName, array $answers, string $timeStamp, string $receiptNo): bool;
 
-    public function confirm(array $types = []): void
+    protected function confirm(array $types = []): void
     {
         /* // 一番長いラベルを探す
         $maxLabelLength = 2;
@@ -54,7 +53,7 @@ abstract class FormTemplate
         $this->supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);
     }
 
-    public function confirming(string $message, bool $reset = true): bool
+    protected function confirming(string $message, bool $reset = true): bool
     {
         switch ($message) {
             case 'はい':
