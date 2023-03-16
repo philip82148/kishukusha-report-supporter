@@ -1,21 +1,98 @@
-# 必要なもの
+# 寄宿舎届出サポートの仕組み
 
-- SSL(https)を設定し、PHP 8.0 以上が載ったサーバー
-- MySQL データベースの認証情報(WordPress が載ったサーバーなら wp-config.php に載っている。もしくはサーバー管理画面から作成可能)
-- Messaging API を設定してチャネルアクセストークンとチャネルシークレットが取得でき、Webhook URL が設定できる LINE BOT([Line Messaging API で簡単 Line Bot 作成（超初心者向け）](https://qiita.com/YSFT_KOBE/items/8dc62ac40c5112df2ed3))
-- (元サーバーの Google Service Account を引き継がずに新たに用意する場合)  
-  [Sheets API を使って PHP で Google スプレッドシートにデータを保存する](https://bashalog.c-brains.jp/19/04/12-101500.php)を参考に取得した json ファイル。  
-  ただし、この記事の API に加えて Drive API も有効にする必要がある。
+## 登場人物
 
-# 使用方法
+**LINE BOT アカウント**:ユーザーから送られてくる LINE の受信元/ユーザーに返ってくる LINE の送信元。  
+**Google サービスアカウント**:Google スプレッドシートや Google ドライブを操作する Google アカウント。  
+**MySQL データベース**:やり取りを行うためにユーザーの前回の回答等を保存しているデータベース。  
+**PHP プログラム**:佐々木が作った回答を**MySQL データベース**に保存したり、**LINE BOT アカウント**や**Google サービスアカウント**を操作したりするプログラムファイル。  
+**サーバー**:**PHP プログラム**を保存し、実行するもの。
 
-## 1.インストール
+## 処理の流れ
 
-### 元サーバーからコピーする場合(コマンドラインが使えない場合)
+寄宿舎届出サポートにメッセージを送る。  
+↓  
+**LINE BOT アカウント**が送られてきたメッセージの内容を**サーバー**に送る。  
+↓  
+**サーバー**が**PHP プログラム**を実行する。  
+必要に応じて**Google サービスアカウント**でスプレッドシート等を操作した後、返信内容を**LINE BOT アカウント**に送る。  
+ユーザーの回答は**MySQL データベース**に保存される。
+↓  
+寄宿舎届出サポートから返信が返ってくる。
 
-kishukusha-form-supporter/フォルダを元サーバーからダウンロード、新サーバーの public_html/配下のどこかに配置する。
+## 登場人物はどこにいるか
 
-### git clone する場合(元サーバーのファイルが壊れている場合等)
+**LINE BOT アカウント**、**Google サービスアカウント**:佐々木の LINE/Google アカウントで登録してあり、佐々木が所有している。
+**プログラムファイル**:**サーバー**上に保存されている。
+**サーバー**:日吉寄宿舎の HP と同じものが使われている。
+**MySQL データベース**:日吉寄宿舎の HP の WordPress が使っているものと同じものが使われている。
+
+# サーバー移動の際にすること
+
+以下は比較的高度な内容となる。  
+やり方はネットで調べればわかる(「FTP やり方」「サーバー名 FTP やり方」等で検索)と思うので、調べながらやってほしい。
+
+## 必要な技術
+
+FTP という方法で**サーバー**にファイルをアップロードすることが必要になる。
+
+## 必要なもの
+
+### **サーバー**(SSL(https)を設定し、PHP 8.0 以上が載っているもの)
+
+デフォルトでは有効になっていない可能性が高いが、大抵のサーバーは SSL と PHP 8.0 以上に対応しているはずだ。  
+SSL は設定していない場合**LINE BOT アカウント**が**サーバー**に受信内容を送れない。
+PHP 8.0 以上に対応していない場合は**PHP プログラム**が実行できない。
+
+### **MySQL データベース**の認証情報
+
+WordPress が載った **サーバー**なら**MySQL データベース**も付帯している。  
+それにアクセスするための認証情報は WordPress の設定ファイルである wp-config.php(「wp-config.php 場所」で検索し、FTP でダウンロードする) に載っているものを使うか、もしくはサーバー管理画面から新しく作成することが可能である。
+
+### Messaging API を設定した**LINE BOT**
+
+参考:[Line Messaging API で簡単 Line Bot 作成（超初心者向け）](https://qiita.com/YSFT_KOBE/items/8dc62ac40c5112df2ed3)
+
+### (必須ではない)**Google サービスアカウント**
+
+これは前のものをそのまま流用すればよいので、わざわざ用意する必要はない。  
+だが、何らかの理由で**Google サービスアカウント**を新しく用意したい場合は[Sheets API を使って PHP で Google スプレッドシートにデータを保存する](https://bashalog.c-brains.jp/19/04/12-101500.php)を参考にアカウントを作成、json ファイルを取得する。  
+ただし、この記事では Spreadsheet API のみ有効にしているが、寄宿舎届出サポートでは Drive API も合わせて有効にする必要がある。
+
+## 手順
+
+### 1.**PHP プログラム**を**サーバー**上に配置する
+
+FTP で kishukusha-form-supporter/フォルダを元サーバーからダウンロードし、新サーバーの public_html/配下のどこかにアップロードする。
+
+### 2.**MySQL データベース**と**LINE BOT アカウント**を**PHP プログラム**が使えるようにする
+
+kishukusha-form-supporter/フォルダの中に config.php があるので、それを FTP でダウンロードし、
+
+- WEBHOOK_PARENT_URL
+- DB\_...(**MySQL データベース**の認証情報)
+- CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET(**LINE BOT アカウント**から取得したチャネルアクセストークンとチャネルシークレット)
+
+を書き換えて、FTP で同じ場所にアップロードして上書きする。
+
+### 3.**Google サービスアカウント**を**PHP プログラム**が使えるようにする
+
+※前のものを流用する場合はこのステップは飛ばす。  
+認証情報を含んだ json ファイルを credentials.json という名前にして kishukusha-form-supporter/配下に FTP でアップロードする(して、前のものがある場合は上書きする)。
+
+### 4.**LINE BOT アカウント**に**PHP プログラム**と**サーバー**の場所を教える
+
+**LINE BOT アカウント**の設定画面から Webhook URL に webhook.php の URL※を設定する。  
+※ブラウザでアクセスすると「ここが webhook.php です」と表示される URL。  
+設定する際は「https://...」で始まるようにする(して、**サーバー**も SSL の設定が必要)。
+
+### 5.諸行事届の画像を一日 1 回行う設定
+
+**サーバー**に cron というサービスがあるので、それに kishukusha-form-supporter/配下の delete-shogyoji-images.php という**PHP プログラムファイル**を設定し、一日 1 回稼働させるようする。
+
+## git clone で行う場合
+
+元サーバーのファイルが壊れている場合等で、手順 1 からできない場合やコマンドラインが使える場合は下記を実行する。
 
 ```
 git clone https://github.com/philip82148/kishukusha-form-supporter
@@ -23,27 +100,7 @@ cd kishukusha-form-supporter
 composer require google/apiclient:^2.0
 ```
 
-git と composer(と php)を適宜インストールし、上記を実行する。  
-サーバー上で実行するか、ローカルで 3.config.php の設定 まで行って、kishukusha-form-supporter/ごとサーバーにアップロードする。  
-この操作により vendor/というフォルダができる。
+※git や composer(、php)は適宜インストールすること。
 
-## 2.Google API の設定
-
-認証情報を含んだ json ファイルを credentials.json という名前にして kishukusha-form-supporter/配下に配置する。  
-元サーバーから引き継ぐ場合は元サーバーの credentials.json をダウンロードして配置する。
-
-## 3.config.php の設定
-
-config-sample.php を config.php とリネームし、各値を設定する。  
-※ここまでの操作をローカルで行った場合はここでサーバーにアップロードする。
-
-## 4.LINE BOT アカウントの設定
-
-LINE BOT の Webhook URL は webhook.php の URL にする。  
-※ブラウザでアクセスすると「ここが webhook.php です」と表示されるページ。  
-設定する際は「https://...」で始まるようにする(して、サーバーも SSL の設定が必要)。
-
-## 5.cron の設定
-
-サーバーに cron というサービスがあるので、それを使って delete-shogyoji-images.php を一日 1 回稼働させるようする。  
-これにより諸行事届の画像の削除が定期的に行われるようになる。
+composer というコマンドにより vendor/というフォルダができる。  
+これをサーバー上で実行するか、ローカルで手順 3 まで行って、kishukusha-form-supporter/ごとサーバーにアップロードする。
