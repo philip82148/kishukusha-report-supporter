@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../form-template.php';
+require_once __DIR__ . '/../manuals.php';
 
 class AdminSettings extends FormTemplateBasic
 {
@@ -18,6 +19,7 @@ class AdminSettings extends FormTemplateBasic
 
             // 選択肢
             $this->supporter->pushOptions([
+                '管理者用マニュアル表示',
                 '行事データ再読み込み',
                 '最大外部来訪者数変更',
                 '任期終了日変更',
@@ -44,6 +46,11 @@ class AdminSettings extends FormTemplateBasic
             }
 
             switch ($this->supporter->storage['unsavedAnswers']['設定項目']) {
+                case '管理者用マニュアル表示':
+                    $this->supporter->pushMessage(ADMIN_MANUAL);
+                    $this->supporter->pushMessage(SERVER_MANUAL);
+                    $this->supporter->resetForm();
+                    return;
                 case '行事データ再読み込み':
                     // 質問
                     $replyMessage = "行事データの再読み込みを行いますか？\n\n現在読み込まれている行事:\n" . $this->getEventListString();
@@ -164,6 +171,7 @@ class AdminSettings extends FormTemplateBasic
         switch ($type) {
             case '設定項目':
                 switch ($message) {
+                    case '管理者用マニュアル表示':
                     case '行事データ再読み込み':
                     case '最大外部来訪者数変更':
                     case '任期終了日変更':

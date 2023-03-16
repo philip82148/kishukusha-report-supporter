@@ -11,6 +11,7 @@ require_once __DIR__ . '/forms/bikes.php';
 require_once __DIR__ . '/forms/nyuryokurireki.php';
 require_once __DIR__ . '/forms/ask-name.php';
 require_once __DIR__ . '/forms/admin-settings.php';
+require_once __DIR__ . '/forms/user-manual.php';
 
 class KishukushaFormSupporter
 {
@@ -27,7 +28,8 @@ class KishukushaFormSupporter
         '309私物配備届' => Haibi309::class,
         '自転車・バイク配備届' => Bikes::class,
         '入力履歴を削除する' => Nyuryokurireki::class,
-        '自分の名前を変更する' => AskName::class
+        '自分の名前を変更する' => AskName::class,
+        'マニュアルを見る' => UserManual::class
     ];
 
     public const MAX_PREVIOUS_ANSWERS = 5;
