@@ -1,7 +1,7 @@
 <?php
 
 // ↓サーバー移動の際はこの項目の変更が必要(サーバー移動の時読んでください.txt参照)
-// index.phpが配置されているURL
+// webhook.phpが配置されているURL
 define('WEBHOOK_PARENT_URL', 'https://.../kishukusha-form-supporter/');
 // MySQLデータベースの設定
 define('DB_HOST', '...');
