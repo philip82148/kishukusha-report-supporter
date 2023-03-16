@@ -40,13 +40,6 @@ foreach ($events as $event) {
 
     $userId = $event['source']['userId'];
 
-    //  管理者が存在していなければ、このユーザーを管理者にする
-    $storageKey = KishukushaFormSupporter::getStorageKey($config['adminId']);
-    if ($database->restore($storageKey) === null) {
-        $config['adminId'] = $userId;
-        $database->store('config', $config);
-    }
-
     // 管理者用意
     $adminSupporter = new KishukushaFormSupporter($config['adminId'], $config, $database);
 

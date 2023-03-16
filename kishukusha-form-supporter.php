@@ -15,7 +15,7 @@ require_once __DIR__ . '/forms/user-manual.php';
 
 class KishukushaFormSupporter
 {
-    public const VERSION = '7.8.1';
+    public const VERSION = '7.8.2';
 
     /* 届出を追加する際はここの編集とformsフォルダへのファイルの追加、
        上のrequire_once文の追加が必要 */
@@ -367,8 +367,7 @@ VERSION\n", true);
             }
         }
 
-        // 新管理者への通知(adminがパスワードを打ち込む可能性もあるのでinitReply()する)
-        $this->initReply();
+        // 新管理者への通知
         $this->pushMessage('管理者が変更されました。');
         $this->pushOptions(['OK']);
 
@@ -382,7 +381,10 @@ VERSION\n", true);
             // adminPhaseの一番最後の質問を元adminに返す
             $this->admin->storage['lastQuestions'] = $adminPhase[0]['lastQuestions'];
             $this->admin->storage['lastQuickReply'] = $adminPhase[0]['lastQuickReply'];
-            $this->admin->storeStorage();
+
+            // 元管理者が存在しなければ保存はしない
+            if ($this->admin->doesThisExist())
+                $this->admin->storeStorage();
 
             $this->restoreStorage(); // 他に発生したトランザクションについて更新
 
@@ -393,16 +395,40 @@ VERSION\n", true);
 
             $this->storage['adminPhase'] = array_merge($this->storage['adminPhase'], $adminPhase);
         } else {
-            $this->admin->storeStorage();
+            // 元管理者が存在しなければ保存はしない
+            if ($this->admin->doesThisExist())
+                $this->admin->storeStorage();
             // このあとstoreすることになるので、ともかくrestoreする
             $this->restoreStorage(); // 他に発生したトランザクションについて更新
         }
+
+        // 変更
+        $this->admin->admin = $this;
+        $this->admin = $this;
 
         return true;
     }
 
     public function applyForm(array $answers, array $answersForSheets, bool $needCheckbox = false, string $message = ''): void
     {
+        // 承認が必要な届出だが、管理者の存在が確認できない場合
+        if ($needCheckbox && !$this->isThisAdmin() && !$this->admin->doesThisExist()) {
+            // このユーザーを管理者にする
+            // configの書き換え
+            $this->config['adminId'] = $this->userId;
+            $this->storeConfig();
+
+            // 変更
+            $this->admin->admin = $this;
+            $this->admin = $this;
+
+            // 通知
+            $this->pushMessage("ボットに登録された管理者のアカウントの存在が確認できませんでした。
+管理者がボットのブロックやLINEアカウントの削除等をした可能性があります。
+管理者のアカウントの存在確認が出来なくなってから初めて承認が必要な届出を行ったあなたのアカウントに管理者権限を移行しました。
+あなたが風紀でない場合は風紀に連絡、あなたが現役舎生でない場合はボットをブロックしてください。");
+        }
+
         try {
             $timeStamp = date('Y/m/d H:i:s');
             $appendRow = array_merge([$timeStamp], $answersForSheets);
@@ -1170,8 +1196,8 @@ VERSION\n", true);
         if (isset($this->messages[$lastIndex]['text']))
             $this->messages[$lastIndex]['text'] = preg_replace('/VERSION\n$/', '(現在のバージョン:' . self::VERSION . ')', $this->messages[$lastIndex]['text']);
 
-        // 質問があれば保存
-        if ($this->questions !== []) {
+        // 質問があり、deleteStorage()されていなければ保存
+        if ($this->questions !== [] && $this->storage !== []) {
             $this->storage['lastQuestions'] = $this->questions;
             $this->storage['lastQuickReply'] = $this->quickReply ?? null;
         }
@@ -1242,7 +1268,7 @@ VERSION\n", true);
         if (!isset($userId))
             $userId = $this->userId;
 
-        // 取得
+        // profile取得
         $ch = curl_init("https://api.line.me/v2/bot/profile/{$userId}");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
@@ -1258,9 +1284,31 @@ VERSION\n", true);
         return $displayName;
     }
 
+    private function doesThisExist(): bool
+    {
+        // profile取得
+        $ch = curl_init("https://api.line.me/v2/bot/profile/{$userId}");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Authorization: Bearer ' . CHANNEL_ACCESS_TOKEN
+        ));
+        $result = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        curl_close($ch);
+
+        // エラーが起こってかつmessageがnot foundの場合のみ存在しないと判断する
+        if ($httpcode >= 400 && $httpcode < 410) {
+            $message = json_decode($result, true)["message"] ?? '';
+            if ($message === 'Not found')
+                return false;
+        }
+
+        return true;
+    }
+
     private function restoreStorage(): void
     {
-        $storageKey = self::getStorageKey($this->userId);
+        $storageKey = $this->getStorageKey();
         $storage = $this->database->restore($storageKey) ?? [];
         $this->storage = [
             'displayName' => $storage['displayName'] ?? '', // なおこれはログ用であり、プログラム中で使うことはない
@@ -1287,7 +1335,7 @@ VERSION\n", true);
         // deleteStorage()されていなければ保存
         if ($this->storage !== []) {
             $this->storage['lastVersion'] = self::VERSION;
-            $storageKey = self::getStorageKey($this->userId);
+            $storageKey = $this->getStorageKey();
             $this->database->store($storageKey, $this->storage);
         }
     }
@@ -1312,20 +1360,20 @@ VERSION\n", true);
         // 一時ファイル削除
         $this->resetStorage();
 
-        $storageKey = self::getStorageKey($this->userId);
+        $storageKey = $this->getStorageKey();
         $this->database->delete($storageKey);
         $this->storage = [];
     }
 
     private function getLastStorageUpdatedTime(): int
     {
-        $storageKey = self::getStorageKey($this->userId);
+        $storageKey = $this->getStorageKey();
         return $this->database->getUpdatedTime($storageKey);
     }
 
-    public static function getStorageKey(string $userId): string
+    public function getStorageKey(): string
     {
-        return 'storage' . $userId;
+        return 'storage' . $this->userId;
     }
 
     public function storeConfig(): void
