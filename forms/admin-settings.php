@@ -102,19 +102,40 @@ class AdminSettings extends FormTemplateBasic
             // 質問
             switch ($this->supporter->storage['unsavedAnswers']['設定項目']) {
                 case '行事スプレッドシートID変更':
+                    $this->supporter->pushMessage("行事スプレッドシートのURLまたはIDを入力してください。
+現在のURL: https://docs.google.com/spreadsheets/d/{$this->supporter->config['variableSheets']}", true);
+                    break;
+
                 case '出力先スプレッドシートID変更':
-                    $this->supporter->pushMessage("スプレッドシートのURLまたはIDを入力してください。", true);
+                    $this->supporter->pushMessage("提出された届出の内容を記録するスプレッドシートのURLまたはIDを入力してください。
+現在のURL: https://docs.google.com/spreadsheets/d/{$this->supporter->config['resultSheets']}", true);
                     break;
+
                 case '舎生大会・諸行事届用画像フォルダID変更':
-                    $this->supporter->pushMessage("五役とボットのみに共有した共有Google Driveにフォルダを作成し、そのフォルダのURLまたはIDを入力してください。
+                    $this->supporter->pushMessage("舎生大会・諸行事届の証拠画像を保存するための、五役とボットのみに共有した共有Google Drive内のフォルダのURLまたはIDを入力してください。
 ※プライバシーに関わる画像がアップロードされる可能性があるため、五役とボットのみに共有したフォルダにしてください。
-また、ボットに画像の完全な削除権限を与えるために、ボットにコンテンツ管理者ではなく管理者の権限を与えてください。", true);
+また、ボットに画像の完全な削除権限を与えるために、ボットにコンテンツ管理者ではなく管理者の権限を与えてください。
+現在のURL: https://drive.google.com/drive/u/0/folders/{$this->supporter->config['shogyojiImageFolder']}", true);
                     break;
+
                 case '多目的室使用届用画像フォルダID変更':
+                    $this->supporter->pushMessage("多目的室使用届の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
+現在のURL: https://drive.google.com/drive/u/0/folders/{$this->supporter->config['tamokutekiImageFolder']}", true);
+                    break;
+
                 case '踊り場私物配備届用画像フォルダID変更':
+                    $this->supporter->pushMessage("踊り場私物配備届の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
+現在のURL: https://drive.google.com/drive/u/0/folders/{$this->supporter->config['odoribaImageFolder']}", true);
+                    break;
+
                 case '309私物配備届用画像フォルダID変更':
+                    $this->supporter->pushMessage("309私物配備届の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
+現在のURL: https://drive.google.com/drive/u/0/folders/{$this->supporter->config['309ImageFolder']}", true);
+                    break;
+
                 case '自転車・バイク配備届用画像フォルダID変更':
-                    $this->supporter->pushMessage("Google DriveのフォルダのURLまたはIDを入力してください。", true);
+                    $this->supporter->pushMessage("自転車・バイク配備届の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
+現在のURL: https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImageFolder']}", true);
                     break;
             }
 
