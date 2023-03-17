@@ -26,8 +26,8 @@ foreach ($shogyojiImages as $eventDate => $ids) {
 
     foreach ($ids as $i => $id) {
         try {
-            $drive->files->delete($id, ['supportsAllDrives' => true]);
-            // $drive->files->trash($id, ['supportsAllDrives' => true]); // ゴミ箱に移動するだけ
+            // $drive->files->trash($id, ['supportsAllDrives' => true]); // ゴミ箱に移動
+            $drive->files->delete($id, ['supportsAllDrives' => true]); // 完全に削除
 
             if ($i === 0) {
                 $deleted = '';
