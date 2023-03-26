@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/kishukusha-report-supporter.php';
+require_once __DIR__ . '/includes.php';
 
 abstract class FormTemplateBasic
 {

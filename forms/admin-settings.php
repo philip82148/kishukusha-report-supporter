@@ -1,7 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../form-template.php';
-require_once __DIR__ . '/../manuals.php';
+require_once __DIR__ . '/includes.php';
 
 class AdminSettings extends FormTemplateBasic
 {

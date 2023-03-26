@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/json-database.php';
+require_once __DIR__ . '/includes.php';
 
 class LogDatabase extends JsonDatabase
 {

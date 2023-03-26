@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/includes.php';
+
 function stringToDate(string $string): int | false
 {
     $string = toHalfWidth($string);

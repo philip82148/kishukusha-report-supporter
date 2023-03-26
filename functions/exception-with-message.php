@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/includes.php';
+
 class ExceptionWithMessage extends RuntimeException
 {
     private string $editedMessage;

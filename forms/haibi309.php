@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../form-template.php';
+require_once __DIR__ . '/includes.php';
 
 class Haibi309 extends FormTemplate
 {

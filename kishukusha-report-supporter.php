@@ -1,6 +1,7 @@
 <?php
 
-require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/includes.php';
+
 require_once __DIR__ . '/forms/tamokuteki.php';
 require_once __DIR__ . '/forms/gaiburaihousha.php';
 require_once __DIR__ . '/forms/chokigaihaku.php';
@@ -368,7 +369,6 @@ VERSION\n", true);
         }
 
         // 新管理者への通知とマニュアルの表示
-        require_once __DIR__ . '/manuals.php';
         $this->pushMessage('管理者が変更されました。');
         $this->pushMessage(ADMIN_MANUAL);
         $this->pushMessage(SERVER_MANUAL);
