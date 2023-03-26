@@ -1,6 +1,7 @@
 <?php
 
-require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/includes.php';
+
 require_once __DIR__ . '/forms/tamokuteki.php';
 require_once __DIR__ . '/forms/gaiburaihousha.php';
 require_once __DIR__ . '/forms/chokigaihaku.php';
@@ -13,7 +14,7 @@ require_once __DIR__ . '/forms/ask-name.php';
 require_once __DIR__ . '/forms/admin-settings.php';
 require_once __DIR__ . '/forms/user-manual.php';
 
-class KishukushaFormSupporter
+class KishukushaReportSupporter
 {
     public const VERSION = '7.8.4';
 
@@ -84,7 +85,7 @@ class KishukushaFormSupporter
 
         // テキストタイプの場合は前後のスペースを除いておく
         if ($event['type'] === 'message' && $event['message']['type'] === 'text')
-            $event['message']['text'] = $this->trimString($event['message']['text']);
+            $event['message']['text'] = trimString($event['message']['text']);
 
         try {
             $this->_handleEvent($event);
@@ -240,7 +241,7 @@ VERSION\n", true);
                         ['valueInputOption' => 'USER_ENTERED']
                     );
                 } catch (Throwable $e) {
-                    throw new MessageAppendingException($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nシートが削除されたか、ボットに編集権限がない可能性があります。");
+                    throw new ExceptionWithMessage($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nシートが削除されたか、ボットに編集権限がない可能性があります。");
                 }
 
                 try {
@@ -251,13 +252,13 @@ VERSION\n", true);
                     $this->confirmPush(true);
                 } catch (Throwable $e) {
                     $this->initReply();
-                    throw new MessageAppendingException($e, "スプレッドシートへの書き込みは成功しましたが、本人への通知中にエラーが発生しました。\nもう一度「承認する」を押すと本人への通知のみを再試行します。");
+                    throw new ExceptionWithMessage($e, "スプレッドシートへの書き込みは成功しましたが、本人への通知中にエラーが発生しました。\nもう一度「承認する」を押すと本人への通知のみを再試行します。");
                 }
 
                 $this->restoreStorage();
                 if (count($this->storage['adminPhase']) !== $unacknowledgedFormCount) {
                     $e = new RuntimeException('New form submitted during approval');
-                    throw new MessageAppendingException($e, "スプレッドシートへの書きこみ及び本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の承認操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認してください(再度書きこみと通知が行われます)。");
+                    throw new ExceptionWithMessage($e, "スプレッドシートへの書きこみ及び本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の承認操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認してください(再度書きこみと通知が行われます)。");
                 }
 
                 // 管理者への通知
@@ -284,7 +285,7 @@ VERSION\n", true);
                 $this->restoreStorage();
                 if (count($this->storage['adminPhase']) !== $unacknowledgedFormCount) {
                     $e = new RuntimeException('New form submitted during approval');
-                    throw new MessageAppendingException($e, "本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認/非承認を行ってください(再度通知が行われます)。");
+                    throw new ExceptionWithMessage($e, "本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認/非承認を行ってください(再度通知が行われます)。");
                 }
 
                 // 管理者への通知
@@ -368,7 +369,6 @@ VERSION\n", true);
         }
 
         // 新管理者への通知とマニュアルの表示
-        require_once __DIR__ . '/manuals.php';
         $this->pushMessage('管理者が変更されました。');
         $this->pushMessage(ADMIN_MANUAL);
         $this->pushMessage(SERVER_MANUAL);
@@ -492,7 +492,7 @@ VERSION\n", true);
                 );
             }
         } catch (Throwable $e) {
-            throw new MessageAppendingException($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nシートが削除されたか、ボットに編集権限がない可能性があります。");
+            throw new ExceptionWithMessage($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nシートが削除されたか、ボットに編集権限がない可能性があります。");
         }
 
         // 自分が管理者でない、かつ、承認が必要なら、管理者に通知
@@ -500,7 +500,7 @@ VERSION\n", true);
             try {
                 $receiptNo = $this->admin->notifyAppliedForm($this, $answers, $timeStamp, $checkboxRange ?? '');
             } catch (Throwable $e) {
-                throw new MessageAppendingException($e, "スプレッドシートへの書き込みは成功しましたが、風紀への通知中にエラーが発生しました。");
+                throw new ExceptionWithMessage($e, "スプレッドシートへの書き込みは成功しましたが、風紀への通知中にエラーが発生しました。");
             }
         }
 
@@ -524,15 +524,15 @@ VERSION\n", true);
         }
     }
 
-    private function appendToResultSheets(string $formType, array $row, $spreadsheet_service, string $resultSheets_id = null)
+    private function appendToResultSheets(string $formType, array $row, $spreadsheet_service, string $resultSheetId = null)
     {
-        if (!isset($resultSheets_id))
-            $resultSheets_id = $this->config['resultSheets'];
+        if (!isset($resultSheetId))
+            $resultSheetId = $this->config['resultSheets'];
 
         try {
             // 書き込み
             $response = $spreadsheet_service->spreadsheets_values->append(
-                $resultSheets_id,
+                $resultSheetId,
                 "'{$formType}'!A1",
                 new Google_Service_Sheets_ValueRange([
                     'values' => [$row]
@@ -554,7 +554,7 @@ VERSION\n", true);
                     ]
                 ]
             ]);
-            $response = $spreadsheet_service->spreadsheets->batchUpdate($resultSheets_id, $requestBody);
+            $response = $spreadsheet_service->spreadsheets->batchUpdate($resultSheetId, $requestBody);
             $sheetId = $response->getReplies()[0]->getAddSheet()->getProperties()->sheetId;
 
             // 一行目固定、セル幅指定
@@ -592,7 +592,7 @@ VERSION\n", true);
 
             // 見出しと共に書き込み
             $response = $spreadsheet_service->spreadsheets_values->append(
-                $resultSheets_id,
+                $resultSheetId,
                 "'{$formType}'!A1",
                 new Google_Service_Sheets_ValueRange([
                     'values' => [$header, $row]
@@ -672,7 +672,7 @@ VERSION\n", true);
 
             return $this->googleIdToUrl($file->getId());
         } catch (Throwable $e) {
-            throw new MessageAppendingException($e, "画像のドライブへの保存に失敗しました。\nボットに指定のフォルダへのファイル追加権限がない可能性があります。");
+            throw new ExceptionWithMessage($e, "画像のドライブへの保存に失敗しました。\nボットに指定のフォルダへのファイル追加権限がない可能性があります。");
         }
     }
 
@@ -708,7 +708,7 @@ VERSION\n", true);
             $events = [];
             foreach ($rows as $row) {
                 $event = [
-                    '行事名' => $this->trimString($row[0] ?? ''),
+                    '行事名' => trimString($row[0] ?? ''),
                     '開始日' => $this->serialNumberToDateStringWithDay($row[1] ?? ''),
                     '終了日' => $this->serialNumberToDateStringWithDay($row[2] ?? '')
                 ];
@@ -723,7 +723,7 @@ VERSION\n", true);
 
             return $events;
         } catch (Throwable $e) {
-            throw new MessageAppendingException($e, '行事データの読み込みに失敗しました。');
+            throw new ExceptionWithMessage($e, '行事データの読み込みに失敗しました。');
         }
     }
 
@@ -737,7 +737,7 @@ VERSION\n", true);
                 return false;
         }
 
-        return $this->dateToDateStringWithDay($unixTimeStamp);
+        return dateToDateStringWithDay($unixTimeStamp);
     }
 
     public function checkValidGoogleItem(string $type, string $id): bool
@@ -796,8 +796,8 @@ VERSION\n", true);
 
     private function updateEndOfTerm(): int
     {
-        $endOfTermDate = $this->stringToDate($this->config['endOfTerm']);
-        $today = $this->getDateAt0AM();
+        $endOfTermDate = stringToDate($this->config['endOfTerm']);
+        $today = getDateAt0AM();
         // endOfTermが設定されていて未来の時刻なら
         if ($endOfTermDate !== false && $endOfTermDate >= $today) return $endOfTermDate;
 
@@ -811,7 +811,7 @@ VERSION\n", true);
             }
         }
 
-        $this->config['endOfTerm'] = $this->dateToDateStringWithDay($endOfTermDate);
+        $this->config['endOfTerm'] = dateToDateStringWithDay($endOfTermDate);
         $this->storeConfig();
 
         return $endOfTermDate;
@@ -1130,7 +1130,7 @@ VERSION\n", true);
             // 400番台のエラーは再試行しても変わらないのでthrow
             if (++$retryCount >= 4 || ($httpcode >= 400 && $httpcode < 500)) {
                 $e = new RuntimeException(curl_error($ch) . "\nRetry Count:{$retryCount}\n{$response}");
-                throw new MessageAppendingException($e, "返信処理に失敗しました。");
+                throw new ExceptionWithMessage($e, "返信処理に失敗しました。");
             }
 
             sleep(2 ** $retryCount);
@@ -1149,7 +1149,7 @@ VERSION\n", true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',
             'Authorization: Bearer ' . CHANNEL_ACCESS_TOKEN,
-            'X-Line-Retry-Key: ' . $this->generateUUID()
+            'X-Line-Retry-Key: ' . generateUUID()
         ));
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
             'to' => $this->pushUserId,
@@ -1211,7 +1211,7 @@ VERSION\n", true);
 
     public function downloadContent(array $message): string
     {
-        $filename = $this->generateUUID() . '.jpg';
+        $filename = generateUUID() . '.jpg';
 
         // 受信
         $ch = curl_init("https://api-data.line.me/v2/bot/message/{$message['id']}/content");
@@ -1227,7 +1227,7 @@ VERSION\n", true);
 
         if ($errno !== CURLE_OK) {
             $e = new RuntimeException($error);
-            throw new MessageAppendingException($e, '画像処理に失敗しました。');
+            throw new ExceptionWithMessage($e, '画像処理に失敗しました。');
         }
 
         // ファイル書き込み
@@ -1239,18 +1239,6 @@ VERSION\n", true);
     {
         // imageの取得に署名が必要になったらphpで処理する
         return IMAGE_FOLDER_URL . $filename;
-    }
-
-    private function generateUUID(): string
-    {
-        $chars = str_split('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
-
-        foreach ($chars as $i => $char) {
-            if ($char === 'x')
-                $chars[$i] = dechex(random_int(0, 15));
-        }
-
-        return implode('', $chars);
     }
 
     private function fetchPushMessageCount(): int|false
@@ -1385,103 +1373,10 @@ VERSION\n", true);
         $this->database->store('config', $this->config);
     }
 
-    public function stringToDate(string $string): int | false
-    {
-        $string = $this->toHalfWidth($string);
-        $matches = [];
-        if (preg_match('/(?<year>(\d{4})?)\/?(?<month>\d{1,2})\/?(?<date>\d{1,2})/', $string, $matches) === 0)
-            return false;
-
-        if ($matches['year'] === '') {
-            // 年の入力なし
-            $time = strtotime(date('Y') . "/{$matches['month']}/{$matches['date']}");
-        } else {
-            $time = strtotime("{$matches['year']}/{$matches['month']}/{$matches['date']}");
-        }
-
-        return $time;
-    }
-
-    public function stringToTime(string $string, string $date = '2022/1/1'): int | false
-    {
-        $string = $this->toHalfWidth($string);
-        $matches = [];
-        if (preg_match('/(?<hours>\d{1,2}):?(?<minutes>\d{1,2})/', $string, $matches) === 0)
-            return false;
-
-        // 24時を0時に戻すために一旦
-        $time = strtotime("{$matches['hours']}:{$matches['minutes']}");
-        if ($time === false) return false;
-
-        $time = strtotime("$date " . date('H:i', $time));
-        if ($time === false) return false;
-
-        return $time;
-    }
-
-    public function dateToDateStringWithDay(?int $date = null): string
-    {
-        if (!isset($date))
-            $date = time();
-
-        $dateString = date('Y/m/d', $date);
-        $day = $this->dateToDay($date);
-
-        return "{$dateString}({$day})";
-    }
-
-    public function deleteParentheses(string $string): string
-    {
-        return preg_replace('/\(.*\)/', '', $string);
-    }
-
-    public function dateToDay(int $date): string
-    {
-        $day = (int)date('w', $date);
-        switch ($day) {
-            case 0:
-                return '日';
-            case 1:
-                return '月';
-            case 2:
-                return '火';
-            case 3:
-                return '水';
-            case 4:
-                return '木';
-            case 5:
-                return '金';
-            default:
-                return '土';
-        }
-    }
-
-    public function getDateAt0AM(?int $time = null): int|false
-    {
-        if (isset($time))
-            return strtotime(date('Y/m/d', $time));
-        return strtotime(date('Y/m/d'));
-    }
-
-    public function toHalfWidth(string $string): string
-    {
-        return mb_convert_kana($string, 'as');
-    }
-
-    private function trimString(string $string): string
-    {
-        return preg_replace('/\A[\x00\s]++|[\x00\s]++\z/u', '', $string);
-    }
-
-    public function insertToAssociativeArray(array &$array, int $offset, array $values): void
-    {
-        $array = array_slice($array, 0, $offset, true) + $values + array_slice($array, $offset, null, true);
-    }
-
     public function getEventInfo(): string
     {
         // 今日初めてメッセージした場合はdisplayNameを更新する
-        if ($this->lastStorageUpdatedTime < $this->getDateAt0AM()) {
+        if ($this->lastStorageUpdatedTime < getDateAt0AM()) {
             $this->restoreStorage();
             $newDisplayName = $this->fetchDisplayName();
             // (unfollowedの場合は取得できずにstoreStorage()されない)
@@ -1572,20 +1467,5 @@ VERSION\n", true);
     public function isThisSsk(): bool
     {
         return $this->userId === SSK_ID;
-    }
-}
-
-class MessageAppendingException extends RuntimeException
-{
-    private string $editedMessage;
-
-    public function __construct($original, $message)
-    {
-        $this->editedMessage = "{$original}\n{$message}";
-    }
-
-    public function __toString(): string
-    {
-        return $this->editedMessage;
     }
 }

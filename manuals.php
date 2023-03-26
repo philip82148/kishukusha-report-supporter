@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/includes.php';
 
 define(
     'USER_MANUAL',
@@ -42,11 +42,11 @@ define(
 寄宿舎届出サポートは寄宿舎のHPのサーバーを使用しています。
 サーバーを移行する場合は次のページの説明を見てください。
 
-https://github.com/philip82148/kishukusha-form-supporter
+https://github.com/philip82148/kishukusha-report-supporter
 
 ここで、分かりやすいように具体例を上げると、次のようになっています。
 現在のwebhook.phpのURL: " . WEBHOOK_PARENT_URL . "webhook.php
-現在のkishukusha-form-supporter/のサーバー内のファイルパス: " . __DIR__ . "/
+現在のkishukusha-report-supporter/のサーバー内のファイルパス: " . __DIR__ . "/
 現在のwebhook.phpのサーバー内のファイルパス: " . __DIR__ . "/webhook.php
 
 webhook.phpのURLのドメイン({$_SERVER['SERVER_NAME']})が寄宿舎のHPと違う場合は寄宿舎のHPのサーバーにはもう一つドメインがある可能性があります。

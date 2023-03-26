@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../form-template.php';
+require_once __DIR__ . '/../includes.php';
 
 class Shogyoji extends FormTemplate
 {
@@ -14,12 +14,12 @@ class Shogyoji extends FormTemplate
 
             // 行事名に対する日付の辞書を作る
             $events = $this->supporter->fetchEvents();
-            $today = $this->supporter->getDateAt0AM();
+            $today = getDateAt0AM();
             $events_to_dates = ['舎生大会' => [], '委員会' => []]; // 最初に表示させる
             $passed_events_to_dates = []; // 同時に過ぎた行事の辞書も作る
             foreach ($events as $event) {
                 // 今日以降の行事でなければ過ぎた行事の辞書へ
-                if ($this->supporter->stringToDate($event['開始日']) >= $today) {
+                if (stringToDate($event['開始日']) >= $today) {
                     if (!isset($events_to_dates[$event['行事名']])) {
                         if (count($events_to_dates) < 11)
                             $events_to_dates[$event['行事名']] = [$event['開始日']];
@@ -87,7 +87,7 @@ class Shogyoji extends FormTemplate
                     $this->supporter->storage['phases'][] = 'askingEventDetail';
                     return;
                 default:
-                    if (!$this->storeOrAskAgain('委員会行事', $message))
+                    if ($this->storeOrAskAgain('委員会行事', $message))
                         return;
             }
 
@@ -151,7 +151,7 @@ class Shogyoji extends FormTemplate
                     $this->supporter->storage['phases'][] = 'askingStartManually';
                     return;
                 default:
-                    if (!$this->storeOrAskAgain('開催日', $message))
+                    if ($this->storeOrAskAgain('開催日', $message))
                         return;
             }
 
@@ -179,7 +179,7 @@ class Shogyoji extends FormTemplate
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する') {
-                if (!$this->storeOrAskAgain('開催日(手動入力)', $message))
+                if ($this->storeOrAskAgain('開催日(手動入力)', $message))
                     return;
             }
 
@@ -207,7 +207,7 @@ class Shogyoji extends FormTemplate
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する') {
-                if (!$this->storeOrAskAgain('出欠', $message))
+                if ($this->storeOrAskAgain('出欠', $message))
                     return;
             }
 
@@ -230,7 +230,7 @@ class Shogyoji extends FormTemplate
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する') {
-                if (!$this->storeOrAskAgain('理由', $message))
+                if ($this->storeOrAskAgain('理由', $message))
                     return;
             }
 
@@ -251,7 +251,7 @@ class Shogyoji extends FormTemplate
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する') {
-                if (!$this->storeOrAskAgain('理由の詳細', $message))
+                if ($this->storeOrAskAgain('理由の詳細', $message))
                     return;
             }
 
@@ -272,7 +272,7 @@ class Shogyoji extends FormTemplate
             return;
         } else if ($lastPhase === 'askingEvidence') {
             if ($message['type'] === 'image') {
-                if (!$this->storeOrAskAgain('証拠画像', $message))
+                if ($this->storeOrAskAgain('証拠画像', $message))
                     return;
             } else {
                 if ($message['type'] !== 'text') {
@@ -329,7 +329,7 @@ class Shogyoji extends FormTemplate
             }
             $message = $message['text'];
 
-            if (!$this->storeOrAskAgain('議決の委任', $message))
+            if ($this->storeOrAskAgain('議決の委任', $message))
                 return;
 
             // 質問・選択肢
@@ -370,7 +370,7 @@ class Shogyoji extends FormTemplate
         $answersForSheets = array_values($answers);
 
         // 日付の曜日を取る
-        $answersForSheets[2] = $this->supporter->deleteParentheses($answersForSheets[2]);
+        $answersForSheets[2] = deleteParentheses($answersForSheets[2]);
 
         // セルの数合わせ
         if (!isset($answers['議決の委任']))
@@ -385,7 +385,7 @@ class Shogyoji extends FormTemplate
 
     public function storeShogyojiImage(string $eventDate, string $id): void
     {
-        $eventDate = $this->supporter->deleteParentheses($eventDate);
+        $eventDate = deleteParentheses($eventDate);
         $shogyojiImages = $this->supporter->database->restore('shogyojiImages') ?? [];
         if (isset($shogyojiImages[$eventDate])) {
             $shogyojiImages[$eventDate][] = $id;
@@ -408,12 +408,12 @@ class Shogyoji extends FormTemplate
 
         // 任期内かどうかと過去の日付かどうか
         $messageAboutDate = '';
-        $date = $this->supporter->stringToDate($answers['開催日']);
+        $date = stringToDate($answers['開催日']);
         if (!$this->supporter->checkInTerm($date)) {
             $messageAboutDate = "
 ※任期外の日付です！";
         } else {
-            $today = $this->supporter->getDateAt0AM();
+            $today = getDateAt0AM();
             if ($date < $today)
                 $messageAboutDate = "
 ※過去の日付です！";
@@ -485,38 +485,38 @@ class Shogyoji extends FormTemplate
         return true;
     }
 
-    protected function storeOrAskAgain(string $type, string|array $message): bool|string|array
+    protected function storeOrAskAgain(string $type, string|array $message): string
     {
         switch ($type) {
             case '委員会行事':
                 if (isset($this->supporter->storage['cache']['eventsToDates'][$message]) || $message === 'その他') {
                     $this->supporter->storage['unsavedAnswers']['委員会行事'] = $message;
-                    return true;
+                    return '';
                 }
                 // 有効でなかった、もう一度質問文送信
                 $this->supporter->askAgainBecauseWrongReply();
-                return false;
+                return 'wrong-reply';
             case '開催日':
                 $event = $this->supporter->storage['unsavedAnswers']['委員会行事'];
                 if (in_array($message, $this->supporter->storage['cache']['eventsToDates'][$event] ?? [], true)) {
                     $this->supporter->storage['unsavedAnswers']['開催日'] = $message;
-                    return true;
+                    return '';
                 }
                 // 有効でなかった、もう一度質問文送信
                 $this->supporter->askAgainBecauseWrongReply();
-                return false;
+                return 'wrong-reply';
             case '開催日(手動入力)':
-                $date = $this->supporter->stringToDate($message);
+                $date = stringToDate($message);
                 if ($date === false) {
                     $year = date('Y');
                     $this->supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な日付です。\n「1006」または「{$year}1006」のように4桁または8桁で入力してください。");
-                    return false;
+                    return 'wrong-reply';
                 }
 
-                $dateString = $this->supporter->dateToDateStringWithDay($date);
+                $dateString = dateToDateStringWithDay($date);
                 $this->supporter->pushMessage("開催日:{$dateString}");
                 $this->supporter->storage['unsavedAnswers']['開催日'] = $dateString;
-                return true;
+                return '';
             case '出欠':
                 switch ($message) {
                     case '欠席':
@@ -525,10 +525,10 @@ class Shogyoji extends FormTemplate
                     case '遅刻または欠席':
                     case '遅刻と早退':
                         $this->supporter->storage['unsavedAnswers']['出欠'] = $message;
-                        return true;
+                        return '';
                 }
                 $this->supporter->askAgainBecauseWrongReply();
-                return false;
+                return 'wrong-reply';
             case '理由':
                 switch ($message) {
                     case '疾病':
@@ -541,13 +541,13 @@ class Shogyoji extends FormTemplate
                     case '大学のカリキュラム':
                     case 'その他':
                         $this->supporter->storage['unsavedAnswers']['理由'] = $message;
-                        return true;
+                        return '';
                 }
                 $this->supporter->askAgainBecauseWrongReply();
-                return false;
+                return 'wrong-reply';
             case '理由の詳細':
                 $this->supporter->storage['unsavedAnswers']['理由の詳細'] = $message;
-                return true;
+                return '';
             case '証拠画像':
                 $fileName = $this->supporter->downloadContent($message);
                 $this->supporter->storage['unsavedAnswers']['証拠画像'] = $fileName;
@@ -556,15 +556,15 @@ class Shogyoji extends FormTemplate
                 if (!isset($this->supporter->storage['cache']['一時ファイル']))
                     $this->supporter->storage['cache']['一時ファイル'] = [];
                 $this->supporter->storage['cache']['一時ファイル'][] = $fileName;
-                return true;
+                return '';
             case '議決の委任':
                 switch ($message) {
                     case 'はい':
                         $this->supporter->storage['unsavedAnswers']['議決の委任'] = $message;
-                        return true;
+                        return '';
                 }
                 $this->supporter->askAgainBecauseWrongReply();
-                return false;
+                return 'wrong-reply';
         }
     }
 }

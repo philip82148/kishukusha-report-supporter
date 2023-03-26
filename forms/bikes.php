@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../form-template.php';
+require_once __DIR__ . '/../includes.php';
 
 class Bikes extends FormTemplate
 {
@@ -33,7 +33,7 @@ class Bikes extends FormTemplate
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する') {
-                if (!$this->storeOrAskAgain('車体の種類', $message))
+                if ($this->storeOrAskAgain('車体の種類', $message))
                     return;
             }
 
@@ -72,7 +72,7 @@ class Bikes extends FormTemplate
                 case '自転車':
                     if ($message !== '前の項目を修正する') {
                         unset($this->supporter->storage['unsavedAnswers']['名義人名']);
-                        $this->supporter->insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 2, ['防犯登録者名' => $message]);
+                        insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 2, ['防犯登録者名' => $message]);
                     }
                     $this->supporter->pushMessage('防犯登録番号を入力してください。', true);
                     $this->supporter->pushUnsavedAnswerOption('防犯登録番号');
@@ -81,7 +81,7 @@ class Bikes extends FormTemplate
                 case '原付':
                     if ($message !== '前の項目を修正する') {
                         unset($this->supporter->storage['unsavedAnswers']['防犯登録者名']);
-                        $this->supporter->insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 2, ['名義人名' => $message]);
+                        insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 2, ['名義人名' => $message]);
                     }
                     $this->supporter->pushMessage('ナンバーの画像を送ってください。', true);
                     $this->supporter->pushUnsavedAnswerOption('ナンバーの画像', 'image');
@@ -104,12 +104,12 @@ class Bikes extends FormTemplate
                         $message = $message['text'];
 
                         unset($this->supporter->storage['unsavedAnswers']['ナンバーの画像']);
-                        $this->supporter->insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 3, ['防犯登録番号' => $message]);
+                        insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 3, ['防犯登録番号' => $message]);
                         break;
                     case 'バイク':
                     case '原付':
                         if ($message['type'] === 'image') {
-                            if (!$this->storeOrAskAgain('ナンバーの画像', $message))
+                            if ($this->storeOrAskAgain('ナンバーの画像', $message))
                                 return;
                         } else {
                             if ($message['type'] !== 'text' || $message['text'] !== '最後に送信した画像') {
@@ -135,7 +135,7 @@ class Bikes extends FormTemplate
             $this->supporter->storage['phases'][] = 'askingImage';
         } else if ($lastPhase === 'askingImage') {
             if ($message['type'] === 'image') {
-                if (!$this->storeOrAskAgain('車体の画像', $message))
+                if ($this->storeOrAskAgain('車体の画像', $message))
                     return;
             } else {
                 if ($message['type'] !== 'text' || $message['text'] !== '最後に送信した画像') {
@@ -240,7 +240,7 @@ class Bikes extends FormTemplate
         return false;
     }
 
-    protected function storeOrAskAgain(string $type, string|array $message): bool|string|array
+    protected function storeOrAskAgain(string $type, string|array $message): string
     {
         switch ($type) {
             case '車体の種類':
@@ -249,16 +249,16 @@ class Bikes extends FormTemplate
                     case 'バイク':
                     case '原付':
                         $this->supporter->storage['unsavedAnswers']['車体の種類'] = $message;
-                        return true;
+                        return '';
                 }
                 $this->supporter->askAgainBecauseWrongReply();
-                return false;
+                return 'wrong-reply';
             case 'ナンバーの画像':
             case '車体の画像':
                 $fileName = $this->supporter->downloadContent($message);
                 if ($type === 'ナンバーの画像') {
                     unset($this->supporter->storage['unsavedAnswers']['防犯登録番号']);
-                    $this->supporter->insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 3, ['ナンバーの画像' => $fileName]);
+                    insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 3, ['ナンバーの画像' => $fileName]);
                 } else {
                     $this->supporter->storage['unsavedAnswers'][$type] = $fileName;
                 }
@@ -267,7 +267,7 @@ class Bikes extends FormTemplate
                 if (!isset($this->supporter->storage['cache']['一時ファイル']))
                     $this->supporter->storage['cache']['一時ファイル'] = [];
                 $this->supporter->storage['cache']['一時ファイル'][] = $fileName;
-                return true;
+                return '';
         }
     }
 }

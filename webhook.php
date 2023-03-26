@@ -1,8 +1,6 @@
 <?php
 
-require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/functions.php';
-require_once __DIR__ . '/kishukusha-form-supporter.php';
+require_once __DIR__ . '/includes.php';
 
 // 署名確認
 $requestBody = file_get_contents('php://input');
@@ -41,7 +39,7 @@ foreach ($events as $event) {
     $userId = $event['source']['userId'];
 
     // 管理者用意
-    $adminSupporter = new KishukushaFormSupporter($config['adminId'], $config, $database);
+    $adminSupporter = new KishukushaReportSupporter($config['adminId'], $config, $database);
 
     // イベント処理
     try {
@@ -50,7 +48,7 @@ foreach ($events as $event) {
             $adminSupporter->handleEvent($event);
         } else {
             // 一般ユーザーである
-            $userSupporter = new KishukushaFormSupporter($userId, $config, $database, $adminSupporter);
+            $userSupporter = new KishukushaReportSupporter($userId, $config, $database, $adminSupporter);
             $userSupporter->handleEvent($event);
         }
     } catch (Throwable $e) {
@@ -82,7 +80,7 @@ foreach ($events as $event) {
 
 <Processing Time>
 {$processing_time_ms}ms";
-        $headers = 'From: supporter@kishukusha-form-supporter.iam.gserviceaccount.com';
+        $headers = 'From: supporter@kishukusha-report-supporter.iam.gserviceaccount.com';
         if (!mb_send_mail($to, $subject, $message, $headers)) {
             $logDb->log("Failed in sending an error mail.");
         };

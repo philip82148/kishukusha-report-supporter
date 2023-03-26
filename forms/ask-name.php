@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../form-template.php';
+require_once __DIR__ . '/../includes.php';
 
 class AskName extends FormTemplateBasic
 {
@@ -47,7 +47,7 @@ class AskName extends FormTemplateBasic
 
         $lastPhase = $this->supporter->storage['phases'][count($this->supporter->storage['phases']) - 1];
         if ($lastPhase === 'askingName') {
-            if (!$this->storeOrAskAgain('ユーザー名', $message))
+            if ($this->storeOrAskAgain('ユーザー名', $message))
                 return;
 
             // 質問
@@ -94,7 +94,7 @@ class AskName extends FormTemplateBasic
         }
     }
 
-    protected function storeOrAskAgain(string $type, string|array $message): bool
+    protected function storeOrAskAgain(string $type, string|array $message): string
     {
         switch ($type) {
             case 'ユーザー名':
@@ -102,11 +102,11 @@ class AskName extends FormTemplateBasic
                     case 'はい':
                     case 'いいえ':
                         $this->supporter->askAgainBecauseWrongReply();
-                        return false;
+                        return 'wrong-reply';
                     default:
                         $message = preg_replace('/[\x00\s]++/u', ' ', $message);
                         $this->supporter->storage['unsavedAnswers']['名前'] = $message;
-                        return true;
+                        return '';
                 }
         }
     }
