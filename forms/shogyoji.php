@@ -14,12 +14,12 @@ class Shogyoji extends FormTemplate
 
             // 行事名に対する日付の辞書を作る
             $events = $this->supporter->fetchEvents();
-            $today = $this->supporter->getDateAt0AM();
+            $today = getDateAt0AM();
             $events_to_dates = ['舎生大会' => [], '委員会' => []]; // 最初に表示させる
             $passed_events_to_dates = []; // 同時に過ぎた行事の辞書も作る
             foreach ($events as $event) {
                 // 今日以降の行事でなければ過ぎた行事の辞書へ
-                if ($this->supporter->stringToDate($event['開始日']) >= $today) {
+                if (stringToDate($event['開始日']) >= $today) {
                     if (!isset($events_to_dates[$event['行事名']])) {
                         if (count($events_to_dates) < 11)
                             $events_to_dates[$event['行事名']] = [$event['開始日']];
@@ -370,7 +370,7 @@ class Shogyoji extends FormTemplate
         $answersForSheets = array_values($answers);
 
         // 日付の曜日を取る
-        $answersForSheets[2] = $this->supporter->deleteParentheses($answersForSheets[2]);
+        $answersForSheets[2] = deleteParentheses($answersForSheets[2]);
 
         // セルの数合わせ
         if (!isset($answers['議決の委任']))
@@ -385,7 +385,7 @@ class Shogyoji extends FormTemplate
 
     public function storeShogyojiImage(string $eventDate, string $id): void
     {
-        $eventDate = $this->supporter->deleteParentheses($eventDate);
+        $eventDate = deleteParentheses($eventDate);
         $shogyojiImages = $this->supporter->database->restore('shogyojiImages') ?? [];
         if (isset($shogyojiImages[$eventDate])) {
             $shogyojiImages[$eventDate][] = $id;
@@ -408,12 +408,12 @@ class Shogyoji extends FormTemplate
 
         // 任期内かどうかと過去の日付かどうか
         $messageAboutDate = '';
-        $date = $this->supporter->stringToDate($answers['開催日']);
+        $date = stringToDate($answers['開催日']);
         if (!$this->supporter->checkInTerm($date)) {
             $messageAboutDate = "
 ※任期外の日付です！";
         } else {
-            $today = $this->supporter->getDateAt0AM();
+            $today = getDateAt0AM();
             if ($date < $today)
                 $messageAboutDate = "
 ※過去の日付です！";
@@ -506,14 +506,14 @@ class Shogyoji extends FormTemplate
                 $this->supporter->askAgainBecauseWrongReply();
                 return false;
             case '開催日(手動入力)':
-                $date = $this->supporter->stringToDate($message);
+                $date = stringToDate($message);
                 if ($date === false) {
                     $year = date('Y');
                     $this->supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な日付です。\n「1006」または「{$year}1006」のように4桁または8桁で入力してください。");
                     return false;
                 }
 
-                $dateString = $this->supporter->dateToDateStringWithDay($date);
+                $dateString = dateToDateStringWithDay($date);
                 $this->supporter->pushMessage("開催日:{$dateString}");
                 $this->supporter->storage['unsavedAnswers']['開催日'] = $dateString;
                 return true;

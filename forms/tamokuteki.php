@@ -43,7 +43,7 @@ class Tamokuteki extends FormTemplate
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('使用開始日');
-            $this->supporter->pushOptions([$this->supporter->dateToDateStringWithDay(), '前の項目を修正する', 'キャンセル']);
+            $this->supporter->pushOptions([dateToDateStringWithDay(), '前の項目を修正する', 'キャンセル']);
 
             $this->supporter->storage['phases'][] = 'askingDay';
         } else if ($lastPhase === 'askingDay') {
@@ -131,7 +131,7 @@ class Tamokuteki extends FormTemplate
             // 選択肢
             // unsavedAnswerOption((翌日)を取る)
             if (isset($this->supporter->storage['unsavedAnswers']['使用終了時刻'])) {
-                $this->supporter->storage['unsavedAnswers']['使用終了時刻'] = $this->supporter->deleteParentheses($this->supporter->storage['unsavedAnswers']['使用終了時刻']);
+                $this->supporter->storage['unsavedAnswers']['使用終了時刻'] = deleteParentheses($this->supporter->storage['unsavedAnswers']['使用終了時刻']);
                 $this->supporter->pushUnsavedAnswerOption('使用終了時刻');
             }
 
@@ -177,8 +177,8 @@ class Tamokuteki extends FormTemplate
         $answersForSheets = array_values($answers);
 
         // 日付の曜日と時刻の(翌日)を取る
-        $answersForSheets[2] = $this->supporter->deleteParentheses($answersForSheets[2]);
-        $answersForSheets[4] = $this->supporter->deleteParentheses($answersForSheets[4]);
+        $answersForSheets[2] = deleteParentheses($answersForSheets[2]);
+        $answersForSheets[4] = deleteParentheses($answersForSheets[4]);
 
         // 申請
         $this->supporter->applyForm($answers, $answersForSheets);
@@ -207,20 +207,20 @@ class Tamokuteki extends FormTemplate
                 $this->supporter->askAgainBecauseWrongReply();
                 return false;
             case '使用開始日':
-                $date = $this->supporter->stringToDate($message);
+                $date = stringToDate($message);
                 if ($date === false) {
                     $year = date('Y');
                     $this->supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な日付です。\n「0506」または「{$year}0506」のように4桁または8桁で入力してください。");
                     return false;
                 }
 
-                $dateString = $this->supporter->dateToDateStringWithDay($date);
+                $dateString = dateToDateStringWithDay($date);
                 $this->supporter->pushMessage("使用開始日:{$dateString}");
                 $this->supporter->storage['unsavedAnswers']['使用開始日'] = $dateString;
                 return true;
             case '使用開始時刻':
             case '使用終了時刻':
-                $stayTime = $this->supporter->stringToTime($message);
+                $stayTime = stringToTime($message);
                 if ($stayTime === false) {
                     if ($type === '滞在開始時刻') {
                         $this->supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な時刻です。\n「1000」のように4桁で入力してください。");
@@ -236,11 +236,11 @@ class Tamokuteki extends FormTemplate
                     $this->supporter->storage['unsavedAnswers']['使用開始時刻'] = $stayTimeString;
                     return true;
                 } else {
-                    if ($stayTime <= $this->supporter->stringToTime($this->supporter->storage['unsavedAnswers']['使用開始時刻']))
+                    if ($stayTime <= stringToTime($this->supporter->storage['unsavedAnswers']['使用開始時刻']))
                         $stayTimeString .= '(翌日)';
 
                     $this->supporter->pushMessage("使用終了時刻:{$stayTimeString}");
-                    $this->supporter->insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 4, ['使用終了時刻' => $stayTimeString]);
+                    insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 4, ['使用終了時刻' => $stayTimeString]);
                     return true;
                 }
             case '使用後の状態':

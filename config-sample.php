@@ -4,7 +4,7 @@
 // webhook.phpが配置されている親フォルダのURL(https://...で始まること)
 // (WEBHOOK_PARENT_URL/webhook.phpとしてブラウザでアクセスすると
 // 「ここが webhook.php です」と表示されるURL)
-define('WEBHOOK_PARENT_URL', 'https://.../kishukusha-form-supporter/');
+define('WEBHOOK_PARENT_URL', 'https://.../kishukusha-report-supporter/');
 // MySQLデータベースの設定
 define('DB_HOST', '...');
 define('DB_NAME', '...');

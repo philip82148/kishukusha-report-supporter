@@ -58,7 +58,7 @@ class Gaiburaihousha extends FormTemplate
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('来訪日');
-            $this->supporter->pushOptions([$this->supporter->dateToDateStringWithDay(), '前の項目を修正する', 'キャンセル']);
+            $this->supporter->pushOptions([dateToDateStringWithDay(), '前の項目を修正する', 'キャンセル']);
 
             $this->supporter->storage['phases'][] = 'askingDay';
         } else if ($lastPhase === 'askingDay') {
@@ -89,17 +89,17 @@ class Gaiburaihousha extends FormTemplate
 
             // 選択肢
             // unsavedAnswerOption
-            $startTime = $this->supporter->stringToTime($this->supporter->storage['unsavedAnswers']['滞在開始時刻']);
+            $startTime = stringToTime($this->supporter->storage['unsavedAnswers']['滞在開始時刻']);
             $endTimeString = $this->supporter->storage['unsavedAnswers']['滞在終了時刻'] ?? '';
             if ($endTimeString !== '') {
-                if ($this->supporter->stringToTime($endTimeString) > $startTime)
+                if (stringToTime($endTimeString) > $startTime)
                     $this->supporter->pushUnsavedAnswerOption('滞在終了時刻');
             }
 
             // 現在時刻
             $now = date('H:i');
             if ($this->checkIfGaiburaihouAllowed($now)) {
-                if ($this->supporter->stringToTime($now) > $startTime)
+                if (stringToTime($now) > $startTime)
                     $this->supporter->pushOptions([$now]);
             }
 
@@ -142,7 +142,7 @@ class Gaiburaihousha extends FormTemplate
         $answersForSheets = array_values($answers);
 
         // 日付の曜日を取る
-        $answersForSheets[2] = $this->supporter->deleteParentheses($answersForSheets[2]);
+        $answersForSheets[2] = deleteParentheses($answersForSheets[2]);
 
         // 申請
         $this->supporter->applyForm($answers, $answersForSheets);
@@ -182,7 +182,7 @@ class Gaiburaihousha extends FormTemplate
                 return true;
             case '外部来訪者数':
             case '外部来訪者の女性の数':
-                $message = $this->supporter->toHalfWidth($message);
+                $message = toHalfWidth($message);
                 $count = preg_replace('/\D+/', '', $message);
                 if ($count === '') {
                     $this->supporter->askAgainBecauseWrongReply("入力が不正です。\n数値で答えてください。");
@@ -223,20 +223,20 @@ class Gaiburaihousha extends FormTemplate
                 $this->supporter->pushPreviousAnswer('外部来訪者の女性の数', $femaleCount . '人');
                 return true;
             case '来訪日':
-                $date = $this->supporter->stringToDate($message);
+                $date = stringToDate($message);
                 if ($date === false) {
                     $year = date('Y');
                     $this->supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な日付です。\n「0506」または「{$year}0506」のように4桁または8桁で入力してください。");
                     return false;
                 }
 
-                $dateString = $this->supporter->dateToDateStringWithDay($date);
+                $dateString = dateToDateStringWithDay($date);
                 $this->supporter->pushMessage("来訪日:{$dateString}");
                 $this->supporter->storage['unsavedAnswers']['来訪日'] = $dateString;
                 return true;
             case '滞在開始時刻':
             case '滞在終了時刻':
-                $stayTime = $this->supporter->stringToTime($message);
+                $stayTime = stringToTime($message);
                 if ($stayTime === false) {
                     if ($type === '滞在開始時刻') {
                         $this->supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な時刻です。\n「1030」のように4桁で入力してください。");
@@ -258,7 +258,7 @@ class Gaiburaihousha extends FormTemplate
                     $this->supporter->storage['unsavedAnswers']['滞在開始時刻'] = $stayTimeString;
                     return true;
                 } else {
-                    if ($stayTime <= $this->supporter->stringToTime($this->supporter->storage['unsavedAnswers']['滞在開始時刻'])) {
+                    if ($stayTime <= stringToTime($this->supporter->storage['unsavedAnswers']['滞在開始時刻'])) {
                         // 有効でなかった、もう一度質問文送信
                         $this->supporter->askAgainBecauseWrongReply("滞在開始時刻以前の時刻です。\nもう一度入力してください。");
                         return false;
@@ -278,7 +278,7 @@ class Gaiburaihousha extends FormTemplate
 
     private function checkIfGaiburaihouAllowed(string $time): bool
     {
-        $time = $this->supporter->stringToTime($time);
+        $time = stringToTime($time);
 
         // 時間内か
         $start = strtotime('2022/1/1 8:00');

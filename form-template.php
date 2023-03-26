@@ -1,10 +1,10 @@
 <?php
 
-require_once __DIR__ . '/kishukusha-form-supporter.php';
+require_once __DIR__ . '/kishukusha-report-supporter.php';
 
 abstract class FormTemplateBasic
 {
-    public function __construct(protected KishukushaFormSupporter $supporter)
+    public function __construct(protected KishukushaReportSupporter $supporter)
     {
     }
     abstract public function form(array $message): void;
@@ -12,6 +12,8 @@ abstract class FormTemplateBasic
 
 abstract class FormTemplate extends FormTemplateBasic
 {
+    public const HEADER = [];
+
     abstract protected function applyForm(): void;
     abstract public function pushAdminMessages(string $displayName, array $answers, string $timeStamp, string $receiptNo): bool;
 

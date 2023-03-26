@@ -18,7 +18,7 @@ class Chokigaihaku extends FormTemplate
 
             // 選択肢
             $nextWeek = array_map(function ($i) {
-                return $this->supporter->dateToDateStringWithDay(strtotime("+{$i} day"));
+                return dateToDateStringWithDay(strtotime("+{$i} day"));
             }, range(0, 6));
             $this->supporter->pushOptions($nextWeek);
             $this->supporter->pushUnsavedAnswerOption('出舎日'); // ラベル変更
@@ -46,9 +46,9 @@ class Chokigaihaku extends FormTemplate
             $this->supporter->pushMessage("帰舎日を4桁(年無し)または8桁(年有り)で入力してください。\n例:0903、{$year}0903", true);
 
             // 選択肢
-            $startDate = $this->supporter->stringToDate($this->supporter->storage['unsavedAnswers']['出舎日']);
+            $startDate = stringToDate($this->supporter->storage['unsavedAnswers']['出舎日']);
             $nextWeek = array_map(function ($i) use ($startDate) {
-                return $this->supporter->dateToDateStringWithDay(strtotime("+{$i} day", $startDate));
+                return dateToDateStringWithDay(strtotime("+{$i} day", $startDate));
             }, range(1, 7));
             $this->supporter->pushOptions($nextWeek);
             $this->supporter->pushUnsavedAnswerOption('帰舎日'); // ラベル変更
@@ -203,8 +203,8 @@ class Chokigaihaku extends FormTemplate
         $answersForSheets = array_values($answers);
 
         // 日付の曜日を取る
-        $answersForSheets[1] = $this->supporter->deleteParentheses($answersForSheets[1]);
-        $answersForSheets[2] = $this->supporter->deleteParentheses($answersForSheets[2]);
+        $answersForSheets[1] = deleteParentheses($answersForSheets[1]);
+        $answersForSheets[2] = deleteParentheses($answersForSheets[2]);
 
         // 連絡先電話番号を数値で表示するようにする
         $answersForSheets[6] = "'" . $answersForSheets[6];
@@ -219,8 +219,8 @@ class Chokigaihaku extends FormTemplate
 
     public function pushAdminMessages(string $displayName, array $answers, string $timeStamp, string $receiptNo): bool
     {
-        $startDate = $this->supporter->stringToDate($answers['出舎日']);
-        $endDate = $this->supporter->stringToDate($answers['帰舎日']);
+        $startDate = stringToDate($answers['出舎日']);
+        $endDate = stringToDate($answers['帰舎日']);
 
         // 外泊期間の計算
         $periodDays = (int)(($endDate - $startDate) / 60 / 60 / 24);
@@ -304,7 +304,7 @@ class Chokigaihaku extends FormTemplate
         switch ($type) {
             case '出舎日':
             case '帰舎日':
-                $date = $this->supporter->stringToDate($message);
+                $date = stringToDate($message);
                 if ($date === false) {
                     $year = date('Y');
                     if ($type === '出舎日') {
@@ -315,11 +315,11 @@ class Chokigaihaku extends FormTemplate
                     return false;
                 }
 
-                $dateString = $this->supporter->dateToDateStringWithDay($date);
+                $dateString = dateToDateStringWithDay($date);
                 $this->supporter->pushMessage("{$type}:{$dateString}");
 
                 if ($type === '出舎日') {
-                    $today = $this->supporter->getDateAt0AM();
+                    $today = getDateAt0AM();
                     if ($date < $today) {
                         $this->supporter->askAgainBecauseWrongReply('今日以降の日付を入力してください。');
                         return false;
@@ -330,7 +330,7 @@ class Chokigaihaku extends FormTemplate
                 }
 
                 // 出舎日の1日後から有効
-                $startDate = $this->supporter->stringToDate($this->supporter->storage['unsavedAnswers']['出舎日']);
+                $startDate = stringToDate($this->supporter->storage['unsavedAnswers']['出舎日']);
                 $oneDayAfterStartDay = strtotime('+1 day', $startDate);
                 if ($date < $oneDayAfterStartDay) {
                     $this->supporter->askAgainBecauseWrongReply("出舎日の1日後以降の日付を入力してください。\nなお、24時を2回周らない外泊の場合は申請不要です。");
@@ -365,7 +365,7 @@ class Chokigaihaku extends FormTemplate
                 $this->supporter->askAgainBecauseWrongReply();
                 return false;
             case '連絡先電話番号':
-                $message = $this->supporter->toHalfWidth($message);
+                $message = toHalfWidth($message);
                 if (mb_strlen(preg_replace('/\D/', '', $message)) < 10) {
                     $this->supporter->askAgainBecauseWrongReply("入力が不正です。\n10桁以上の数値を含めてください。");
                     return false;
@@ -380,7 +380,7 @@ class Chokigaihaku extends FormTemplate
         $conflictingEvents = '';
         $events = $this->supporter->fetchEvents();
         foreach ($events as $event) {
-            if ($endDate < $this->supporter->stringToDate($event['開始日']) || $startDate > $this->supporter->stringToDate($event['終了日'])) continue;
+            if ($endDate < stringToDate($event['開始日']) || $startDate > stringToDate($event['終了日'])) continue;
 
             // 被っていた
             if ($conflictingEvents !== '')

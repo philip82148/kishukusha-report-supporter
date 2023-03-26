@@ -56,22 +56,22 @@ WordPress が載った **サーバー**なら**MySQL データベース**も付�
 
 ### 1.**PHP プログラム**を**サーバー**上に配置する
 
-FTP で kishukusha-form-supporter/フォルダを元サーバーからダウンロードし、新サーバーの public_html/配下のどこかにアップロードする。
+FTP で kishukusha-report-supporter/フォルダを元サーバーからダウンロードし、新サーバーの public_html/配下のどこかにアップロードする。
 
 ### 2.**Google サービスアカウント**を**PHP プログラム**が使えるようにする
 
 ※前のものを流用する場合はこのステップは飛ばす。  
-認証情報を含んだ json ファイルを credentials.json という名前にして kishukusha-form-supporter/配下に FTP でアップロードする(して、前のものがある場合は上書きする)。
+認証情報を含んだ json ファイルを credentials.json という名前にして kishukusha-report-supporter/配下に FTP でアップロードする(して、前のものがある場合は上書きする)。
 
 ### 3.**LINE BOT アカウント**に**PHP プログラム**と**サーバー**の場所を教える
 
-**LINE BOT アカウント**の設定画面から Webhook URL に kishukusha-form-supporter/フォルダ内の webhook.php の URL※を設定する。  
+**LINE BOT アカウント**の設定画面から Webhook URL に kishukusha-report-supporter/フォルダ内の webhook.php の URL※を設定する。  
 ※ブラウザでアクセスすると「ここが webhook.php です」と表示される URL。  
 設定する際は「https://...」で始まるようにする(して、**サーバー**も SSL の設定が必要)。
 
 ### 4.**MySQL データベース**と**LINE BOT アカウント**を**PHP プログラム**が使えるようにする
 
-kishukusha-form-supporter/フォルダの中に config.php があるので、それを FTP でダウンロードし、
+kishukusha-report-supporter/フォルダの中に config.php があるので、それを FTP でダウンロードし、
 
 - WEBHOOK_PARENT_URL(webhook.php が配置されている親フォルダの URL)
 - DB\_...(**MySQL データベース**の認証情報)
@@ -81,19 +81,19 @@ kishukusha-form-supporter/フォルダの中に config.php があるので、そ
 
 ### 5.諸行事届の画像を一日 1 回行う設定
 
-**サーバー**に cron というサービスがあるので、それに kishukusha-form-supporter/配下の delete-shogyoji-images.php という**PHP プログラムファイル**を設定し、一日 1 回稼働させるようする。
+**サーバー**に cron というサービスがあるので、それに kishukusha-report-supporter/配下の delete-shogyoji-images.php という**PHP プログラムファイル**を設定し、一日 1 回稼働させるようする。
 
 ## git clone で行う場合
 
 元サーバーのファイルが壊れている場合等で、手順 1 からできない場合やコマンドラインが使える場合は下記を実行する。
 
 ```
-git clone https://github.com/philip82148/kishukusha-form-supporter
-cd kishukusha-form-supporter
-composer require google/apiclient:^2.0
+git clone https://github.com/philip82148/kishukusha-report-supporter
+cd kishukusha-report-supporter
+composer install
 ```
 
 ※git や composer(、php)は適宜インストールすること。
 
 composer というコマンドにより vendor/というフォルダができる。  
-これをサーバー上で実行するか、ローカルで手順 3 まで行って、kishukusha-form-supporter/ごとサーバーにアップロードする。
+これをサーバー上で実行するか、ローカルで手順 3 まで行って、kishukusha-report-supporter/ごとサーバーにアップロードする。

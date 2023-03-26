@@ -72,7 +72,7 @@ class Bikes extends FormTemplate
                 case '自転車':
                     if ($message !== '前の項目を修正する') {
                         unset($this->supporter->storage['unsavedAnswers']['名義人名']);
-                        $this->supporter->insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 2, ['防犯登録者名' => $message]);
+                        insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 2, ['防犯登録者名' => $message]);
                     }
                     $this->supporter->pushMessage('防犯登録番号を入力してください。', true);
                     $this->supporter->pushUnsavedAnswerOption('防犯登録番号');
@@ -81,7 +81,7 @@ class Bikes extends FormTemplate
                 case '原付':
                     if ($message !== '前の項目を修正する') {
                         unset($this->supporter->storage['unsavedAnswers']['防犯登録者名']);
-                        $this->supporter->insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 2, ['名義人名' => $message]);
+                        insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 2, ['名義人名' => $message]);
                     }
                     $this->supporter->pushMessage('ナンバーの画像を送ってください。', true);
                     $this->supporter->pushUnsavedAnswerOption('ナンバーの画像', 'image');
@@ -104,7 +104,7 @@ class Bikes extends FormTemplate
                         $message = $message['text'];
 
                         unset($this->supporter->storage['unsavedAnswers']['ナンバーの画像']);
-                        $this->supporter->insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 3, ['防犯登録番号' => $message]);
+                        insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 3, ['防犯登録番号' => $message]);
                         break;
                     case 'バイク':
                     case '原付':
@@ -258,7 +258,7 @@ class Bikes extends FormTemplate
                 $fileName = $this->supporter->downloadContent($message);
                 if ($type === 'ナンバーの画像') {
                     unset($this->supporter->storage['unsavedAnswers']['防犯登録番号']);
-                    $this->supporter->insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 3, ['ナンバーの画像' => $fileName]);
+                    insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 3, ['ナンバーの画像' => $fileName]);
                 } else {
                     $this->supporter->storage['unsavedAnswers'][$type] = $fileName;
                 }

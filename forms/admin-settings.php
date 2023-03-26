@@ -231,7 +231,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
                 $this->supporter->askAgainBecauseWrongReply();
                 return false;
             case '最大外部来訪者数':
-                $message = $this->supporter->toHalfWidth($message);
+                $message = toHalfWidth($message);
                 $count = preg_replace('/\D+/', '', $message);
                 if ($count === '') {
                     $this->supporter->askAgainBecauseWrongReply("入力が不正です。\n数値で答えてください。");
@@ -244,17 +244,17 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
                 $this->supporter->storeConfig();
                 return true;
             case '任期終了日':
-                $date = $this->supporter->stringToDate($message);
+                $date = stringToDate($message);
                 if ($date === false) {
                     $year = date('Y');
                     $this->supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な日付です。\n「1130」または「{$year}1130」のように4桁または8桁で入力してください。");
                     return false;
                 }
 
-                $dateString = $this->supporter->dateToDateStringWithDay($date);
+                $dateString = dateToDateStringWithDay($date);
                 $this->supporter->pushMessage("任期終了日:{$dateString}");
 
-                $today = $this->supporter->getDateAt0AM();
+                $today = getDateAt0AM();
                 if ($date < $today) {
                     $this->supporter->askAgainBecauseWrongReply("その日付はすでに過ぎています。\nもう一度入力してください。");
                     return false;
