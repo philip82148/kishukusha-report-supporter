@@ -33,7 +33,7 @@ class Gaiburaihousha extends FormTemplate
         $lastPhase = $this->supporter->storage['phases'][count($this->supporter->storage['phases']) - 1];
         if ($lastPhase === 'askingNames') {
             if ($message !== '前の項目を修正する') {
-                if (!$this->storeOrAskAgain('外部来訪者名', $message))
+                if ($this->storeOrAskAgain('外部来訪者名', $message))
                     return;
             }
 
@@ -48,7 +48,7 @@ class Gaiburaihousha extends FormTemplate
             $this->supporter->storage['phases'][] = 'askingNumber';
         } else if ($lastPhase === 'askingNumber') {
             if ($message !== '前の項目を修正する') {
-                if (!$this->storeOrAskAgain('外部来訪者数', $message))
+                if ($this->storeOrAskAgain('外部来訪者数', $message))
                     return;
             }
 
@@ -63,7 +63,7 @@ class Gaiburaihousha extends FormTemplate
             $this->supporter->storage['phases'][] = 'askingDay';
         } else if ($lastPhase === 'askingDay') {
             if ($message !== '前の項目を修正する') {
-                if (!$this->storeOrAskAgain('来訪日', $message))
+                if ($this->storeOrAskAgain('来訪日', $message))
                     return;
             }
 
@@ -80,7 +80,7 @@ class Gaiburaihousha extends FormTemplate
             $this->supporter->storage['phases'][] = 'askingStart';
         } else if ($lastPhase === 'askingStart') {
             if ($message !== '前の項目を修正する') {
-                if (!$this->storeOrAskAgain('滞在開始時刻', $message))
+                if ($this->storeOrAskAgain('滞在開始時刻', $message))
                     return;
             }
 
@@ -107,7 +107,7 @@ class Gaiburaihousha extends FormTemplate
 
             $this->supporter->storage['phases'][] = 'askingEnd';
         } else if ($lastPhase === 'askingEnd') {
-            if (!$this->storeOrAskAgain('滞在終了時刻', $message))
+            if ($this->storeOrAskAgain('滞在終了時刻', $message))
                 return;
 
             $this->confirm();
@@ -128,7 +128,7 @@ class Gaiburaihousha extends FormTemplate
             $this->supporter->storage['phases'] = ['askingFemale', 'askingFemale', 'askingFemale'];
         } else {
             $this->supporter->storage['phases'] = ['askingFemale', 'askingFemale', 'askingFemale'];
-            if (!$this->storeOrAskAgain('外部来訪者の女性の数', $message))
+            if ($this->storeOrAskAgain('外部来訪者の女性の数', $message))
                 return;
 
             $this->supporter->resetForm();
@@ -169,7 +169,7 @@ class Gaiburaihousha extends FormTemplate
         return false;
     }
 
-    protected function storeOrAskAgain(string $type, string|array $message): bool|string|array
+    protected function storeOrAskAgain(string $type, string|array $message): string
     {
         switch ($type) {
             case '外部来訪者名':
@@ -179,14 +179,14 @@ class Gaiburaihousha extends FormTemplate
                 $commaCount = mb_substr_count($message, ',') + mb_substr_count($message, '、') + mb_substr_count($message, "\n");
                 $this->supporter->storage['cache']['外部来訪者数'] = ($commaCount + 1) . '人';
 
-                return true;
+                return '';
             case '外部来訪者数':
             case '外部来訪者の女性の数':
                 $message = toHalfWidth($message);
                 $count = preg_replace('/\D+/', '', $message);
                 if ($count === '') {
                     $this->supporter->askAgainBecauseWrongReply("入力が不正です。\n数値で答えてください。");
-                    return false;
+                    return 'wrong-reply';
                 }
 
                 $count = (int)$count;
@@ -195,21 +195,21 @@ class Gaiburaihousha extends FormTemplate
 
                     if ($count === 0) {
                         $this->supporter->askAgainBecauseWrongReply("正しくない人数です。\nもう一度入力してください。");
-                        return false;
+                        return 'wrong-reply';
                     } else if (!$this->checkGaiburaihoushasuu($count)) {
                         $this->supporter->askAgainBecauseWrongReply("現在外部来訪者数は{$this->supporter->config['maxGaiburaihoushasuu']}人に制限されています。\nもう一度入力してください。");
-                        return false;
+                        return 'wrong-reply';
                     }
 
                     $this->supporter->storage['unsavedAnswers']['外部来訪者数'] = $count . '人';
-                    return true;
+                    return '';
                 }
 
                 // 女性の数
                 $totalCount = (int)preg_replace('/\D+/', '', $this->supporter->storage['unsavedAnswers']['外部来訪者数']);
                 if ($count > $totalCount) {
                     $this->supporter->askAgainBecauseWrongReply("申請した人数を超えています。\nもう一度入力してください。");
-                    return false;
+                    return 'wrong-reply';
                 }
 
                 $femaleCount = $count;
@@ -221,19 +221,19 @@ class Gaiburaihousha extends FormTemplate
                 $announcement .= "{$this->supporter->storage['unsavedAnswers']['滞在開始時刻']}~{$this->supporter->storage['unsavedAnswers']['滞在終了時刻']}です。\nよろしくお願いいたします。";
                 $this->supporter->pushMessage($announcement);
                 $this->supporter->pushPreviousAnswer('外部来訪者の女性の数', $femaleCount . '人');
-                return true;
+                return '';
             case '来訪日':
                 $date = stringToDate($message);
                 if ($date === false) {
                     $year = date('Y');
                     $this->supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な日付です。\n「0506」または「{$year}0506」のように4桁または8桁で入力してください。");
-                    return false;
+                    return 'wrong-reply';
                 }
 
                 $dateString = dateToDateStringWithDay($date);
                 $this->supporter->pushMessage("来訪日:{$dateString}");
                 $this->supporter->storage['unsavedAnswers']['来訪日'] = $dateString;
-                return true;
+                return '';
             case '滞在開始時刻':
             case '滞在終了時刻':
                 $stayTime = stringToTime($message);
@@ -243,7 +243,7 @@ class Gaiburaihousha extends FormTemplate
                     } else {
                         $this->supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な時刻です。\n「1700」のように4桁で入力してください。");
                     }
-                    return false;
+                    return 'wrong-reply';
                 }
 
                 $stayTimeString = date('H:i', $stayTime);
@@ -251,21 +251,21 @@ class Gaiburaihousha extends FormTemplate
 
                 if (!$this->checkIfGaiburaihouAllowed($stayTimeString)) {
                     $this->supporter->askAgainBecauseWrongReply("外部来訪者が認められない時刻です。\nもう一度入力してください。");
-                    return false;
+                    return 'wrong-reply';
                 }
 
                 if ($type === '滞在開始時刻') {
                     $this->supporter->storage['unsavedAnswers']['滞在開始時刻'] = $stayTimeString;
-                    return true;
+                    return '';
                 } else {
                     if ($stayTime <= stringToTime($this->supporter->storage['unsavedAnswers']['滞在開始時刻'])) {
                         // 有効でなかった、もう一度質問文送信
                         $this->supporter->askAgainBecauseWrongReply("滞在開始時刻以前の時刻です。\nもう一度入力してください。");
-                        return false;
+                        return 'wrong-reply';
                     }
 
                     $this->supporter->storage['unsavedAnswers']['滞在終了時刻'] = $stayTimeString;
-                    return true;
+                    return '';
                 }
         }
     }

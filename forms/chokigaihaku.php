@@ -37,7 +37,7 @@ class Chokigaihaku extends FormTemplate
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する') {
-                if (!$this->storeOrAskAgain('出舎日', $message))
+                if ($this->storeOrAskAgain('出舎日', $message))
                     return;
             }
 
@@ -63,12 +63,13 @@ class Chokigaihaku extends FormTemplate
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する') {
-                $errorType = $this->storeOrAskAgain('帰舎日', $message);
-                if ($errorType !== true) {
-                    if ($errorType === 'booking') {
+                switch ($this->storeOrAskAgain('帰舎日', $message)) {
+                    case '':
+                        break;
+                    case 'booking':
                         $this->supporter->storage['phases'][] = 'confirmingPeriod';
-                    }
-                    return;
+                    default:
+                        return;
                 }
             }
 
@@ -115,7 +116,7 @@ class Chokigaihaku extends FormTemplate
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する') {
-                if (!$this->storeOrAskAgain('外泊理由', $message))
+                if ($this->storeOrAskAgain('外泊理由', $message))
                     return;
             }
 
@@ -178,7 +179,7 @@ class Chokigaihaku extends FormTemplate
             }
             $message = $message['text'];
 
-            if (!$this->storeOrAskAgain('連絡先電話番号', $message))
+            if ($this->storeOrAskAgain('連絡先電話番号', $message))
                 return;
 
             // 質問・選択肢
@@ -273,7 +274,7 @@ class Chokigaihaku extends FormTemplate
                 true
             );
             $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
-            return true;
+            return '';
         }
 
         $this->supporter->pushMessage(
@@ -296,10 +297,10 @@ class Chokigaihaku extends FormTemplate
             true
         );
         $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
-        return true;
+        return '';
     }
 
-    protected function storeOrAskAgain(string $type, string|array $message): bool|string|array
+    protected function storeOrAskAgain(string $type, string|array $message): string
     {
         switch ($type) {
             case '出舎日':
@@ -312,7 +313,7 @@ class Chokigaihaku extends FormTemplate
                     } else {
                         $this->supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な日付です。\n「0903」または「{$year}0903」のように4桁または8桁で入力してください。");
                     }
-                    return false;
+                    return 'wrong-reply';
                 }
 
                 $dateString = dateToDateStringWithDay($date);
@@ -322,11 +323,11 @@ class Chokigaihaku extends FormTemplate
                     $today = getDateAt0AM();
                     if ($date < $today) {
                         $this->supporter->askAgainBecauseWrongReply('今日以降の日付を入力してください。');
-                        return false;
+                        return 'wrong-reply';
                     }
 
                     $this->supporter->storage['unsavedAnswers']['出舎日'] = $dateString;
-                    return true;
+                    return '';
                 }
 
                 // 出舎日の1日後から有効
@@ -334,7 +335,7 @@ class Chokigaihaku extends FormTemplate
                 $oneDayAfterStartDay = strtotime('+1 day', $startDate);
                 if ($date < $oneDayAfterStartDay) {
                     $this->supporter->askAgainBecauseWrongReply("出舎日の1日後以降の日付を入力してください。\nなお、24時を2回周らない外泊の場合は申請不要です。");
-                    return false;
+                    return 'wrong-reply';
                 }
                 $this->supporter->storage['unsavedAnswers']['帰舎日'] = $dateString;
 
@@ -351,7 +352,7 @@ class Chokigaihaku extends FormTemplate
                     return 'booking';
                 }
 
-                return true;
+                return '';
             case '外泊理由':
                 switch ($message) {
                     case '帰省':
@@ -359,19 +360,19 @@ class Chokigaihaku extends FormTemplate
                     case '旅行':
                     case 'その他':
                         $this->supporter->storage['unsavedAnswers']['外泊理由'] = $message;
-                        return true;
+                        return '';
                 }
                 // 有効でなかった、もう一度質問文送信
                 $this->supporter->askAgainBecauseWrongReply();
-                return false;
+                return 'wrong-reply';
             case '連絡先電話番号':
                 $message = toHalfWidth($message);
                 if (mb_strlen(preg_replace('/\D/', '', $message)) < 10) {
                     $this->supporter->askAgainBecauseWrongReply("入力が不正です。\n10桁以上の数値を含めてください。");
-                    return false;
+                    return 'wrong-reply';
                 }
                 $this->supporter->storage['unsavedAnswers']['連絡先電話番号'] = $message;
-                return true;
+                return '';
         }
     }
 

@@ -45,7 +45,7 @@ class Haibi309 extends FormTemplate
             $this->supporter->storage['phases'][] = 'askingImage';
         } else if ($lastPhase === 'askingImage') {
             if ($message['type'] === 'image') {
-                if (!$this->storeOrAskAgain('保管品の画像', $message))
+                if ($this->storeOrAskAgain('保管品の画像', $message))
                     return;
             } else {
                 if ($message['type'] !== 'text' || $message['text'] !== '最後に送信した画像') {
@@ -107,7 +107,7 @@ class Haibi309 extends FormTemplate
         return false;
     }
 
-    protected function storeOrAskAgain(string $type, string|array $message): bool|string|array
+    protected function storeOrAskAgain(string $type, string|array $message): string
     {
         switch ($type) {
             case '保管品の画像':
@@ -118,7 +118,7 @@ class Haibi309 extends FormTemplate
                 if (!isset($this->supporter->storage['cache']['一時ファイル']))
                     $this->supporter->storage['cache']['一時ファイル'] = [];
                 $this->supporter->storage['cache']['一時ファイル'][] = $fileName;
-                return true;
+                return '';
         }
     }
 }
