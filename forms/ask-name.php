@@ -83,8 +83,18 @@ class AskName extends FormTemplateBasic
             // 確認
             switch ($message) {
                 case 'はい':
+                    if ($this->supporter->storage['userName'] === '') {
+                        $isFirstTime = false;
+                    } else {
+                        $isFirstTime = true;
+                    }
                     $this->supporter->storage['userName'] = $this->supporter->storage['unsavedAnswers']['名前'];
                     $this->supporter->pushMessage('名前を登録しました。');
+                    // 初回の登録であればマニュアルを表示
+                    if (!$isFirstTime) {
+                        $this->supporter->pushMessage(USER_MANUAL);
+                        $this->supporter->pushMessage(USER_MANUAL_PHOTO_URL, false, 'image');
+                    }
                     $this->supporter->resetForm();
                     return;
                 default:
