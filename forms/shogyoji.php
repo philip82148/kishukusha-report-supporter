@@ -163,7 +163,6 @@ class Shogyoji extends FormTemplate
                 '欠席',
                 '遅刻',
                 '早退',
-                '遅刻または欠席',
                 '遅刻と早退'
             ], true);
             $this->supporter->pushUnsavedAnswerOption('出欠');
@@ -191,7 +190,6 @@ class Shogyoji extends FormTemplate
                 '欠席',
                 '遅刻',
                 '早退',
-                '遅刻または欠席',
                 '遅刻と早退'
             ], true);
             $this->supporter->pushUnsavedAnswerOption('出欠');
@@ -522,7 +520,6 @@ class Shogyoji extends FormTemplate
                     case '欠席':
                     case '遅刻':
                     case '早退':
-                    case '遅刻または欠席':
                     case '遅刻と早退':
                         $this->supporter->storage['unsavedAnswers']['出欠'] = $message;
                         return '';

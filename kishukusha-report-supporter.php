@@ -16,7 +16,7 @@ require_once __DIR__ . '/forms/user-manual.php';
 
 class KishukushaReportSupporter
 {
-    public const VERSION = '8.0.0';
+    public const VERSION = '8.0.1';
 
     /* 届出を追加する際はここの編集とformsフォルダへのファイルの追加、
        上のrequire_once文の追加が必要 */
