@@ -153,14 +153,9 @@ class Chokigaihaku extends FormTemplate
                 $message = $message['text'];
                 if ($message !== '前の項目を修正する')
                     $this->supporter->storage['unsavedAnswers']['滞在先住所'] = $message;
-            } else if ($message['type'] === 'location' && isset($message['address'])) {
-                $address = $message['address'];
-                if (isset($message['title'])) $address .= "({$message['title']})";
-                $this->supporter->pushMessage("滞在先住所:{$address}");
-                $this->supporter->storage['unsavedAnswers']['滞在先住所'] = $address;
             } else {
-                $this->supporter->askAgainBecauseWrongReply();
-                return;
+                if ($this->storeOrAskAgain('滞在先住所', $message))
+                    return;
             }
 
             // 質問
@@ -365,6 +360,22 @@ class Chokigaihaku extends FormTemplate
                 // 有効でなかった、もう一度質問文送信
                 $this->supporter->askAgainBecauseWrongReply();
                 return 'wrong-reply';
+            case '滞在先住所':
+                if ($message['type'] !== 'location') {
+                    $this->supporter->askAgainBecauseWrongReply();
+                    return 'wrong-reply';
+                }
+
+                if (!isset($message['address'])) {
+                    $this->supporter->askAgainBecauseWrongReply("住所がありません。\nもう一度入力して下さい。");
+                    return 'wrong-reply';
+                }
+
+                $address = $message['address'];
+                if (isset($message['title'])) $address .= "({$message['title']})";
+                $this->supporter->pushMessage("滞在先住所:{$address}");
+                $this->supporter->storage['unsavedAnswers']['滞在先住所'] = $address;
+                return '';
             case '連絡先電話番号':
                 $message = toHalfWidth($message);
                 if (mb_strlen(preg_replace('/\D/', '', $message)) < 10) {
