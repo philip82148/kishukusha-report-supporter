@@ -16,7 +16,7 @@ require_once __DIR__ . '/forms/user-manual.php';
 
 class KishukushaReportSupporter
 {
-    public const VERSION = '8.0.1';
+    public const VERSION = '8.0.2';
 
     /* 届出を追加する際はここの編集とformsフォルダへのファイルの追加、
        上のrequire_once文の追加が必要 */
@@ -1376,7 +1376,8 @@ VERSION\n", true);
     public function getEventInfo(): string
     {
         // 今日初めてメッセージした場合はdisplayNameを更新する
-        if ($this->lastStorageUpdatedTime < getDateAt0AM()) {
+        $today = getDateAt0AM();
+        if ($this->lastStorageUpdatedTime < $today) {
             $this->restoreStorage();
             $newDisplayName = $this->fetchDisplayName();
             // (unfollowedの場合は取得できずにstoreStorage()されない)
@@ -1392,12 +1393,18 @@ VERSION\n", true);
                 case 'text';
                     $whatUserDid = "Messaged '{$message['text']}'";
                     break;
+                case 'location':
+                    $whatUserDid = "Sent a {$message['type']}(Title:'{$message['title']}', Addr.:'{$message['address']}', Lat.:{$message['latitude']}, Lng.:{$message['longitude']})";
+                    break;
+                case 'sticker':
+                    $whatUserDid = "Sent a {$message['type']}(Pack. ID:{$message['packageId']}, Sti. ID:{$message['stickerId']})";
+                    break;
                 case 'image':
                 case 'audio':
-                    $whatUserDid = "Sent an {$message['type']}";
+                    $whatUserDid = "Sent an {$message['type']}(Msg. ID:{$message['id']})";
                     break;
                 default:
-                    $whatUserDid = "Sent a {$message['type']}";
+                    $whatUserDid = "Sent a {$message['type']}(Msg. ID:{$message['id']})";
                     break;
             }
         } else if ($this->lastEvent['type'] === 'unfollow') {
@@ -1415,7 +1422,7 @@ VERSION\n", true);
                 $messages = $this->messages;
             }
 
-            $replies = 'Nothing';
+            $replies = 'nothing';
             $lastIndex = count($messages) - 1;
             foreach ($messages as $i => $message) {
                 if ($i === 0) {
@@ -1455,13 +1462,13 @@ VERSION\n", true);
             if ($replyType === 'push') {
                 $pushUserId = self::$lastPushUserId;
                 $pushUserDisplayName = $this->fetchDisplayName($pushUserId);
-                $whatIDid[] = "Pushed(Tried to Push) to `{$pushUserDisplayName}`({$pushUserId}) {$replies}";
+                $whatIDid[] = "Pushed(tried to Push) to `{$pushUserDisplayName}`({$pushUserId}) {$replies}";
             } else {
                 $whatIDid[] .= "Replied {$replies}";
             }
         }
 
-        return "`{$this->displayName}`({$this->userId}) {$whatUserDid} and I " . implode(' and ', $whatIDid) . '.';
+        return "`{$this->displayName}`(User ID:{$this->userId}) {$whatUserDid} and I " . implode(' and ', $whatIDid) . '.';
     }
 
     public function isThisSsk(): bool
