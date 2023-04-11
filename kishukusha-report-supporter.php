@@ -1380,7 +1380,7 @@ VERSION\n", true);
         if ($this->lastStorageUpdatedTime < $today) {
             $this->restoreStorage();
             $newDisplayName = $this->fetchDisplayName();
-            // (unfollowedの場合は取得できずにstoreStorage()されない)
+            // (unfollowの場合は取得できずにstoreStorage()されない)
             if ($newDisplayName)
                 $this->storeStorage();
         }
