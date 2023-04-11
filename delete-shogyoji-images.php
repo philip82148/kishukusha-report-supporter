@@ -4,12 +4,12 @@ require_once __DIR__ . '/includes.php';
 require_once __DIR__ . '/vendor/autoload.php';
 
 // Google関連
-$googleClient = new Google_Client();
+$googleClient = new Google\Client();
 $googleClient->setScopes([
-    Google_Service_Sheets::DRIVE, // ドライブ
+    Google\Service\Sheets::DRIVE, // ドライブ
 ]);
 $googleClient->setAuthConfig(CREDENTIALS_PATH);
-$drive = new Google_Service_Drive($googleClient);
+$drive = new Google\Service\Drive($googleClient);
 
 // データベース関連
 $database = new JsonDatabase(MAIN_TABLE_NAME);
