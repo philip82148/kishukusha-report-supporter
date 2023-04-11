@@ -1120,15 +1120,15 @@ VERSION\n", true);
         $retryCount = 0;
         while (1) {
             $response = curl_exec($ch);
-            $httpcode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+            $statusCode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 
             // 成功
-            if ($httpcode >= 200 && $httpcode < 300) break;
+            if ($statusCode >= 200 && $statusCode < 300) break;
             // Conflict:すでにリクエストは受理済み
-            if ($httpcode === 409) break;
+            if ($statusCode === 409) break;
 
             // 400番台のエラーは再試行しても変わらないのでthrow
-            if (++$retryCount >= 4 || ($httpcode >= 400 && $httpcode < 500)) {
+            if (++$retryCount >= 4 || ($statusCode >= 400 && $statusCode < 500)) {
                 $e = new RuntimeException(curl_error($ch) . "\nRetry Count:{$retryCount}\n{$response}");
                 throw new ExceptionWithMessage($e, "返信処理に失敗しました。");
             }
@@ -1166,15 +1166,15 @@ VERSION\n", true);
         $retryCount = 0;
         while (1) {
             $response = curl_exec($ch);
-            $httpcode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+            $statusCode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 
             // 成功
-            if ($httpcode >= 200 && $httpcode < 300) break;
+            if ($statusCode >= 200 && $statusCode < 300) break;
             // Conflict:すでにリクエストは受理済み
-            if ($httpcode === 409) break;
+            if ($statusCode === 409) break;
 
             // 400番台のエラーは再試行しても変わらないのでthrow
-            if (++$retryCount >= 4 || ($httpcode >= 400 && $httpcode < 500))
+            if (++$retryCount >= 4 || ($statusCode >= 400 && $statusCode < 500))
                 // RuntimeExceptionなのは後でMessageAppendingされる前提だから
                 throw new RuntimeException(curl_error($ch) . "\nRetry Count:{$retryCount}\n{$response}");
 
@@ -1285,11 +1285,11 @@ VERSION\n", true);
             'Authorization: Bearer ' . CHANNEL_ACCESS_TOKEN
         ));
         $result = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        $statusCode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         curl_close($ch);
 
         // エラーが起こってかつmessageがnot foundの場合のみ存在しないと判断する
-        if ($httpcode >= 400 && $httpcode < 410) {
+        if ($statusCode >= 400 && $statusCode < 410) {
             $message = json_decode($result, true)["message"] ?? '';
             if ($message === 'Not found')
                 return false;
