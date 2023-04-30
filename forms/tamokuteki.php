@@ -16,7 +16,7 @@ class Tamokuteki extends FormTemplate
             $this->supporter->pushMessage("使用した(する)多目的室を選んでください。", true);
 
             // 選択肢
-            $this->supporter->pushOptions(['309号室', '308号室', '209号室', '208号室'], true);
+            $this->supporter->pushOptions(['309号室', '308号室', '301号室', '209号室', '208号室', '201号室'], true);
             $this->supporter->pushUnsavedAnswerOption('多目的室の種類');
             $this->supporter->pushOptions(['キャンセル']);
 
@@ -199,8 +199,10 @@ class Tamokuteki extends FormTemplate
                 switch ($message) {
                     case '309号室':
                     case '308号室':
+                    case '301号室':
                     case '209号室':
                     case '208号室':
+                    case '201号室':
                         $this->supporter->storage['unsavedAnswers']['多目的室の種類'] = $message;
                         return '';
                 }
