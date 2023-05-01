@@ -269,7 +269,7 @@ class Chokigaihaku extends FormTemplate
                 true
             );
             $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
-            return '';
+            return true;
         }
 
         $this->supporter->pushMessage(
@@ -292,7 +292,7 @@ class Chokigaihaku extends FormTemplate
             true
         );
         $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
-        return '';
+        return true;
     }
 
     protected function storeOrAskAgain(string $type, string|array $message): string
