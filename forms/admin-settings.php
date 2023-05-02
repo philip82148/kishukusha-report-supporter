@@ -59,7 +59,7 @@ class AdminSettings extends FormTemplateBasic
 読み込み先のスプレッドシート:
 https://docs.google.com/spreadsheets/d/{$this->supporter->config['variableSheets']}
 
-現在読み込まれている行事:
+現在読み込まれている行事(開始日順):
 " . $this->getEventListString(), true);
 
                     // 選択肢
@@ -171,7 +171,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
                     $replyMessage = "行事データの再読み込みを行いました。
 ※全ての行事が読み込まれているか、日付の年があっているか確認してください。
 
-読み込まれた行事:
+読み込まれた行事(開始日順):
 " . $this->getEventListString();
                     $this->supporter->pushMessage($replyMessage);
                     $this->supporter->resetForm();

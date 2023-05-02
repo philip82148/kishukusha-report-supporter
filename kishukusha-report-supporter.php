@@ -722,6 +722,9 @@ VERSION\n", true);
                 $events[] = $event;
             }
 
+            // 開始日順にソート
+            usort($events, fn ($a, $b) => stringToDate($a['開始日']) <=> stringToDate($b['開始日']));
+
             // データベースに保存
             $this->database->store('events', $events);
 
