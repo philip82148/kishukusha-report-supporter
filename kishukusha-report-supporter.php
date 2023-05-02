@@ -16,7 +16,7 @@ require_once __DIR__ . '/forms/user-manual.php';
 
 class KishukushaReportSupporter
 {
-    public const VERSION = '8.0.4';
+    public const VERSION = '8.0.5';
 
     /* 届出を追加する際はここの編集とformsフォルダへのファイルの追加、
        上のrequire_once文の追加が必要 */
@@ -713,7 +713,11 @@ VERSION\n", true);
                     '終了日' => $this->serialNumberToDateStringWithDay($row[2] ?? '')
                 ];
                 if ($event['開始日'] === false) continue;
-                if ($event['終了日'] === false) $event['終了日'] = $event['開始日'];
+                if ($event['終了日'] === false) {
+                    $event['終了日'] = $event['開始日'];
+                } else if (stringToDate($event['開始日']) > stringToDate($event['終了日'])) {
+                    continue;
+                }
 
                 $events[] = $event;
             }

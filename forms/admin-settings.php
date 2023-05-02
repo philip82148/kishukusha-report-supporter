@@ -53,12 +53,14 @@ class AdminSettings extends FormTemplateBasic
                 case '行事データ再読み込み':
                     // 質問
                     $this->supporter->pushMessage("行事データの再読み込みを行いますか？
-
-現在読み込まれている行事:
-" . $this->getEventListString() . "
+※開始日(B列)が日付の形式でない行、終了日(C列)が設定されている行で、終了日が開始日より前の行はスキップされます。
+再読み込み後に全ての行事が読み込まれているか確認してください。
 
 読み込み先のスプレッドシート:
-https://docs.google.com/spreadsheets/d/{$this->supporter->config['variableSheets']}", true);
+https://docs.google.com/spreadsheets/d/{$this->supporter->config['variableSheets']}
+
+現在読み込まれている行事:
+" . $this->getEventListString(), true);
 
                     // 選択肢
                     $this->supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);
@@ -167,6 +169,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
 
                     // 返信
                     $replyMessage = "行事データの再読み込みを行いました。
+※全ての行事が読み込まれているか、日付の年があっているか確認してください。
 
 読み込まれた行事:
 " . $this->getEventListString();
