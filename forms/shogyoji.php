@@ -395,24 +395,29 @@ class Shogyoji extends FormTemplate
 
     public function pushAdminMessages(string $displayName, array $answers, string $timeStamp, string $receiptNo): bool
     {
+        $eventDate = stringToDate($answers['開催日']);
+
         // 告知文
         $unspacedName = preg_replace('/[\x00\s]++/u', '', $answers['氏名']);
-        $this->supporter->pushMessage("告知文<{$answers['委員会行事']}@{$answers['開催日']}>:
-(以下敬称略)
-・{$unspacedName} {$answers['出欠']}
+        $simplifiedDate = date("m/d", $eventDate);
+
+        $this->supporter->pushMessage("<告知文 {$simplifiedDate} {$answers['委員会行事']} {$unspacedName}>
+※(以下敬称略)を記載して使用すること。
+また、理由の詳細は適宜要約すること。");
+
+        $this->supporter->pushMessage("・{$unspacedName} {$answers['出欠']}
 理由:{$answers['理由']}
 {$answers['理由の詳細']}");
 
 
         // 任期内かどうかと過去の日付かどうか
         $messageAboutDate = '';
-        $date = stringToDate($answers['開催日']);
-        if (!$this->supporter->checkInTerm($date)) {
+        if (!$this->supporter->checkInTerm($eventDate)) {
             $messageAboutDate = "
 ※任期外の日付です！";
         } else {
             $today = getDateAt0AM();
-            if ($date < $today)
+            if ($eventDate < $today)
                 $messageAboutDate = "
 ※過去の日付です！";
         }
