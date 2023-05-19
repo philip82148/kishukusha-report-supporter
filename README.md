@@ -79,7 +79,7 @@ kishukusha-report-supporter/フォルダの中に config.php があるので、�
 
 を書き換えて、FTP で同じ場所にアップロードして上書きする。
 
-### 5.諸行事届の画像を一日 1 回行う設定
+### 5.諸行事届の画像の削除を一日 1 回行う設定
 
 **サーバー**に cron というサービスがあるので、それに kishukusha-report-supporter/配下の delete-shogyoji-images.php という**PHP プログラムファイル**を設定し、一日 1 回稼働させるようする。
 
@@ -87,7 +87,7 @@ kishukusha-report-supporter/フォルダの中に config.php があるので、�
 
 元サーバーのファイルが壊れている場合等で、手順 1 からできない場合やコマンドラインが使える場合は下記を実行する。
 
-```
+```shell
 git clone https://github.com/philip82148/kishukusha-report-supporter
 cd kishukusha-report-supporter
 composer install
