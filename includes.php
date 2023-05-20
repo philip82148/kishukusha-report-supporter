@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/config-selector.php';
 require_once __DIR__ . '/manuals.php';
 
 require_once __DIR__ . '/functions/check-signature.php';

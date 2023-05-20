@@ -1,5 +1,6 @@
 .vscode/sftp.json
 deploy/
 vendor/
-config.php
 credentials.json
+config.php
+config-develop.php
