@@ -283,11 +283,10 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
                             $this->supporter->fetchEvents(true);
 
                             // 返信
-                            $replyMessage = "設定を保存、行事データを更新しました。
+                            $this->supporter->pushMessage("設定を保存、行事データを更新しました。
 
-読み込まれた行事:
-" . $this->getEventListString();
-                            $this->supporter->pushMessage($replyMessage);
+読み込まれた行事(開始日順):
+" . $this->getEventListString());
                             return '';
                         }
                         $this->supporter->askAgainBecauseWrongReply("入力されたIDのスプレッドシートにアクセスできませんでした。
