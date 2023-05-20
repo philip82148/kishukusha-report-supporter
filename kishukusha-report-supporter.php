@@ -767,7 +767,7 @@ VERSION\n", true);
                 case '309ImageFolder':
                 case 'bikesImageFolder':
                 case 'tamokutekiImageFolder':
-                    $fileId = $this->saveToDrive(TEST_IMAGE_FILENAME, TEST_IMAGE_FILENAME, $id, true);
+                    $fileId = $this->saveToDrive(TEST_IMAGE_FILENAME, 'TEST', $id, true);
                     if ($type === 'shogyojiImageFolder') {
                         $drive_service = new Google_Service_Drive($this->googleClient);
                         $drive_service->files->delete($fileId, ['supportsAllDrives' => true]);
