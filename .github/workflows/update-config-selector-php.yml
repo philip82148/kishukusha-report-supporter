@@ -1,0 +1,18 @@
+name: update config-selector.php
+on:
+  push:
+    branches:
+      - main
+jobs:
+  update-config-selector-php:
+    name: update config-selector.php
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - run: echo "<?php require_once __DIR__ . '/config.php';" > config-selector.php
+      - id: check_diff
+        run: echo "diff=$(git diff --name-only)" >> $GITHUB_OUTPUT
+      - if: steps.check_diff.outputs.diff
+        uses: stefanzweifel/git-auto-commit-action@v4
