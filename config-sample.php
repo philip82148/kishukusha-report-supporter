@@ -18,6 +18,9 @@ define('CHANNEL_ACCESS_TOKEN', '...');
 define('CHANNEL_SECRET', '...');
 // ↑ここまで変更すべきもの
 
+
+/* 以下は基本的に変更しなくてよい --------------------------------------------------------- */
+
 // MySQLデータベースの設定(変更しなくてもよいもの)
 define('DB_CHARSET', 'utf8');
 define('MAIN_TABLE_NAME', 'bot_objects');
@@ -33,14 +36,11 @@ define('IMAGE_FOLDER_URL', WEBHOOK_PARENT_URL . 'image/');
 // Googleドライブへアップロードできるかを試すテスト画像
 define('TEST_IMAGE_FILENAME', 'user-manual.jpg');
 
-// 佐々木の情報
-define('SSK_ID', '...');
-define('SSK_EMAIL', '...');
-
-// サーバー移動直後の管理者は、'password'を設定しておき、ボットの画面に打ち込めば管理者となれる
+// サーバー移動後、最初にボットにメッセージを送った人が管理者となる
+// 管理者権限を移す場合は、以下に'password'を設定しておき、ボットの入力に打ち込む
 define('DEFAULT_CONFIG', [
     // 'password' => 'パスワードをここに設定する',
-    'adminId' => SSK_ID,
+    'adminId' => 'dummy',
     'variableSheets' => 'dummy',
     'resultSheets' => 'dummy',
     'shogyojiImageFolder' => 'dummy',
@@ -52,5 +52,5 @@ define('DEFAULT_CONFIG', [
     'endOfTerm' => '2023/05/31(水)'
 ]);
 
-// デバッグ時はtrue
-define('DEBUGGING_ADMIN_SETTINGS', false);
+// 佐々木の情報
+define('SSK_EMAIL', '...');

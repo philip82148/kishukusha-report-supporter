@@ -826,10 +826,6 @@ VERSION\n", true);
 
     public function isThisAdmin(): bool
     {
-        if (DEBUGGING_ADMIN_SETTINGS) {
-            if ($this->isThisSsk()) return true;
-        }
-
         // configを書き換えるとisThisAdminが効かなくなる
         return $this->userId === $this->config['adminId'];
     }
@@ -1466,10 +1462,5 @@ VERSION\n", true);
         }
 
         return "`{$this->displayName}`(User ID:{$this->userId}) {$whatUserDid} and I " . implode(' and ', $whatIDid) . '.';
-    }
-
-    public function isThisSsk(): bool
-    {
-        return $this->userId === SSK_ID;
     }
 }

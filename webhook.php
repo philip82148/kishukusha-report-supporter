@@ -1,5 +1,7 @@
 <?php
 
+$start = hrtime(true);
+
 require_once __DIR__ . '/includes.php';
 
 // 署名確認
@@ -26,17 +28,19 @@ $events = json_decode($requestBody, true)['events'] ?? [];
 $database = new JsonDatabase(MAIN_TABLE_NAME);
 foreach ($events as $event) {
     if (!isset($event['type'])) continue;
+    if (!isset($event['source']['userId'])) continue;
 
-    $start = hrtime(true);
+    $userId = $event['source']['userId'];
 
     // 設定取得、なければデフォルトで作成
+    // 最初にアクセスした人を管理者にする
     $config = $database->restore('config');
     if (!isset($config)) {
         $config = DEFAULT_CONFIG;
+        $config['adminId'] = $userId;
+
         $database->store('config', $config);
     }
-
-    $userId = $event['source']['userId'];
 
     // 管理者用意
     $adminSupporter = new KishukushaReportSupporter($config['adminId'], $config, $database);
