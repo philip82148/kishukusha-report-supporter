@@ -10,13 +10,27 @@ define('DB_HOST', '...');
 define('DB_NAME', '...');
 define('DB_USER', '...');
 define('DB_PASSWORD', '...');
-// ↑ここまで変更すべきもの
 
 // ↓自分でLINE BOTを新たに用意する場合はこの設定も必要
 // LINEボットの設定
 define('CHANNEL_ACCESS_TOKEN', '...');
 define('CHANNEL_SECRET', '...');
-// ↑ここまで変更すべきもの
+
+// サーバー移動後、最初にボットにメッセージを送った人が管理者となる
+// 管理者権限を強制的に移す場合は、以下に'password'を設定しておき、ボットの入力に打ち込む
+define('DEFAULT_CONFIG', [
+    // 'password' => 'パスワードをここに設定する(コメントアウト(//を消すこと)すること)',
+    'adminId' => 'dummy',
+    'variableSheets' => 'dummy',
+    'resultSheets' => 'dummy',
+    'shogyojiImageFolder' => 'dummy',
+    'odoribaImageFolder' => 'dummy',
+    '309ImageFolder' => 'dummy',
+    'bikesImageFolder' => 'dummy',
+    'tamokutekiImageFolder' => 'dummy',
+    'maxGaiburaihoushasuu' => 0,
+    'endOfTerm' => '2023/05/31(水)'
+]);
 
 
 /* 以下は基本的に変更しなくてよい --------------------------------------------------------- */
@@ -35,22 +49,6 @@ define('IMAGE_FOLDER_URL', WEBHOOK_PARENT_URL . 'image/');
 
 // Googleドライブへアップロードできるかを試すテスト画像
 define('TEST_IMAGE_FILENAME', 'user-manual.jpg');
-
-// サーバー移動後、最初にボットにメッセージを送った人が管理者となる
-// 管理者権限を移す場合は、以下に'password'を設定しておき、ボットの入力に打ち込む
-define('DEFAULT_CONFIG', [
-    // 'password' => 'パスワードをここに設定する',
-    'adminId' => 'dummy',
-    'variableSheets' => 'dummy',
-    'resultSheets' => 'dummy',
-    'shogyojiImageFolder' => 'dummy',
-    'odoribaImageFolder' => 'dummy',
-    '309ImageFolder' => 'dummy',
-    'bikesImageFolder' => 'dummy',
-    'tamokutekiImageFolder' => 'dummy',
-    'maxGaiburaihoushasuu' => 0,
-    'endOfTerm' => '2023/05/31(水)'
-]);
 
 // 佐々木の情報
 define('SSK_EMAIL', '...');
