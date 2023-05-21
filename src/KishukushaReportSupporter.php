@@ -352,7 +352,8 @@ VERSION\n", true);
             // 元管理者への通知
             try {
                 $this->admin->initPush();
-                $this->admin->pushMessage('管理者が変更されました。');
+                $newAdminProfile = $this->fetchProfile();
+                $this->admin->pushMessage('管理者が変更されました。', false, 'text', ['name' => $newAdminProfile['displayName'], 'iconUrl' => $newAdminProfile['pictureUrl'] ?? 'https://dummy.com']);
                 $this->admin->pushOptions(['OK']);
                 $this->admin->confirmPush(true);
             } catch (\Throwable $e) {

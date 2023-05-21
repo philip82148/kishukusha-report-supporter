@@ -575,7 +575,7 @@ class Shogyoji extends FormTemplate
         $this->supporter->database->store('shogyojiImages', $shogyojiImages);
     }
 
-    public static function deleteShogyojiImage(JsonDatabase $database, LogDatabase $logDb): void
+    public static function deleteShogyojiImage(JsonDatabase $database, LogDatabase $logDatabase): void
     {
         // 昨日の0:00より前の行事の写真を取得
         $shogyojiImages = $database->restore('shogyojiImages') ?? [];
@@ -616,7 +616,7 @@ class Shogyoji extends FormTemplate
         }
 
         // ログの記録
-        if ($failureMessage) $logDb->log('delete-shogyoji-images: ' . $failureMessage);
-        $logDb->log('delete-shogyoji-images: deletedFileUrls ' . $deletedFileUrls);
+        if ($failureMessage) $logDatabase->log('delete-shogyoji-images: ' . $failureMessage);
+        $logDatabase->log('delete-shogyoji-images: deletedFileUrls ' . $deletedFileUrls);
     }
 }

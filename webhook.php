@@ -7,7 +7,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 use KishukushaReportSupporter\KishukushaReportSupporter;
 use KishukushaReportSupporter\JsonDatabase;
 use KishukushaReportSupporter\LogDatabase;
-use KishukushaReportSupporter\Forms\Shogyoji;
 
 // 署名確認
 $requestBody = file_get_contents('php://input');
@@ -41,38 +40,39 @@ foreach ($events as $event) {
     $supporter = new KishukushaReportSupporter($userId, $database);
 
     // イベント処理
+    $errorMessage = '';
     try {
         $supporter->handleEvent($event);
     } catch (Throwable $e) {
-        $errorMsg = "{$e}";
+        $errorMessage = "{$e}";
     }
 
     $end = hrtime(true);
 
     // ログの記録
-    $processing_time_ms = (($end - $start) / 1000000);
+    $processingTimeMs = (($end - $start) / 1000000);
     $eventInfo = $supporter->getEventInfo();
-    $logDb = new LogDatabase(LOG_TABLE_NAME);
-    if (isset($errorMsg)) $logDb->log("An error occurred:\n" . $errorMsg);
-    $logDb->log("Handled the event in {$processing_time_ms} ms. {$eventInfo}");
+    $logDatabase = new LogDatabase(LOG_TABLE_NAME);
+    if ($errorMessage) $logDatabase->log("An error occurred:\n" . $errorMessage);
+    $logDatabase->log("Handled the event in {$processingTimeMs} ms. {$eventInfo}");
 
     // エラーメールの送信
-    if (isset($errorMsg)) {
+    if ($errorMessage) {
         $to = SSK_EMAIL;
         $subject = '【寄宿舎届出サポート】エラーが発生しました。送信/返信が行われていない可能性があります。';
         $message = "<Error Message>
-{$errorMsg}
+{$errorMessage}
 
 <Event Info>
 {$eventInfo}
 
 <Processing Time>
-{$processing_time_ms}ms";
+{$processingTimeMs}ms";
         $headers = 'From: supporter@kishukusha-report-supporter.iam.gserviceaccount.com';
         if (!mb_send_mail($to, $subject, $message, $headers)) {
-            $logDb->log("Failed in sending an error mail.");
+            $logDatabase->log("Failed in sending an error mail.");
         };
     }
 }
 
-Shogyoji::deleteShogyojiImage($database, $logDb);
+include __DIR__ . '/delete-shogyoji-images.php';
