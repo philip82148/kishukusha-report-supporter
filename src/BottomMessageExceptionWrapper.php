@@ -2,13 +2,13 @@
 
 namespace KishukushaReportSupporter;
 
-class ExceptionWithMessage extends \RuntimeException
+class BottomMessageExceptionWrapper extends \RuntimeException
 {
     private string $editedMessage;
 
-    public function __construct($original, $message)
+    public function __construct($exception, $message)
     {
-        $this->editedMessage = "{$original}\n{$message}";
+        $this->editedMessage = "{$exception}\n{$message}";
     }
 
     public function __toString(): string

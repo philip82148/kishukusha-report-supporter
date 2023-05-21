@@ -230,7 +230,7 @@ VERSION\n", true);
                         ['valueInputOption' => 'USER_ENTERED']
                     );
                 } catch (\Throwable $e) {
-                    throw new ExceptionWithMessage($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nシートが削除されたか、ボットに編集権限がない可能性があります。");
+                    throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nシートが削除されたか、ボットに編集権限がない可能性があります。");
                 }
 
                 try {
@@ -242,13 +242,13 @@ VERSION\n", true);
                     $this->confirmPush(true);
                 } catch (\Throwable $e) {
                     $this->initReply();
-                    throw new ExceptionWithMessage($e, "スプレッドシートへの書き込みは成功しましたが、本人への通知中にエラーが発生しました。\nもう一度「承認する」を押すと本人への通知のみを再試行します。");
+                    throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書き込みは成功しましたが、本人への通知中にエラーが発生しました。\nもう一度「承認する」を押すと本人への通知のみを再試行します。");
                 }
 
                 $this->restoreStorage();
                 if (count($this->storage['adminPhase']) !== $unapprovedFormCount) {
                     $e = new \RuntimeException('New form submitted during approval');
-                    throw new ExceptionWithMessage($e, "スプレッドシートへの書きこみ及び本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の承認操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認してください(再度書きこみと通知が行われます)。");
+                    throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書きこみ及び本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の承認操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認してください(再度書きこみと通知が行われます)。");
                 }
 
                 // 管理者への通知
@@ -276,7 +276,7 @@ VERSION\n", true);
                 $this->restoreStorage();
                 if (count($this->storage['adminPhase']) !== $unapprovedFormCount) {
                     $e = new \RuntimeException('New form submitted during approval');
-                    throw new ExceptionWithMessage($e, "本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認/非承認を行ってください(再度通知が行われます)。");
+                    throw new BottomMessageExceptionWrapper($e, "本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認/非承認を行ってください(再度通知が行われます)。");
                 }
 
                 // 管理者への通知
@@ -481,7 +481,7 @@ VERSION\n", true);
                 );
             }
         } catch (\Throwable $e) {
-            throw new ExceptionWithMessage($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nシートが削除されたか、ボットに編集権限がない可能性があります。");
+            throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nシートが削除されたか、ボットに編集権限がない可能性があります。");
         }
 
         // 自分が管理者でない、かつ、承認が必要なら、管理者に通知
@@ -489,7 +489,7 @@ VERSION\n", true);
             try {
                 $receiptNo = $this->admin->notifyAppliedForm($this, $answers, $timeStamp, $checkboxRange ?? '');
             } catch (\Throwable $e) {
-                throw new ExceptionWithMessage($e, "スプレッドシートへの書き込みは成功しましたが、風紀への通知中にエラーが発生しました。");
+                throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書き込みは成功しましたが、風紀への通知中にエラーが発生しました。");
             }
         }
 
@@ -659,7 +659,7 @@ VERSION\n", true);
 
             return $this->googleIdToUrl($file->getId());
         } catch (\Throwable $e) {
-            throw new ExceptionWithMessage($e, "画像のドライブへの保存に失敗しました。\nボットに指定のフォルダへのファイル追加権限がない可能性があります。");
+            throw new BottomMessageExceptionWrapper($e, "画像のドライブへの保存に失敗しました。\nボットに指定のフォルダへのファイル追加権限がない可能性があります。");
         }
     }
 
@@ -715,7 +715,7 @@ VERSION\n", true);
 
             return $events;
         } catch (\Throwable $e) {
-            throw new ExceptionWithMessage($e, '行事データの読み込みに失敗しました。');
+            throw new BottomMessageExceptionWrapper($e, '行事データの読み込みに失敗しました。');
         }
     }
 
@@ -1123,7 +1123,7 @@ VERSION\n", true);
             // 400番台のエラーは再試行しても変わらないのでthrow
             if (++$retryCount >= 4 || ($statusCode >= 400 && $statusCode < 500)) {
                 $e = new \RuntimeException(curl_error($ch) . "\nRetry Count:{$retryCount}\n{$response}");
-                throw new ExceptionWithMessage($e, "返信処理に失敗しました。");
+                throw new BottomMessageExceptionWrapper($e, "返信処理に失敗しました。");
             }
 
             sleep(2 ** $retryCount);
@@ -1220,7 +1220,7 @@ VERSION\n", true);
 
         if ($errno !== CURLE_OK) {
             $e = new \RuntimeException($error);
-            throw new ExceptionWithMessage($e, '画像処理に失敗しました。');
+            throw new BottomMessageExceptionWrapper($e, '画像処理に失敗しました。');
         }
 
         // ファイル書き込み
