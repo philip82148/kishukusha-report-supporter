@@ -52,3 +52,6 @@ define('TEST_IMAGE_FILENAME', 'user-manual.jpg');
 
 // 佐々木の情報
 define('SSK_EMAIL', '...');
+
+// デバッグ時はtrue
+define('DEBUGGING', false);

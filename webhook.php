@@ -12,13 +12,16 @@ if (!checkSignature($requestBody)) {
 }
 
 // コネクション切断→既読?
-set_time_limit(20); // 永遠に稼働しないようにする
-if (function_exists('fastcgi_finish_request')) {
-    fastcgi_finish_request();
-} else {
-    ignore_user_abort(true); // レスポンス後処理続行可
-    header('Connection: close');
-    header('Content-Length: 0');
+// 切断するとerror_logが効かなくなるのでデバッグ時はしない
+if (!DEBUGGING) {
+    set_time_limit(20); // 永遠に稼働しないようにする
+    if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request();
+    } else {
+        ignore_user_abort(true); // レスポンス後処理続行可
+        header('Connection: close');
+        header('Content-Length: 0');
+    }
 }
 
 // event取得
