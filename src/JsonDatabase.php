@@ -1,10 +1,10 @@
 <?php
 
-require_once __DIR__ . '/../includes.php';
+namespace KishukushaReportSupporter;
 
 class JsonDatabase
 {
-    private mysqli $link;
+    private \mysqli $link;
     private string $tableName;
 
     public function __construct(string $tableName)

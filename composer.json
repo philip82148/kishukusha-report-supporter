@@ -1,5 +1,15 @@
 {
-    "require": {
-        "google/apiclient": "^2.0"
+  "require": {
+    "google/apiclient": "^2.0"
+  },
+  "autoload": {
+    "files": [
+      "src/config-selector.php",
+      "src/manuals.php",
+      "src/functions.php"
+    ],
+    "psr-4": {
+      "KishukushaReportSupporter\\": "src/"
     }
+  }
 }

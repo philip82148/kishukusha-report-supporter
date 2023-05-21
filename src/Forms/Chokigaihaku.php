@@ -1,6 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../includes.php';
+namespace KishukushaReportSupporter\Forms;
+
+use KishukushaReportSupporter\FormTemplate;
 
 class Chokigaihaku extends FormTemplate
 {

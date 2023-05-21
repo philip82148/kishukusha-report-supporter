@@ -1,6 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../includes.php';
+namespace KishukushaReportSupporter\Forms;
+
+use KishukushaReportSupporter\FormTemplateBasic;
 
 class AdminSettings extends FormTemplateBasic
 {

@@ -1,6 +1,11 @@
 <?php
 
-require_once __DIR__ . '/../includes.php';
+namespace KishukushaReportSupporter\Forms;
+
+use KishukushaReportSupporter\FormTemplate;
+use KishukushaReportSupporter\KishukushaReportSupporter;
+use KishukushaReportSupporter\JsonDatabase;
+use KishukushaReportSupporter\LogDatabase;
 
 class Shogyoji extends FormTemplate
 {

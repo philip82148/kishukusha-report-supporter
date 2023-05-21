@@ -2,7 +2,11 @@
 
 $start = hrtime(true);
 
-require_once __DIR__ . '/includes.php';
+require_once __DIR__ . '/vendor/autoload.php';
+
+use KishukushaReportSupporter\KishukushaReportSupporter;
+use KishukushaReportSupporter\JsonDatabase;
+use KishukushaReportSupporter\LogDatabase;
 
 // 署名確認
 $requestBody = file_get_contents('php://input');

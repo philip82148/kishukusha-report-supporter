@@ -1,36 +1,25 @@
 <?php
 
-require_once __DIR__ . '/includes.php';
+namespace KishukushaReportSupporter;
 
-require_once __DIR__ . '/forms/tamokuteki.php';
-require_once __DIR__ . '/forms/gaiburaihousha.php';
-require_once __DIR__ . '/forms/chokigaihaku.php';
-require_once __DIR__ . '/forms/shogyoji.php';
-require_once __DIR__ . '/forms/odoriba.php';
-require_once __DIR__ . '/forms/haibi309.php';
-require_once __DIR__ . '/forms/bikes.php';
-require_once __DIR__ . '/forms/nyuryokurireki.php';
-require_once __DIR__ . '/forms/ask-name.php';
-require_once __DIR__ . '/forms/admin-settings.php';
-require_once __DIR__ . '/forms/user-manual.php';
+use KishukushaReportSupporter\Forms;
 
 class KishukushaReportSupporter
 {
     public const VERSION = '8.0.5';
 
-    /* 届出を追加する際はここの編集とformsフォルダへのファイルの追加、
-       上のrequire_once文の追加が必要 */
+    /* 届出を追加する際はここの編集とsrc/Formsフォルダへのファイルの追加が必要 */
     public const FORMS = [
-        '多目的室使用届' => Tamokuteki::class,
-        '外部来訪者届' => Gaiburaihousha::class,
-        '長期外泊届' => Chokigaihaku::class,
-        '舎生大会・諸行事届' => Shogyoji::class,
-        '踊り場私物配備届' => Odoriba::class,
-        '309私物配備届' => Haibi309::class,
-        '自転車・バイク配備届' => Bikes::class,
-        '入力履歴を削除する' => Nyuryokurireki::class,
-        '自分の名前を変更する' => AskName::class,
-        'マニュアルを見る' => UserManual::class
+        '多目的室使用届' => Forms\Tamokuteki::class,
+        '外部来訪者届' => Forms\Gaiburaihousha::class,
+        '長期外泊届' => Forms\Chokigaihaku::class,
+        '舎生大会・諸行事届' => Forms\Shogyoji::class,
+        '踊り場私物配備届' => Forms\Odoriba::class,
+        '309私物配備届' => Forms\Haibi309::class,
+        '自転車・バイク配備届' => Forms\Bikes::class,
+        '入力履歴を削除する' => Forms\Nyuryokurireki::class,
+        '自分の名前を変更する' => Forms\AskName::class,
+        'マニュアルを見る' => Forms\UserManual::class
     ];
 
     public const MAX_PREVIOUS_ANSWERS = 5;
@@ -50,7 +39,7 @@ class KishukushaReportSupporter
     private array $uniqueTextOptions;
     private array $lastQuestions;
     private ?array $lastQuickReply;
-    private Google_Client $googleClient;
+    private static \Google_Client $googleClient;
 
     // getEventInfo()用
     private array $lastEvent;
@@ -93,7 +82,7 @@ class KishukushaReportSupporter
             $this->_handleEvent($event);
             $this->confirmReply();
             $this->storeStorage();
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->pushMessage("エラー内容:
 {$e}
 
@@ -103,7 +92,7 @@ class KishukushaReportSupporter
             $this->setLastQuestions();
             $this->confirmReply();
             // storageは保存しない
-            throw new RuntimeException('メッセージの送信は完了しています。');
+            throw new \RuntimeException('メッセージの送信は完了しています。');
         } finally {
             $this->lastEvent = $event;
         }
@@ -112,7 +101,7 @@ class KishukushaReportSupporter
     private function _handleEvent(array $event): void
     {
         if ($event['type'] === 'follow') {
-            (new AskName($this))->form([]);
+            (new Forms\AskName($this))->form([]);
             return;
         } else if ($event['type'] === 'unfollow') {
             $this->deleteStorage();
@@ -179,7 +168,7 @@ class KishukushaReportSupporter
                 break;
             case '管理者設定':
                 if ($this->isThisAdmin()) {
-                    (new AdminSettings($this))->form($message);
+                    (new Forms\AdminSettings($this))->form($message);
                     break;
                 }
             default:
@@ -229,20 +218,18 @@ VERSION\n", true);
         switch ($message) {
             case '承認する':
                 try {
-                    $this->setGoogleClient();
-
-                    $spreadsheet_service = new Google_Service_Sheets($this->googleClient);
+                    $spreadsheet_service = new \Google_Service_Sheets(self::getGoogleClient());
 
                     // 書き込み
                     $spreadsheet_service->spreadsheets_values->update(
                         $this->config['resultSheets'],
                         $lastPhase['checkboxRange'],
-                        new Google_Service_Sheets_ValueRange([
+                        new \Google_Service_Sheets_ValueRange([
                             'values' => [['TRUE']]
                         ]),
                         ['valueInputOption' => 'USER_ENTERED']
                     );
-                } catch (Throwable $e) {
+                } catch (\Throwable $e) {
                     throw new ExceptionWithMessage($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nシートが削除されたか、ボットに編集権限がない可能性があります。");
                 }
 
@@ -253,14 +240,14 @@ VERSION\n", true);
                     $this->pushMessage("{$lastPhase['formType']}が承認されました。\n(届出番号:{$lastPhase['receiptNo']})", false, 'text', ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com']);
                     $this->pushOptions(['OK']);
                     $this->confirmPush(true);
-                } catch (Throwable $e) {
+                } catch (\Throwable $e) {
                     $this->initReply();
                     throw new ExceptionWithMessage($e, "スプレッドシートへの書き込みは成功しましたが、本人への通知中にエラーが発生しました。\nもう一度「承認する」を押すと本人への通知のみを再試行します。");
                 }
 
                 $this->restoreStorage();
                 if (count($this->storage['adminPhase']) !== $unapprovedFormCount) {
-                    $e = new RuntimeException('New form submitted during approval');
+                    $e = new \RuntimeException('New form submitted during approval');
                     throw new ExceptionWithMessage($e, "スプレッドシートへの書きこみ及び本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の承認操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認してください(再度書きこみと通知が行われます)。");
                 }
 
@@ -280,7 +267,7 @@ VERSION\n", true);
 まず、スプレッドシートにチェックが入っているかを確認し、入っていない場合は風紀に直接問い合わせてください。", false, 'text', ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com']);
                     $this->pushOptions(['OK']);
                     $this->confirmPush(true);
-                } catch (Throwable $e) {
+                } catch (\Throwable $e) {
                     $this->initReply();
                     $this->pushMessage("{$e}\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}について、ボットを使用した承認が行われなかった旨の本人への通知中にエラーが発生しました。\n必要ならば手動で本人に通知してください。");
                     break;
@@ -288,7 +275,7 @@ VERSION\n", true);
 
                 $this->restoreStorage();
                 if (count($this->storage['adminPhase']) !== $unapprovedFormCount) {
-                    $e = new RuntimeException('New form submitted during approval');
+                    $e = new \RuntimeException('New form submitted during approval');
                     throw new ExceptionWithMessage($e, "本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認/非承認を行ってください(再度通知が行われます)。");
                 }
 
@@ -368,7 +355,7 @@ VERSION\n", true);
                 $this->admin->pushMessage('管理者が変更されました。');
                 $this->admin->pushOptions(['OK']);
                 $this->admin->confirmPush(true);
-            } catch (Throwable $e) {
+            } catch (\Throwable $e) {
             }
         }
 
@@ -450,9 +437,7 @@ VERSION\n", true);
             }
 
             // スプレッドシートに書き込み
-            $this->setGoogleClient();
-
-            $spreadsheet_service = new Google_Service_Sheets($this->googleClient);
+            $spreadsheet_service = new \Google_Service_Sheets(self::getGoogleClient());
 
             // 結果を追加
             $response = $this->appendToResultSheets($this->storage['formType'], $appendRow, $spreadsheet_service);
@@ -472,7 +457,7 @@ VERSION\n", true);
                 $sheetId = $this->getSheetId($response->getSheets(), $this->storage['formType']);
 
                 // チェックボックス追加
-                $requestBody = new Google_Service_Sheets_BatchUpdateSpreadsheetRequest();
+                $requestBody = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest();
                 $requestBody->setRequests([
                     'setDataValidation' => [
                         'range' =>  [
@@ -495,7 +480,7 @@ VERSION\n", true);
                     $requestBody
                 );
             }
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             throw new ExceptionWithMessage($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nシートが削除されたか、ボットに編集権限がない可能性があります。");
         }
 
@@ -503,7 +488,7 @@ VERSION\n", true);
         if (!$this->isThisAdmin() && $needCheckbox) {
             try {
                 $receiptNo = $this->admin->notifyAppliedForm($this, $answers, $timeStamp, $checkboxRange ?? '');
-            } catch (Throwable $e) {
+            } catch (\Throwable $e) {
                 throw new ExceptionWithMessage($e, "スプレッドシートへの書き込みは成功しましたが、風紀への通知中にエラーが発生しました。");
             }
         }
@@ -538,18 +523,18 @@ VERSION\n", true);
             $response = $spreadsheet_service->spreadsheets_values->append(
                 $resultSheetId,
                 "'{$formType}'!A1",
-                new Google_Service_Sheets_ValueRange([
+                new \Google_Service_Sheets_ValueRange([
                     'values' => [$row]
                 ]),
                 ['valueInputOption' => 'USER_ENTERED']
             );
 
             return $response;
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $header = array_merge(['タイムスタンプ'], self::FORMS[$formType]::HEADER);
 
             // シートが存在しない場合作成
-            $requestBody = new Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
+            $requestBody = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
                 'requests' => [
                     'addSheet' => [
                         'properties' => [
@@ -562,9 +547,9 @@ VERSION\n", true);
             $sheetId = $response->getReplies()[0]->getAddSheet()->getProperties()->sheetId;
 
             // 一行目固定、セル幅指定
-            $requestBody = new Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
+            $requestBody = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
                 'requests' => [
-                    new Google_Service_Sheets_Request([
+                    new \Google_Service_Sheets_Request([
                         'update_sheet_properties' => [
                             'properties' => [
                                 'sheet_id' => $sheetId,
@@ -573,7 +558,7 @@ VERSION\n", true);
                             'fields' => 'gridProperties.frozenRowCount'
                         ]
                     ]),
-                    new Google_Service_Sheets_Request([
+                    new \Google_Service_Sheets_Request([
                         'updateDimensionProperties' => [
                             'range' =>  [
                                 'sheetId' => $sheetId,
@@ -598,7 +583,7 @@ VERSION\n", true);
             $response = $spreadsheet_service->spreadsheets_values->append(
                 $resultSheetId,
                 "'{$formType}'!A1",
-                new Google_Service_Sheets_ValueRange([
+                new \Google_Service_Sheets_ValueRange([
                     'values' => [$header, $row]
                 ]),
                 ['valueInputOption' => 'USER_ENTERED']
@@ -657,11 +642,9 @@ VERSION\n", true);
     public function saveToDrive(string $imageFilename, string $driveFilename, string $parentFolder, bool $returnId = false): string
     {
         try {
-            $this->setGoogleClient();
-
             // ドライブに保存
-            $drive_service = new Google_Service_Drive($this->googleClient);
-            $file = $drive_service->files->create(new Google_Service_Drive_DriveFile([
+            $drive_service = new \Google_Service_Drive(self::getGoogleClient());
+            $file = $drive_service->files->create(new \Google_Service_Drive_DriveFile([
                 'name' => $driveFilename, // なんかバリデーションは要らないらしい
                 'parents' => [$parentFolder],
             ]), [
@@ -675,7 +658,7 @@ VERSION\n", true);
                 return $file->getId();
 
             return $this->googleIdToUrl($file->getId());
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             throw new ExceptionWithMessage($e, "画像のドライブへの保存に失敗しました。\nボットに指定のフォルダへのファイル追加権限がない可能性があります。");
         }
     }
@@ -697,9 +680,7 @@ VERSION\n", true);
         try {
             // データベースに無かった
             // スプレッドシートから取得
-            $this->setGoogleClient();
-
-            $spreadsheet_service = new Google_Service_Sheets($this->googleClient);
+            $spreadsheet_service = new \Google_Service_Sheets(self::getGoogleClient());
 
             // 読み取り
             $response = $spreadsheet_service->spreadsheets_values->get($this->config['variableSheets'], "'行事'!A1:C", [
@@ -733,7 +714,7 @@ VERSION\n", true);
             $this->database->store('events', $events);
 
             return $events;
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             throw new ExceptionWithMessage($e, '行事データの読み込みに失敗しました。');
         }
     }
@@ -757,8 +738,7 @@ VERSION\n", true);
             switch ($type) {
                 case 'variableSheets':
                 case 'resultSheets':
-                    $this->setGoogleClient();
-                    $spreadsheet_service = new Google_Service_Sheets($this->googleClient);
+                    $spreadsheet_service = new \Google_Service_Sheets(self::getGoogleClient());
                     if ($type === 'variableSheets') {
                         // 読み取り
                         $response = $spreadsheet_service->spreadsheets_values->get($id, "'行事'!A1:C");
@@ -777,27 +757,29 @@ VERSION\n", true);
                 case 'tamokutekiImageFolder':
                     $fileId = $this->saveToDrive(TEST_IMAGE_FILENAME, 'TEST', $id, true);
                     if ($type === 'shogyojiImageFolder') {
-                        $drive_service = new Google_Service_Drive($this->googleClient);
+                        $drive_service = new \Google_Service_Drive(self::getGoogleClient());
                         $drive_service->files->delete($fileId, ['supportsAllDrives' => true]);
                     }
                     break;
             }
             return true;
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             return false;
         }
     }
 
-    private function setGoogleClient()
+    public static function getGoogleClient(): \Google_Client
     {
-        if (!isset($this->googleClient)) {
-            $this->googleClient = new Google_Client();
-            $this->googleClient->setScopes([
-                Google_Service_Sheets::SPREADSHEETS, // スプレッドシート
-                Google_Service_Sheets::DRIVE, // ドライブ
+        if (!isset(self::$googleClient)) {
+            self::$googleClient = new \Google_Client();
+            self::$googleClient->setScopes([
+                \Google_Service_Sheets::SPREADSHEETS, // スプレッドシート
+                \Google_Service_Sheets::DRIVE, // ドライブ
             ]);
-            $this->googleClient->setAuthConfig(CREDENTIALS_PATH);
+            self::$googleClient->setAuthConfig(CREDENTIALS_PATH);
         }
+
+        return self::$googleClient;
     }
 
     public function checkInTerm(int $date): bool
@@ -1140,7 +1122,7 @@ VERSION\n", true);
 
             // 400番台のエラーは再試行しても変わらないのでthrow
             if (++$retryCount >= 4 || ($statusCode >= 400 && $statusCode < 500)) {
-                $e = new RuntimeException(curl_error($ch) . "\nRetry Count:{$retryCount}\n{$response}");
+                $e = new \RuntimeException(curl_error($ch) . "\nRetry Count:{$retryCount}\n{$response}");
                 throw new ExceptionWithMessage($e, "返信処理に失敗しました。");
             }
 
@@ -1186,8 +1168,8 @@ VERSION\n", true);
 
             // 400番台のエラーは再試行しても変わらないのでthrow
             if (++$retryCount >= 4 || ($statusCode >= 400 && $statusCode < 500))
-                // RuntimeExceptionなのは後でMessageAppendingされる前提だから
-                throw new RuntimeException(curl_error($ch) . "\nRetry Count:{$retryCount}\n{$response}");
+                // \RuntimeExceptionなのは後でMessageAppendingされる前提だから
+                throw new \RuntimeException(curl_error($ch) . "\nRetry Count:{$retryCount}\n{$response}");
 
             sleep(2 ** $retryCount);
         }
@@ -1237,7 +1219,7 @@ VERSION\n", true);
         curl_close($ch);
 
         if ($errno !== CURLE_OK) {
-            $e = new RuntimeException($error);
+            $e = new \RuntimeException($error);
             throw new ExceptionWithMessage($e, '画像処理に失敗しました。');
         }
 

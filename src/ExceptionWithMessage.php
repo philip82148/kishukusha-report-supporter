@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../includes.php';
+namespace KishukushaReportSupporter;
 
-class ExceptionWithMessage extends RuntimeException
+class ExceptionWithMessage extends \RuntimeException
 {
     private string $editedMessage;
 
