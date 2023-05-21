@@ -393,7 +393,7 @@ class Shogyoji extends FormTemplate
         $this->supporter->database->store('shogyojiImages', $shogyojiImages);
     }
 
-    public function pushAdminMessages(string $displayName, array $answers, string $timeStamp, string $receiptNo): bool
+    public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
         $eventDate = stringToDate($answers['開催日']);
 
@@ -448,7 +448,7 @@ class Shogyoji extends FormTemplate
 
         // 全文生成
         if ($messageAboutDate !== '' || $messageAboutEvent !== '') {
-            $message = "{$answers['氏名']}(`{$displayName}`)が舎生大会・諸行事届を提出しました。
+            $message = "{$answers['氏名']}(`{$profile['displayName']}`)が舎生大会・諸行事届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
 (届出番号:{$receiptNo})
@@ -462,7 +462,7 @@ class Shogyoji extends FormTemplate
 
 未チェックの項目:";
         } else {
-            $message = "{$answers['氏名']}(`{$displayName}`)が舎生大会・諸行事届を提出しました。
+            $message = "{$answers['氏名']}(`{$profile['displayName']}`)が舎生大会・諸行事届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
 (届出番号:{$receiptNo})
@@ -483,7 +483,7 @@ class Shogyoji extends FormTemplate
             $message .= "\n{$label}:{$value}";
         }
 
-        $this->supporter->pushMessage($message, true);
+        $this->supporter->pushMessage($message, true, 'text', ['iconUrl' => $profile['pictureUrl']]);
         $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
         return true;
     }

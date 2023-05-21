@@ -187,7 +187,7 @@ class Tamokuteki extends FormTemplate
         $this->supporter->pushPreviousAnswer('目的・備考', $answers['目的・備考']);
     }
 
-    public function pushAdminMessages(string $displayName, array $answers, string $timeStamp, string $receiptNo): bool
+    public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
         return false;
     }

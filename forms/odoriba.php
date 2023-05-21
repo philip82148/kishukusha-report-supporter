@@ -88,10 +88,10 @@ class Odoriba extends FormTemplate
         $this->supporter->applyForm($answers, $answersForSheets, false, '保管品はロビーの踊り場私物配備許可証を記入の上貼り付けて保管してください。');
     }
 
-    public function pushAdminMessages(string $displayName, array $answers, string $timeStamp, string $receiptNo): bool
+    public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
         $this->supporter->pushMessage(
-            "{$answers['氏名']}(`{$displayName}`)が踊り場私物配備届を提出しました。
+            "{$answers['氏名']}(`{$profile['displayName']}`)が踊り場私物配備届を提出しました。
 (TS:{$timeStamp})
 
 チェック済み:
@@ -100,9 +100,11 @@ class Odoriba extends FormTemplate
 保管品:{$answers['保管品']}
 保管品の画像:
 {$answers['保管品の画像']}
-(ドライブに保存済み)"
+(ドライブに保存済み)",
+            false,
+            'text',
+            ['iconUrl' => $profile['pictureUrl']]
         );
-        $this->supporter->pushMessage($answers['保管品の画像'], false, 'image');
         $this->supporter->setLastQuestions();
         return false;
     }

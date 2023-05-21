@@ -15,7 +15,7 @@ abstract class FormTemplate extends FormTemplateBasic
     public const HEADER = [];
 
     abstract protected function applyForm(): void;
-    abstract public function pushAdminMessages(string $displayName, array $answers, string $timeStamp, string $receiptNo): bool;
+    abstract public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool;
 
     protected function confirm(array $types = []): void
     {

@@ -618,7 +618,7 @@ VERSION\n", true);
     private function notifyAppliedForm(self $supporter, array $answers, string $timeStamp, string $checkboxRange): string
     {
         $timeStamp = date('Y/m/d H:i', strtotime($timeStamp));
-        $displayName = $supporter->fetchProfile()['displayName'] ?? '';
+        $profile = $supporter->fetchProfile();
         $pushMessageCount = $this->fetchPushMessageCount();
         if ($pushMessageCount === false) $pushMessageCount = 9999;
 
@@ -630,7 +630,7 @@ VERSION\n", true);
         $receiptNo = sprintf('#%d%02d', $unacknowledgedFormCount, $pushMessageCount);
 
         $formClass = self::FORMS[$supporter->storage['formType']];
-        $needAcknowledgement = (new $formClass($this))->pushAdminMessages($displayName, $answers, $timeStamp, $receiptNo);
+        $needAcknowledgement = (new $formClass($this))->pushAdminMessages($profile, $answers, $timeStamp, $receiptNo);
 
         // 通知
         if ($needAcknowledgement) {
@@ -761,7 +761,11 @@ VERSION\n", true);
                         // 読み取り
                         $response = $spreadsheet_service->spreadsheets_values->get($id, "'行事'!A1:C");
                     } else {
-                        $this->appendToResultSheets('外部来訪者届', [], $spreadsheet_service, $id);
+                        // 何か一つ届出のシートを書き込む
+                        foreach (self::FORMS as $formType => $formClass) {
+                            if (is_subclass_of($formClass, FormTemplate::class)) break;
+                        }
+                        $this->appendToResultSheets($formType, [], $spreadsheet_service, $id);
                     }
                     break;
                 case 'shogyojiImageFolder':
@@ -858,7 +862,7 @@ VERSION\n", true);
         $this->uniqueTextOptions = [];
     }
 
-    public function pushMessage(string $item, bool $isQuestion = false, string $type = 'text'): void
+    public function pushMessage(string $item, bool $isQuestion = false, string $type = 'text', ?array $sender = null): void
     {
         switch ($type) {
             case 'text':
@@ -882,6 +886,7 @@ VERSION\n", true);
             default:
                 return;
         }
+        if (isset($sender)) $message['sender'] = $sender;
         if ($isQuestion) {
             $this->questions[] = $message;
         } else {
