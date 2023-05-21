@@ -7,6 +7,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 use KishukushaReportSupporter\KishukushaReportSupporter;
 use KishukushaReportSupporter\JsonDatabase;
 use KishukushaReportSupporter\LogDatabase;
+use KishukushaReportSupporter\Forms\Shogyoji;
 
 // 署名確認
 $requestBody = file_get_contents('php://input');
@@ -73,3 +74,5 @@ foreach ($events as $event) {
         };
     }
 }
+
+Shogyoji::deleteShogyojiImage($database, $logDb);
