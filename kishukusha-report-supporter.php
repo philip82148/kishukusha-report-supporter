@@ -59,17 +59,19 @@ class KishukushaReportSupporter
     private static string $lastPushUserId;
     private static array $lastPushMessages;
 
-    public function __construct(string $userId, array $config, JsonDatabase $database, ?self $admin = null)
+    public function __construct(string $userId, JsonDatabase $database, ?self $admin = null)
     {
         $this->userId = $userId;
-        $this->config = $config;
         $this->database = $database;
-        if ($userId === $this->config['adminId']) {
-            $this->admin = $this;
-        } else {
-            $this->admin = $admin;
-        }
+        $this->restoreConfig();
         $this->restoreStorage();
+
+        $this->admin = match (true) {
+            $userId === $this->config['adminId'] => $this,
+            isset($admin) => $admin,
+            default => new self($this->config['adminId'], $this->database)
+        };
+
         // storageの方が書き換わっても、setLastQuestions()したときは必ず前回の質問になる
         $this->lastQuestions = $this->storage['lastQuestions'];
         $this->lastQuickReply = $this->storage['lastQuickReply'];
@@ -1358,6 +1360,20 @@ VERSION\n", true);
     public function getStorageKey(): string
     {
         return 'storage' . $this->userId;
+    }
+
+    public function restoreConfig(): void
+    {
+        $config = $this->database->restore('config');
+        if (isset($config)) {
+            $this->config = $config;
+            return;
+        }
+
+        $this->config = DEFAULT_CONFIG;
+        $this->config['adminId'] = $this->userId;
+
+        $this->storeConfig();
     }
 
     public function storeConfig(): void

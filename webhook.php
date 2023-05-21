@@ -27,34 +27,14 @@ $events = json_decode($requestBody, true)['events'] ?? [];
 // ほとんどの場合eventは1つしかないみたい
 $database = new JsonDatabase(MAIN_TABLE_NAME);
 foreach ($events as $event) {
-    if (!isset($event['type'])) continue;
     if (!isset($event['source']['userId'])) continue;
 
     $userId = $event['source']['userId'];
-
-    // 設定取得、なければデフォルトで作成
-    // 最初にアクセスした人を管理者にする
-    $config = $database->restore('config');
-    if (!isset($config)) {
-        $config = DEFAULT_CONFIG;
-        $config['adminId'] = $userId;
-
-        $database->store('config', $config);
-    }
-
-    // 管理者用意
-    $adminSupporter = new KishukushaReportSupporter($config['adminId'], $config, $database);
+    $supporter = new KishukushaReportSupporter($userId, $database);
 
     // イベント処理
     try {
-        if ($userId === $config['adminId']) {
-            // 管理者である
-            $adminSupporter->handleEvent($event);
-        } else {
-            // 一般ユーザーである
-            $userSupporter = new KishukushaReportSupporter($userId, $config, $database, $adminSupporter);
-            $userSupporter->handleEvent($event);
-        }
+        $supporter->handleEvent($event);
     } catch (Throwable $e) {
         $errorMsg = "{$e}";
     }
@@ -63,11 +43,7 @@ foreach ($events as $event) {
 
     // ログの記録
     $processing_time_ms = (($end - $start) / 1000000);
-    if ($userId === $config['adminId']) {
-        $eventInfo = $adminSupporter->getEventInfo();
-    } else {
-        $eventInfo = $userSupporter->getEventInfo();
-    }
+    $eventInfo = $supporter->getEventInfo();
     $logDb = new LogDatabase(LOG_TABLE_NAME);
     if (isset($errorMsg)) $logDb->log("An error occurred:\n" . $errorMsg);
     $logDb->log("Handled the event in {$processing_time_ms} ms. {$eventInfo}");
