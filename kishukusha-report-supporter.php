@@ -616,7 +616,7 @@ VERSION\n", true);
     private function notifyAppliedForm(self $supporter, array $answers, string $timeStamp, string $checkboxRange): string
     {
         $timeStamp = date('Y/m/d H:i', strtotime($timeStamp));
-        $displayName = $supporter->fetchDisplayName();
+        $displayName = $supporter->fetchProfile()['displayName'] ?? '';
         $pushMessageCount = $this->fetchPushMessageCount();
         if ($pushMessageCount === false) $pushMessageCount = 9999;
 
@@ -1262,7 +1262,7 @@ VERSION\n", true);
         return json_decode($result, true)['totalUsage'] ?? false;
     }
 
-    public function fetchDisplayName(?string $userId = null): string
+    public function fetchProfile(?string $userId = null): array
     {
         if (!isset($userId))
             $userId = $this->userId;
@@ -1276,31 +1276,20 @@ VERSION\n", true);
         $result = curl_exec($ch);
         curl_close($ch);
 
-        $displayName = json_decode($result, true)['displayName'] ?? '';
+        $profile = json_decode($result, true);
+        $displayName = $profile['displayName'] ?? '';
         if ($displayName && $userId === $this->userId)
             $this->displayName = $this->storage['displayName'] = $displayName;
 
-        return $displayName;
+        return $profile;
     }
 
     private function doesThisExist(): bool
     {
-        // profile取得
-        $ch = curl_init("https://api.line.me/v2/bot/profile/{$this->userId}");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Authorization: Bearer ' . CHANNEL_ACCESS_TOKEN
-        ));
-        $result = curl_exec($ch);
-        $statusCode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        curl_close($ch);
+        $profile = $this->fetchProfile();
 
-        // エラーが起こってかつmessageがnot foundの場合のみ存在しないと判断する
-        if ($statusCode >= 400 && $statusCode < 410) {
-            $message = json_decode($result, true)["message"] ?? '';
-            if ($message === 'Not found')
-                return false;
-        }
+        if (isset($profile["message"]) && $profile["message"] === 'Not found')
+            return false;
 
         return true;
     }
@@ -1386,9 +1375,10 @@ VERSION\n", true);
         $today = getDateAt0AM();
         if ($this->lastStorageUpdatedTime < $today) {
             $this->restoreStorage();
-            $newDisplayName = $this->fetchDisplayName();
+            // ここでdisplayNameが更新される
+            $profile = $this->fetchProfile();
             // (unfollowの場合は取得できずにstoreStorage()されない)
-            if ($newDisplayName)
+            if (isset($profile['displayName']))
                 $this->storeStorage();
         }
 
@@ -1468,7 +1458,7 @@ VERSION\n", true);
 
             if ($replyType === 'push') {
                 $pushUserId = self::$lastPushUserId;
-                $pushUserDisplayName = $this->fetchDisplayName($pushUserId);
+                $pushUserDisplayName = $this->fetchProfile($pushUserId)['displayName'] ?? '';
                 $whatIDid[] = "Pushed(tried to Push) to `{$pushUserDisplayName}`({$pushUserId}) {$replies}";
             } else {
                 $whatIDid[] .= "Replied {$replies}";
