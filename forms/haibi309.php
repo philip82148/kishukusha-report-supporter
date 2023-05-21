@@ -103,7 +103,7 @@ class Haibi309 extends FormTemplate
 (ドライブに保存済み)",
             false,
             'text',
-            ['iconUrl' => $profile['pictureUrl']]
+            ['iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']
         );
         $this->supporter->setLastQuestions();
         return false;

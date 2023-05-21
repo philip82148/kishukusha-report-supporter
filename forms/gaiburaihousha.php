@@ -166,7 +166,7 @@ class Gaiburaihousha extends FormTemplate
 外部来訪者名:{$answers['外部来訪者名']}",
             false,
             'text',
-            ['iconUrl' => $profile['pictureUrl']]
+            ['iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']
         );
         $this->supporter->setLastQuestions();
         return false;

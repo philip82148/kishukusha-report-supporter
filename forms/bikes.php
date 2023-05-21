@@ -213,9 +213,9 @@ class Bikes extends FormTemplate
 (ドライブに保存済み)",
                     false,
                     'text',
-                    ['iconUrl' => $profile['pictureUrl']]
+                    ['iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']
                 );
-                $this->supporter->pushMessage($answers['車体の画像'], false, 'image', ['iconUrl' => $profile['pictureUrl']]);
+                $this->supporter->pushMessage($answers['車体の画像'], false, 'image', ['iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']);
                 break;
             case 'バイク':
             case '原付':
@@ -236,10 +236,10 @@ class Bikes extends FormTemplate
 (ドライブに保存済み)",
                     false,
                     'text',
-                    ['iconUrl' => $profile['pictureUrl']]
+                    ['iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']
                 );
-                $this->supporter->pushMessage($answers['防犯登録番号またはナンバーの画像'], false, 'image', ['iconUrl' => $profile['pictureUrl']]);
-                $this->supporter->pushMessage($answers['車体の画像'], false, 'image', ['iconUrl' => $profile['pictureUrl']]);
+                $this->supporter->pushMessage($answers['防犯登録番号またはナンバーの画像'], false, 'image', ['iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']);
+                $this->supporter->pushMessage($answers['車体の画像'], false, 'image', ['iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']);
                 break;
         }
         $this->supporter->setLastQuestions();

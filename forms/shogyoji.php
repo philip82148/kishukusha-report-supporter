@@ -483,7 +483,7 @@ class Shogyoji extends FormTemplate
             $message .= "\n{$label}:{$value}";
         }
 
-        $this->supporter->pushMessage($message, true, 'text', ['iconUrl' => $profile['pictureUrl']]);
+        $this->supporter->pushMessage($message, true, 'text', ['iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']);
         $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
         return true;
     }
