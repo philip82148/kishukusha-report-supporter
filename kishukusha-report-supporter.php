@@ -789,7 +789,6 @@ VERSION\n", true);
     private function setGoogleClient()
     {
         if (!isset($this->googleClient)) {
-            require_once __DIR__ . '/vendor/autoload.php';
             $this->googleClient = new Google_Client();
             $this->googleClient->setScopes([
                 Google_Service_Sheets::SPREADSHEETS, // スプレッドシート
