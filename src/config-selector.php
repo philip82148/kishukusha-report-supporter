@@ -1,3 +1,1 @@
-<?php
-
-require_once __DIR__ . '/../config-develop.php';
+<?php require_once __DIR__ . '/../config.php';
