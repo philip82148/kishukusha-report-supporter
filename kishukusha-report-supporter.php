@@ -128,7 +128,7 @@ class KishukushaReportSupporter
             return;
 
         // 管理者、承認用
-        if ($this->acknowledging($message))
+        if ($this->approving($message))
             return;
 
         // まだ名前が確定していない
@@ -211,7 +211,7 @@ VERSION\n", true);
     }
 
     // 管理者、届出承認用
-    private function acknowledging(array $message): bool
+    private function approving(array $message): bool
     {
         // (管理者でないまたは)届け出がない場合はreturn
         if (empty($this->storage['adminPhase']))
@@ -224,8 +224,8 @@ VERSION\n", true);
         }
         $message = $message['text'];
 
-        $unacknowledgedFormCount = count($this->storage['adminPhase']);
-        $lastPhase = $this->storage['adminPhase'][$unacknowledgedFormCount - 1];
+        $unapprovedFormCount = count($this->storage['adminPhase']);
+        $lastPhase = $this->storage['adminPhase'][$unapprovedFormCount - 1];
         switch ($message) {
             case '承認する':
                 try {
@@ -259,7 +259,7 @@ VERSION\n", true);
                 }
 
                 $this->restoreStorage();
-                if (count($this->storage['adminPhase']) !== $unacknowledgedFormCount) {
+                if (count($this->storage['adminPhase']) !== $unapprovedFormCount) {
                     $e = new RuntimeException('New form submitted during approval');
                     throw new ExceptionWithMessage($e, "スプレッドシートへの書きこみ及び本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の承認操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認してください(再度書きこみと通知が行われます)。");
                 }
@@ -287,7 +287,7 @@ VERSION\n", true);
                 }
 
                 $this->restoreStorage();
-                if (count($this->storage['adminPhase']) !== $unacknowledgedFormCount) {
+                if (count($this->storage['adminPhase']) !== $unapprovedFormCount) {
                     $e = new RuntimeException('New form submitted during approval');
                     throw new ExceptionWithMessage($e, "本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認/非承認を行ってください(再度通知が行われます)。");
                 }
@@ -628,14 +628,14 @@ VERSION\n", true);
         // 他に発生したトランザクションについて更新する
         $this->restoreStorage();
 
-        $unacknowledgedFormCount = count($this->storage['adminPhase']) + 1;
-        $receiptNo = sprintf('#%d%02d', $unacknowledgedFormCount, $pushMessageCount);
+        $unapprovedFormCount = count($this->storage['adminPhase']) + 1;
+        $receiptNo = sprintf('#%d%02d', $unapprovedFormCount, $pushMessageCount);
 
         $formClass = self::FORMS[$supporter->storage['formType']];
-        $needAcknowledgement = (new $formClass($this))->pushAdminMessages($profile, $answers, $timeStamp, $receiptNo);
+        $needApproval = (new $formClass($this))->pushAdminMessages($profile, $answers, $timeStamp, $receiptNo);
 
         // 通知
-        if ($needAcknowledgement) {
+        if ($needApproval) {
             $this->storage['adminPhase'][] = [
                 'userId' => $supporter->userId,
                 'userName' => $supporter->storage['userName'],
