@@ -249,7 +249,8 @@ VERSION\n", true);
                 try {
                     // 申請した本人への通知
                     $this->initPush($lastPhase['userId']);
-                    $this->pushMessage("{$lastPhase['formType']}が承認されました。\n(届出番号:{$lastPhase['receiptNo']})");
+                    $adminProfile = $this->fetchProfile();
+                    $this->pushMessage("{$lastPhase['formType']}が承認されました。\n(届出番号:{$lastPhase['receiptNo']})", false, 'text', ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com']);
                     $this->pushOptions(['OK']);
                     $this->confirmPush(true);
                 } catch (Throwable $e) {
@@ -271,11 +272,12 @@ VERSION\n", true);
                 try {
                     // 申請した本人への通知
                     $this->initPush($lastPhase['userId']);
+                    $adminProfile = $this->fetchProfile();
                     $this->pushMessage("届出番号{$lastPhase['receiptNo']}の{$lastPhase['formType']}を風紀は確認しましたが、ボットを使用した承認は行われませんでした。
 
 これについて風紀から直接連絡がなかった場合は手動でスプレッドシートにチェックを入れた可能性があります。
 
-まず、スプレッドシートにチェックが入っているかを確認し、入っていない場合は風紀に直接問い合わせてください。");
+まず、スプレッドシートにチェックが入っているかを確認し、入っていない場合は風紀に直接問い合わせてください。", false, 'text', ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com']);
                     $this->pushOptions(['OK']);
                     $this->confirmPush(true);
                 } catch (Throwable $e) {
