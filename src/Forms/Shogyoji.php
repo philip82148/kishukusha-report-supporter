@@ -563,7 +563,7 @@ class Shogyoji extends FormTemplate
         }
     }
 
-    public function storeShogyojiImage(string $eventDate, string $id): void
+    private function storeShogyojiImage(string $eventDate, string $id): void
     {
         $eventDate = deleteParentheses($eventDate);
         $shogyojiImages = $this->supporter->database->restore('shogyojiImages') ?? [];
