@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__ . '/includes.php';
-
 define(
     'USER_MANUAL',
     "【寄宿舎届出サポート ユーザー用マニュアル】

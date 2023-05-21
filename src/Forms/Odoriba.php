@@ -1,8 +1,10 @@
 <?php
 
-require_once __DIR__ . '/../includes.php';
+namespace KishukushaReportSupporter\Forms;
 
-class Haibi309 extends FormTemplate
+use KishukushaReportSupporter\FormTemplate;
+
+class Odoriba extends FormTemplate
 {
     public const HEADER = ['氏名', '保管品', '保管品の画像'];
 
@@ -13,7 +15,7 @@ class Haibi309 extends FormTemplate
             $this->supporter->storage['unsavedAnswers']['氏名'] = $this->supporter->storage['userName'];
 
             // 質問
-            $this->supporter->pushMessage("保管品を入力してください。\n※309では主に楽器の配備のみが許可されます。\n楽器以外の配備品については五役に確認を取ってから届出を提出してください。\n例:エレキギター", true);
+            $this->supporter->pushMessage("保管品を入力してください。\n例:赤いハードキャリーケース", true);
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('保管品');
@@ -80,18 +82,18 @@ class Haibi309 extends FormTemplate
         // ドライブに保存
         $imageFileName = $answers['保管品の画像'];
         $itemName = mb_substr($answers['保管品'], 0, 15);
-        $driveFileName = "309_{$this->supporter->storage['userName']}_{$itemName}.jpg";
-        $answers['保管品の画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['309ImageFolder']);
+        $driveFileName = "踊り場_{$this->supporter->storage['userName']}_{$itemName}.jpg";
+        $answers['保管品の画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['odoribaImageFolder']);
         $answersForSheets = array_values($answers);
 
         // 申請
-        $this->supporter->applyForm($answers, $answersForSheets);
+        $this->supporter->applyForm($answers, $answersForSheets, false, '保管品はロビーの踊り場私物配備許可証を記入の上貼り付けて保管してください。');
     }
 
-    public function pushAdminMessages(string $displayName, array $answers, string $timeStamp, string $receiptNo): bool
+    public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
         $this->supporter->pushMessage(
-            "{$answers['氏名']}(`{$displayName}`)が309私物配備届を提出しました。
+            "{$answers['氏名']}(`{$profile['displayName']}`)が踊り場私物配備届を提出しました。
 (TS:{$timeStamp})
 
 チェック済み:
@@ -100,9 +102,11 @@ class Haibi309 extends FormTemplate
 保管品:{$answers['保管品']}
 保管品の画像:
 {$answers['保管品の画像']}
-(ドライブに保存済み)"
+(ドライブに保存済み)",
+            false,
+            'text',
+            ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']
         );
-        $this->supporter->pushMessage($answers['保管品の画像'], false, 'image');
         $this->supporter->setLastQuestions();
         return false;
     }

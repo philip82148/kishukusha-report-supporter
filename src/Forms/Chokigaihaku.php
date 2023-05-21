@@ -1,6 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../includes.php';
+namespace KishukushaReportSupporter\Forms;
+
+use KishukushaReportSupporter\FormTemplate;
 
 class Chokigaihaku extends FormTemplate
 {
@@ -213,7 +215,7 @@ class Chokigaihaku extends FormTemplate
         $this->supporter->pushPreviousAnswer('連絡先電話番号', $answers['連絡先電話番号']);
     }
 
-    public function pushAdminMessages(string $displayName, array $answers, string $timeStamp, string $receiptNo): bool
+    public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
         $startDate = stringToDate($answers['出舎日']);
         $endDate = stringToDate($answers['帰舎日']);
@@ -248,7 +250,7 @@ class Chokigaihaku extends FormTemplate
 
         if ($conflictingEvents !== '' || !$isDateInTerm) {
             $this->supporter->pushMessage(
-                "{$answers['氏名']}(`{$displayName}`)が長期外泊届を提出しました。
+                "{$answers['氏名']}(`{$profile['displayName']}`)が長期外泊届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
 (届出番号:{$receiptNo})
@@ -266,14 +268,16 @@ class Chokigaihaku extends FormTemplate
 外泊理由の詳細:{$answers['外泊理由の詳細']}
 滞在先住所:{$answers['滞在先住所']}
 連絡先電話番号:{$answers['連絡先電話番号']}",
-                true
+                true,
+                'text',
+                ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']
             );
             $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
             return true;
         }
 
         $this->supporter->pushMessage(
-            "{$answers['氏名']}(`{$displayName}`)が長期外泊届を提出しました。
+            "{$answers['氏名']}(`{$profile['displayName']}`)が長期外泊届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
 (届出番号:{$receiptNo})
@@ -289,7 +293,9 @@ class Chokigaihaku extends FormTemplate
 外泊理由の詳細:{$answers['外泊理由の詳細']}
 滞在先住所:{$answers['滞在先住所']}
 連絡先電話番号:{$answers['連絡先電話番号']}",
-            true
+            true,
+            'text',
+            ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']
         );
         $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
         return true;

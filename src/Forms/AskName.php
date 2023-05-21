@@ -1,6 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../includes.php';
+namespace KishukushaReportSupporter\Forms;
+
+use KishukushaReportSupporter\FormTemplateBasic;
 
 class AskName extends FormTemplateBasic
 {
@@ -33,8 +35,9 @@ class AskName extends FormTemplateBasic
             }
 
             // 選択肢表示
-            $displayName = $this->supporter->fetchDisplayName();
-            $this->supporter->pushOptions(['(LINE名より)' => $displayName]);
+            $profile = $this->supporter->fetchProfile();
+            if (isset($profile['displayName']))
+                $this->supporter->pushOptions(['(LINE名より)' => $profile['displayName']]);
             $this->supporter->pushUnsavedAnswerOption('名前');
             if ($this->supporter->storage['userName'] !== '') {
                 // すでに一度登録済みなら、キャンセルを用意しておく

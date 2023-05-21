@@ -1,6 +1,11 @@
 <?php
 
-require_once __DIR__ . '/../includes.php';
+namespace KishukushaReportSupporter\Forms;
+
+use KishukushaReportSupporter\FormTemplate;
+use KishukushaReportSupporter\KishukushaReportSupporter;
+use KishukushaReportSupporter\JsonDatabase;
+use KishukushaReportSupporter\LogDatabase;
 
 class Shogyoji extends FormTemplate
 {
@@ -381,19 +386,7 @@ class Shogyoji extends FormTemplate
         $this->supporter->applyForm($answers, $answersForSheets, true);
     }
 
-    public function storeShogyojiImage(string $eventDate, string $id): void
-    {
-        $eventDate = deleteParentheses($eventDate);
-        $shogyojiImages = $this->supporter->database->restore('shogyojiImages') ?? [];
-        if (isset($shogyojiImages[$eventDate])) {
-            $shogyojiImages[$eventDate][] = $id;
-        } else {
-            $shogyojiImages[$eventDate] = [$id];
-        }
-        $this->supporter->database->store('shogyojiImages', $shogyojiImages);
-    }
-
-    public function pushAdminMessages(string $displayName, array $answers, string $timeStamp, string $receiptNo): bool
+    public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
         $eventDate = stringToDate($answers['開催日']);
 
@@ -448,7 +441,7 @@ class Shogyoji extends FormTemplate
 
         // 全文生成
         if ($messageAboutDate !== '' || $messageAboutEvent !== '') {
-            $message = "{$answers['氏名']}(`{$displayName}`)が舎生大会・諸行事届を提出しました。
+            $message = "{$answers['氏名']}(`{$profile['displayName']}`)が舎生大会・諸行事届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
 (届出番号:{$receiptNo})
@@ -462,7 +455,7 @@ class Shogyoji extends FormTemplate
 
 未チェックの項目:";
         } else {
-            $message = "{$answers['氏名']}(`{$displayName}`)が舎生大会・諸行事届を提出しました。
+            $message = "{$answers['氏名']}(`{$profile['displayName']}`)が舎生大会・諸行事届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
 (届出番号:{$receiptNo})
@@ -483,7 +476,7 @@ class Shogyoji extends FormTemplate
             $message .= "\n{$label}:{$value}";
         }
 
-        $this->supporter->pushMessage($message, true);
+        $this->supporter->pushMessage($message, true, 'text', ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']);
         $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
         return true;
     }
@@ -568,5 +561,62 @@ class Shogyoji extends FormTemplate
                 $this->supporter->askAgainBecauseWrongReply();
                 return 'wrong-reply';
         }
+    }
+
+    private function storeShogyojiImage(string $eventDate, string $id): void
+    {
+        $eventDate = deleteParentheses($eventDate);
+        $shogyojiImages = $this->supporter->database->restore('shogyojiImages') ?? [];
+        if (isset($shogyojiImages[$eventDate])) {
+            $shogyojiImages[$eventDate][] = $id;
+        } else {
+            $shogyojiImages[$eventDate] = [$id];
+        }
+        $this->supporter->database->store('shogyojiImages', $shogyojiImages);
+    }
+
+    public static function deleteShogyojiImage(JsonDatabase $database, LogDatabase $logDatabase): void
+    {
+        // 昨日の0:00より前の行事の写真を取得
+        $shogyojiImages = $database->restore('shogyojiImages') ?? [];
+        $yesterday =  getDateAt0AM(time() - 60 * 60 * 24);
+        $idsToDelete = [];
+        foreach ($shogyojiImages as $eventDate => $ids) {
+            if (strtotime($eventDate) < $yesterday) {
+                $idsToDelete = array_merge($idsToDelete, $ids);
+                unset($shogyojiImages[$eventDate]);
+            }
+        }
+
+        if (!$idsToDelete) return;
+        $database->store('shogyojiImages', $shogyojiImages);
+
+        // 削除
+        $drive = new \Google_Service_Drive(KishukushaReportSupporter::getGoogleClient());
+        $deletedFileUrls = 'Nothing';
+        $failureMessage = '';
+        foreach ($idsToDelete as $i => $id) {
+            try {
+                // $drive->files->trash($id, ['supportsAllDrives' => true]); // ゴミ箱に移動
+                $drive->files->delete($id, ['supportsAllDrives' => true]); // 完全に削除
+
+                if ($i === 0) {
+                    $deletedFileUrls = '';
+                } else if ($i < count($ids) - 1) {
+                    $deletedFileUrls .= ', ';
+                } else {
+                    $deletedFileUrls .= ' and ';
+                }
+
+                $deletedFileUrls .= "https://drive.google.com/file/d/{$id}/view?usp=sharing";
+            } catch (\Throwable $e) {
+                if ($failureMessage) $failureMessage .= "\n";
+                $failureMessage .= "An error occurred. Please delete https://drive.google.com/file/d/{$id}/view?usp=sharing manually.\nError Message:\n{$e}";
+            }
+        }
+
+        // ログの記録
+        if ($failureMessage) $logDatabase->log('delete-shogyoji-images: ' . $failureMessage);
+        $logDatabase->log('delete-shogyoji-images: deletedFileUrls ' . $deletedFileUrls);
     }
 }

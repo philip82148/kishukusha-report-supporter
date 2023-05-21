@@ -81,6 +81,7 @@ kishukusha-report-supporter/フォルダの中に config.php があるので、�
 
 ### 5.諸行事届の画像の削除を一日 1 回行う設定
 
+ボットにアクセスされる(メッセージが送られる)度に昨日以前の諸行事届の画像が削除されるようになっているが、アクセスされなかった場合でも削除されるようにする。  
 **サーバー**に cron というサービスがあるので、それに kishukusha-report-supporter/配下の delete-shogyoji-images.php という**PHP プログラムファイル**を設定し、一日 1 回稼働させるようする。
 
 ## git clone で行う場合

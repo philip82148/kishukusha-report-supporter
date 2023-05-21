@@ -1,6 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../includes.php';
+namespace KishukushaReportSupporter\Forms;
+
+use KishukushaReportSupporter\FormTemplate;
 
 class Bikes extends FormTemplate
 {
@@ -194,12 +196,12 @@ class Bikes extends FormTemplate
         $this->supporter->applyForm($answers, $answersForSheets);
     }
 
-    public function pushAdminMessages(string $displayName, array $answers, string $timeStamp, string $receiptNo): bool
+    public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
         switch ($answers['車体の種類']) {
             case '自転車':
                 $this->supporter->pushMessage(
-                    "{$answers['届出提出者名']}(`{$displayName}`)が自転車・バイク配備届を提出しました。
+                    "{$answers['届出提出者名']}(`{$profile['displayName']}`)が自転車・バイク配備届を提出しました。
 (TS:{$timeStamp})
 
 チェック済み:
@@ -210,14 +212,17 @@ class Bikes extends FormTemplate
 防犯登録番号またはナンバーの画像:{$answers['防犯登録番号またはナンバーの画像']}
 車体の画像:
 {$answers['車体の画像']}
-(ドライブに保存済み)"
+(ドライブに保存済み)",
+                    false,
+                    'text',
+                    ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']
                 );
-                $this->supporter->pushMessage($answers['車体の画像'], false, 'image');
+                $this->supporter->pushMessage($answers['車体の画像'], false, 'image', ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']);
                 break;
             case 'バイク':
             case '原付':
                 $this->supporter->pushMessage(
-                    "{$answers['届出提出者名']}(`{$displayName}`)が自転車・バイク配備届を提出しました。
+                    "{$answers['届出提出者名']}(`{$profile['displayName']}`)が自転車・バイク配備届を提出しました。
 (TS:{$timeStamp})
 
 チェック済み:
@@ -230,10 +235,13 @@ class Bikes extends FormTemplate
 (ドライブに保存済み)
 車体の画像:
 {$answers['車体の画像']}
-(ドライブに保存済み)"
+(ドライブに保存済み)",
+                    false,
+                    'text',
+                    ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']
                 );
-                $this->supporter->pushMessage($answers['防犯登録番号またはナンバーの画像'], false, 'image');
-                $this->supporter->pushMessage($answers['車体の画像'], false, 'image');
+                $this->supporter->pushMessage($answers['防犯登録番号またはナンバーの画像'], false, 'image', ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']);
+                $this->supporter->pushMessage($answers['車体の画像'], false, 'image', ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']);
                 break;
         }
         $this->supporter->setLastQuestions();

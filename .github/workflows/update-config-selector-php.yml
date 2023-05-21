@@ -11,7 +11,7 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v3
-      - run: echo "<?php require_once __DIR__ . '/config.php';" > config-selector.php
+      - run: echo "<?php require_once __DIR__ . '/../config.php';" > src/config-selector.php
       - id: check_diff
         run: echo "diff=$(git diff --name-only)" >> $GITHUB_OUTPUT
       - if: steps.check_diff.outputs.diff

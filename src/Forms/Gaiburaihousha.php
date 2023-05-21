@@ -1,6 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../includes.php';
+namespace KishukushaReportSupporter\Forms;
+
+use KishukushaReportSupporter\FormTemplate;
 
 class Gaiburaihousha extends FormTemplate
 {
@@ -151,10 +153,10 @@ class Gaiburaihousha extends FormTemplate
         $this->supporter->pushPreviousAnswer('外部来訪者名', $answers['外部来訪者名']);
     }
 
-    public function pushAdminMessages(string $displayName, array $answers, string $timeStamp, string $receiptNo): bool
+    public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
         $this->supporter->pushMessage(
-            "{$answers['関係舎生の氏名']}(`{$displayName}`)が外部来訪者届を提出しました。
+            "{$answers['関係舎生の氏名']}(`{$profile['displayName']}`)が外部来訪者届を提出しました。
 (TS:{$timeStamp})
 
 チェック済み:
@@ -163,7 +165,10 @@ class Gaiburaihousha extends FormTemplate
 退舎時間:{$answers['滞在終了時刻']}
 
 未チェックの項目:
-外部来訪者名:{$answers['外部来訪者名']}"
+外部来訪者名:{$answers['外部来訪者名']}",
+            false,
+            'text',
+            ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']
         );
         $this->supporter->setLastQuestions();
         return false;

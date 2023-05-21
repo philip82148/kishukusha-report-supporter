@@ -1,6 +1,12 @@
 <?php
 
-require_once __DIR__ . '/../includes.php';
+function checkSignature(string $requestBody): bool
+{
+    $hash = hash_hmac('sha256', $requestBody, CHANNEL_SECRET, true);
+    $signature = base64_encode($hash);
+
+    return isset($_SERVER['HTTP_X_LINE_SIGNATURE']) && $signature === $_SERVER['HTTP_X_LINE_SIGNATURE'];
+}
 
 function stringToDate(string $string): int | false
 {
@@ -75,9 +81,7 @@ function dateToDay(int $date): string
 
 function getDateAt0AM(?int $time = null): int|false
 {
-    if (isset($time))
-        return strtotime(date('Y/m/d', $time));
-    return strtotime(date('Y/m/d'));
+    return strtotime(date('Y/m/d', $time));
 }
 
 function toHalfWidth(string $string): string
