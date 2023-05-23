@@ -105,7 +105,7 @@ class Odoriba extends FormTemplate
 (ドライブに保存済み)",
             false,
             'text',
-            ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']
+            ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
         );
         $this->supporter->setLastQuestions();
         return false;

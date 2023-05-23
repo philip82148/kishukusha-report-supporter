@@ -6,7 +6,7 @@ use KishukushaReportSupporter\Forms;
 
 class KishukushaReportSupporter
 {
-    public const VERSION = '9.0.0';
+    public const VERSION = '9.0.1';
 
     /* 届出を追加する際はここの編集とsrc/Formsフォルダへのファイルの追加が必要 */
     public const FORMS = [
@@ -237,7 +237,7 @@ VERSION\n", true);
                     // 申請した本人への通知
                     $this->initPush($lastPhase['userId']);
                     $adminProfile = $this->fetchProfile();
-                    $this->pushMessage("{$lastPhase['formType']}が承認されました。\n(届出番号:{$lastPhase['receiptNo']})", false, 'text', ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com']);
+                    $this->pushMessage("{$lastPhase['formType']}が承認されました。\n(届出番号:{$lastPhase['receiptNo']})", false, 'text', ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com/']);
                     $this->pushOptions(['OK']);
                     $this->confirmPush(true);
                 } catch (\Throwable $e) {
@@ -264,7 +264,7 @@ VERSION\n", true);
 
 これについて風紀から直接連絡がなかった場合は手動でスプレッドシートにチェックを入れた可能性があります。
 
-まず、スプレッドシートにチェックが入っているかを確認し、入っていない場合は風紀に直接問い合わせてください。", false, 'text', ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com']);
+まず、スプレッドシートにチェックが入っているかを確認し、入っていない場合は風紀に直接問い合わせてください。", false, 'text', ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com/']);
                     $this->pushOptions(['OK']);
                     $this->confirmPush(true);
                 } catch (\Throwable $e) {
@@ -353,7 +353,7 @@ VERSION\n", true);
             try {
                 $this->admin->initPush();
                 $newAdminProfile = $this->fetchProfile();
-                $this->admin->pushMessage('管理者が変更されました。', false, 'text', ['name' => $newAdminProfile['displayName'], 'iconUrl' => $newAdminProfile['pictureUrl'] ?? 'https://dummy.com']);
+                $this->admin->pushMessage('管理者が変更されました。', false, 'text', ['name' => $newAdminProfile['displayName'], 'iconUrl' => $newAdminProfile['pictureUrl'] ?? 'https://dummy.com/']);
                 $this->admin->pushOptions(['OK']);
                 $this->admin->confirmPush(true);
             } catch (\Throwable $e) {
@@ -1082,7 +1082,7 @@ VERSION\n", true);
 
     public function setLastQuestions(?array $questions = null, ?array $quickReply = null): void
     {
-        // confirmReply/Push後に呼び出されるとstorageの方は書き変わって可能性があるので、
+        // confirmReply/Push後に呼び出されるとstorageの方は書き変わっている可能性があるので、
         // プロパティを使う。これで確実に前回の質問
         if (!isset($questions))
             $questions = $this->lastQuestions;
@@ -1421,11 +1421,10 @@ VERSION\n", true);
             }
 
             $replies = 'nothing';
-            $lastIndex = count($messages) - 1;
             foreach ($messages as $i => $message) {
                 if ($i === 0) {
                     $replies = '';
-                } else if ($i < $lastIndex) {
+                } else if ($i < count($messages) - 1) {
                     $replies .= ', ';
                 } else {
                     $replies .= ' and ';
@@ -1437,7 +1436,12 @@ VERSION\n", true);
                     $replies .= "a photo({$message['originalContentUrl']})";
                 }
 
-                if ($i === $lastIndex && isset($message['quickReply'])) {
+                if (isset($message['sender'])) {
+                    $sender = $message['sender'];
+                    $replies .= " as '{$sender['name']}'({$sender['iconUrl']})";
+                }
+
+                if (isset($message['quickReply'])) {
                     $quickReply = [];
                     foreach ($message['quickReply']['items'] ?? [] as $item) {
                         $label = "'{$item['action']['label']}'";

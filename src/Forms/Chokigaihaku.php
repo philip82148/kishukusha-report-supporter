@@ -270,7 +270,7 @@ class Chokigaihaku extends FormTemplate
 連絡先電話番号:{$answers['連絡先電話番号']}",
                 true,
                 'text',
-                ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']
+                ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
             );
             $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
             return true;
@@ -295,7 +295,7 @@ class Chokigaihaku extends FormTemplate
 連絡先電話番号:{$answers['連絡先電話番号']}",
             true,
             'text',
-            ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com']
+            ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
         );
         $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
         return true;
