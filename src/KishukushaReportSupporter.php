@@ -1082,7 +1082,7 @@ VERSION\n", true);
 
     public function setLastQuestions(?array $questions = null, ?array $quickReply = null): void
     {
-        // confirmReply/Push後に呼び出されるとstorageの方は書き変わって可能性があるので、
+        // confirmReply/Push後に呼び出されるとstorageの方は書き変わっている可能性があるので、
         // プロパティを使う。これで確実に前回の質問
         if (!isset($questions))
             $questions = $this->lastQuestions;
