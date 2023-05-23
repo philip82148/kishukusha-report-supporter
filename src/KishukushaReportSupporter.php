@@ -1421,11 +1421,10 @@ VERSION\n", true);
             }
 
             $replies = 'nothing';
-            $lastIndex = count($messages) - 1;
             foreach ($messages as $i => $message) {
                 if ($i === 0) {
                     $replies = '';
-                } else if ($i < $lastIndex) {
+                } else if ($i < count($messages) - 1) {
                     $replies .= ', ';
                 } else {
                     $replies .= ' and ';
@@ -1437,7 +1436,12 @@ VERSION\n", true);
                     $replies .= "a photo({$message['originalContentUrl']})";
                 }
 
-                if ($i === $lastIndex && isset($message['quickReply'])) {
+                if (isset($message['sender'])) {
+                    $sender = $message['sender'];
+                    $replies .= " as '{$sender['name']}'({$sender['iconUrl']})";
+                }
+
+                if (isset($message['quickReply'])) {
                     $quickReply = [];
                     foreach ($message['quickReply']['items'] ?? [] as $item) {
                         $label = "'{$item['action']['label']}'";
