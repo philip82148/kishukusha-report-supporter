@@ -617,7 +617,7 @@ class Shogyoji extends FormTemplate
 
         // ログの記録
         $log = "deleteShogyojiImages: {$deletedFileUrls}";
-        if ($failureMessage) $log .= "error: {$failureMessage}";
+        if ($failureMessage) $log .= " error: {$failureMessage}";
         $logDatabase->log($log);
     }
 }
