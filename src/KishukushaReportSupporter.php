@@ -237,7 +237,7 @@ VERSION\n", true);
                     // 申請した本人への通知
                     $this->initPush($lastPhase['userId']);
                     $adminProfile = $this->fetchProfile();
-                    $this->pushMessage("{$lastPhase['formType']}が承認されました。\n(届出番号:{$lastPhase['receiptNo']})", false, 'text', ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com']);
+                    $this->pushMessage("{$lastPhase['formType']}が承認されました。\n(届出番号:{$lastPhase['receiptNo']})", false, 'text', ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com/']);
                     $this->pushOptions(['OK']);
                     $this->confirmPush(true);
                 } catch (\Throwable $e) {
@@ -264,7 +264,7 @@ VERSION\n", true);
 
 これについて風紀から直接連絡がなかった場合は手動でスプレッドシートにチェックを入れた可能性があります。
 
-まず、スプレッドシートにチェックが入っているかを確認し、入っていない場合は風紀に直接問い合わせてください。", false, 'text', ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com']);
+まず、スプレッドシートにチェックが入っているかを確認し、入っていない場合は風紀に直接問い合わせてください。", false, 'text', ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com/']);
                     $this->pushOptions(['OK']);
                     $this->confirmPush(true);
                 } catch (\Throwable $e) {
@@ -353,7 +353,7 @@ VERSION\n", true);
             try {
                 $this->admin->initPush();
                 $newAdminProfile = $this->fetchProfile();
-                $this->admin->pushMessage('管理者が変更されました。', false, 'text', ['name' => $newAdminProfile['displayName'], 'iconUrl' => $newAdminProfile['pictureUrl'] ?? 'https://dummy.com']);
+                $this->admin->pushMessage('管理者が変更されました。', false, 'text', ['name' => $newAdminProfile['displayName'], 'iconUrl' => $newAdminProfile['pictureUrl'] ?? 'https://dummy.com/']);
                 $this->admin->pushOptions(['OK']);
                 $this->admin->confirmPush(true);
             } catch (\Throwable $e) {
