@@ -6,6 +6,11 @@ use KishukushaReportSupporter\JsonDatabase;
 use KishukushaReportSupporter\LogDatabase;
 use KishukushaReportSupporter\Forms\Shogyoji;
 
-$database = new JsonDatabase(MAIN_TABLE_NAME);
-$logDatabase = new LogDatabase(LOG_TABLE_NAME);
-Shogyoji::deleteShogyojiImage($database, $logDatabase);
+// $databaseが存在しない、つまりwebhook.phpでincludeされず単体で稼働している場合は
+// 'delete-shogyoji-image.php:'とログに残す
+if (!isset($database)) {
+    $database = new JsonDatabase(MAIN_TABLE_NAME);
+    $logDatabase = new LogDatabase(LOG_TABLE_NAME);
+    $logDatabase->log('delete-shogyoji-images.php:');
+}
+Shogyoji::deleteShogyojiImages($database, $logDatabase);
