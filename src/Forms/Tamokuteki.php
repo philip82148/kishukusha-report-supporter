@@ -15,7 +15,7 @@ class Tamokuteki extends FormTemplate
             $this->supporter->storage['unsavedAnswers']['氏名'] = $this->supporter->storage['userName'];
 
             // 質問
-            $this->supporter->pushMessage("使用した(する)多目的室を選んでください。", true);
+            $this->supporter->pushText("使用した(する)多目的室を選んでください。", true);
 
             // 選択肢
             $this->supporter->pushOptions(['309号室', '308号室', '301号室', '209号室', '208号室', '201号室'], true);
@@ -41,7 +41,7 @@ class Tamokuteki extends FormTemplate
 
             // 質問文
             $year = date('Y');
-            $this->supporter->pushMessage("使用開始日を4桁(年無し)または8桁(年有り)で入力してください。\n例:0506、{$year}0506", true);
+            $this->supporter->pushText("使用開始日を4桁(年無し)または8桁(年有り)で入力してください。\n例:0506、{$year}0506", true);
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('使用開始日');
@@ -61,7 +61,7 @@ class Tamokuteki extends FormTemplate
             }
 
             // 質問文
-            $this->supporter->pushMessage("使用開始時刻を4桁で入力してください。\n例:1000", true);
+            $this->supporter->pushText("使用開始時刻を4桁で入力してください。\n例:1000", true);
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('使用開始時刻');
@@ -81,7 +81,7 @@ class Tamokuteki extends FormTemplate
             }
 
             // 質問文送信
-            $this->supporter->pushMessage("目的を入力してください。\n備考があれば備考も記入してください。\n例:就職活動。\n使用前からちりくずが散乱していた。", true);
+            $this->supporter->pushText("目的を入力してください。\n備考があれば備考も記入してください。\n例:就職活動。\n使用前からちりくずが散乱していた。", true);
 
             // 選択肢
             $this->supporter->pushPreviousAnswerOptions('目的・備考');
@@ -100,7 +100,7 @@ class Tamokuteki extends FormTemplate
                 $this->supporter->storage['unsavedAnswers']['目的・備考'] = $message;
 
             // 質問文送信
-            $this->supporter->pushMessage('使用後の状態を写真で送信してください。', true);
+            $this->supporter->pushText('使用後の状態を写真で送信してください。', true);
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('使用後の状態', 'image');
@@ -128,7 +128,7 @@ class Tamokuteki extends FormTemplate
             }
 
             // 質問文送信
-            $this->supporter->pushMessage("使用終了時刻を4桁で入力してください。\n例:1100\n※使用開始時刻より前の時刻は自動的に翌日の時刻と解釈されます。", true);
+            $this->supporter->pushText("使用終了時刻を4桁で入力してください。\n例:1100\n※使用開始時刻より前の時刻は自動的に翌日の時刻と解釈されます。", true);
 
             // 選択肢
             // unsavedAnswerOption((翌日)を取る)
@@ -174,7 +174,7 @@ class Tamokuteki extends FormTemplate
         // ドライブに保存
         $imageFileName = $answers['使用後の状態'];
         $driveFileName = "{$answers['多目的室の種類']}_{$answers['使用開始日']}_{$answers['使用開始時刻']}-{$answers['使用終了時刻']}_{$this->supporter->storage['userName']}.jpg";
-        $answers['使用後の状態'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['tamokutekiImageFolder']);
+        $answers['使用後の状態'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['generalImageFolderId'], '多目的室使用届');
 
         $answersForSheets = array_values($answers);
 
@@ -219,7 +219,7 @@ class Tamokuteki extends FormTemplate
                 }
 
                 $dateString = dateToDateStringWithDay($date);
-                $this->supporter->pushMessage("使用開始日:{$dateString}");
+                $this->supporter->pushText("使用開始日:{$dateString}");
                 $this->supporter->storage['unsavedAnswers']['使用開始日'] = $dateString;
                 return '';
             case '使用開始時刻':
@@ -236,14 +236,14 @@ class Tamokuteki extends FormTemplate
 
                 $stayTimeString = date('H:i', $stayTime);
                 if ($type === '使用開始時刻') {
-                    $this->supporter->pushMessage("使用開始時刻:{$stayTimeString}");
+                    $this->supporter->pushText("使用開始時刻:{$stayTimeString}");
                     $this->supporter->storage['unsavedAnswers']['使用開始時刻'] = $stayTimeString;
                     return '';
                 } else {
                     if ($stayTime <= stringToTime($this->supporter->storage['unsavedAnswers']['使用開始時刻']))
                         $stayTimeString .= '(翌日)';
 
-                    $this->supporter->pushMessage("使用終了時刻:{$stayTimeString}");
+                    $this->supporter->pushText("使用終了時刻:{$stayTimeString}");
                     insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 4, ['使用終了時刻' => $stayTimeString]);
                     return '';
                 }

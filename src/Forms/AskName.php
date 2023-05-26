@@ -23,13 +23,13 @@ class AskName extends FormTemplateBasic
             // 質問文送信
             if ($this->supporter->storage['userName'] === '') {
                 // 名前がまだ登録されていない
-                $this->supporter->pushMessage("あなたの名前を和文フルネームで入力してください。
+                $this->supporter->pushText("あなたの名前を和文フルネームで入力してください。
 (初回のみ)
 例:山田 太郎
 ※スマホでLINE名が和文フルネームの場合はクイックリプライが使用できます。", true);
             } else {
                 // 名前が過去に登録されたことがある
-                $this->supporter->pushMessage("あなたの名前を和文フルネームで入力してください。
+                $this->supporter->pushText("あなたの名前を和文フルネームで入力してください。
 例:山田 太郎
 現在の登録名:{$this->supporter->storage['userName']}", true);
             }
@@ -58,7 +58,7 @@ class AskName extends FormTemplateBasic
             // 質問文送信
             if ($this->supporter->storage['userName'] === '') {
                 // 名前がまだ登録されていない
-                $this->supporter->pushMessage("届出の際に使用する名前を以下で登録します。
+                $this->supporter->pushText("届出の際に使用する名前を以下で登録します。
 よろしいですか？
 (初回のみ)
 ※和文フルネームであることを確認してください。
@@ -68,7 +68,7 @@ class AskName extends FormTemplateBasic
 届出者氏名:{$name}", true);
             } else {
                 // 名前が過去に登録されたことがある
-                $this->supporter->pushMessage("届出の際に使用する名前を以下で登録します。
+                $this->supporter->pushText("届出の際に使用する名前を以下で登録します。
 よろしいですか？
 ※和文フルネームであることを確認してください。
 
@@ -88,7 +88,7 @@ class AskName extends FormTemplateBasic
             switch ($message) {
                 case 'はい':
                     $this->supporter->storage['userName'] = $this->supporter->storage['unsavedAnswers']['名前'];
-                    $this->supporter->pushMessage('名前を登録しました。');
+                    $this->supporter->pushText('名前を登録しました。');
                     $this->supporter->resetForm();
                     return;
                 default:

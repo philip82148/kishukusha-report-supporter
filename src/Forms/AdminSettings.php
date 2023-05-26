@@ -16,7 +16,7 @@ class AdminSettings extends FormTemplateBasic
 
         if (count($this->supporter->storage['phases']) === 0) {
             // 質問
-            $this->supporter->pushMessage('項目を選んでください。', true);
+            $this->supporter->pushText('項目を選んでください。', true);
 
             // 選択肢
             $this->supporter->pushOptions([
@@ -27,11 +27,8 @@ class AdminSettings extends FormTemplateBasic
                 '管理者変更',
                 '行事スプレッドシートID変更',
                 '出力先スプレッドシートID変更',
-                '多目的室使用届用画像フォルダID変更',
                 '舎生大会・諸行事届用画像フォルダID変更',
-                '踊り場私物配備届用画像フォルダID変更',
-                '309私物配備届用画像フォルダID変更',
-                '自転車・バイク配備届用画像フォルダID変更'
+                'その他届出用画像フォルダID変更',
             ], true);
             $this->supporter->pushOptions(['キャンセル']);
 
@@ -48,18 +45,18 @@ class AdminSettings extends FormTemplateBasic
 
             switch ($this->supporter->storage['unsavedAnswers']['設定項目']) {
                 case '管理者用マニュアル表示':
-                    $this->supporter->pushMessage(ADMIN_MANUAL);
-                    $this->supporter->pushMessage(SERVER_MANUAL);
+                    $this->supporter->pushText(ADMIN_MANUAL);
+                    $this->supporter->pushText(SERVER_MANUAL);
                     $this->supporter->resetForm();
                     return;
                 case '行事データ再読み込み':
                     // 質問
-                    $this->supporter->pushMessage("行事データの再読み込みを行いますか？
+                    $this->supporter->pushText("行事データの再読み込みを行いますか？
 ※開始日(B列)が日付の形式でない行、終了日(C列)が設定されている行で、終了日が開始日より前の行はスキップされます。
 再読み込み後に全ての行事が読み込まれているか確認してください。
 
 読み込み先のスプレッドシート:
-https://docs.google.com/spreadsheets/d/{$this->supporter->config['variableSheets']}
+https://docs.google.com/spreadsheets/d/{$this->supporter->config['eventSheetId']}
 
 現在読み込まれている行事(開始日順):
 " . $this->getEventListString(), true);
@@ -71,7 +68,7 @@ https://docs.google.com/spreadsheets/d/{$this->supporter->config['variableSheets
                     return;
                 case '最大外部来訪者数変更':
                     // 質問
-                    $this->supporter->pushMessage("許容する外部来訪者の最大数を数値で入力してください。
+                    $this->supporter->pushText("許容する外部来訪者の最大数を数値で入力してください。
 0人にすると人数の制限がなくなります。
 現在の最大外部来訪者数:{$this->supporter->config['maxGaiburaihoushasuu']}人", true);
 
@@ -83,7 +80,7 @@ https://docs.google.com/spreadsheets/d/{$this->supporter->config['variableSheets
                 case '任期終了日変更':
                     // 質問
                     $year = date('Y');
-                    $this->supporter->pushMessage("任期終了日を4桁(年無し)または8桁(年有り)で入力してください。
+                    $this->supporter->pushText("任期終了日を4桁(年無し)または8桁(年有り)で入力してください。
 例:1130、{$year}1130
 ※任期終了日は任期が終了する度に次の5/31または11/30に自動で更新されます。
 現在の設定値:{$this->supporter->config['endOfTerm']}", true);
@@ -96,7 +93,7 @@ https://docs.google.com/spreadsheets/d/{$this->supporter->config['variableSheets
                 case '管理者変更':
                     // 質問
                     $password = $this->supporter->config['password'] ?? 'なし';
-                    $this->supporter->pushMessage("新しい管理者が入力するための8文字以上の合言葉を入力してください。
+                    $this->supporter->pushText("新しい管理者が入力するための8文字以上の合言葉を入力してください。
 ※前後の改行やスペースは無視されます。
 ※現在の設定値を削除するには、この画面をキャンセルして管理者自身が合言葉を入力してください。
 現在の設定値:{$password}", true);
@@ -112,50 +109,34 @@ https://docs.google.com/spreadsheets/d/{$this->supporter->config['variableSheets
             // 質問
             switch ($this->supporter->storage['unsavedAnswers']['設定項目']) {
                 case '行事スプレッドシートID変更':
-                    $this->supporter->pushMessage("行事の読み込み先のスプレッドシートのURLまたはIDを入力してください。
+                    $this->supporter->pushText("行事の読み込み先のスプレッドシートのURLまたはIDを入力してください。
 現在の行事スプレッドシート:
-https://docs.google.com/spreadsheets/d/{$this->supporter->config['variableSheets']}", true);
+https://docs.google.com/spreadsheets/d/{$this->supporter->config['eventSheetId']}", true);
                     break;
 
                 case '出力先スプレッドシートID変更':
-                    $this->supporter->pushMessage("提出された届出の内容を記録するスプレッドシートのURLまたはIDを入力してください。
+                    $this->supporter->pushText("提出された届出の内容を記録するスプレッドシートのURLまたはIDを入力してください。
 現在の出力先スプレッドシート:
-https://docs.google.com/spreadsheets/d/{$this->supporter->config['resultSheets']}", true);
+https://docs.google.com/spreadsheets/d/{$this->supporter->config['outputSheetId']}", true);
                     break;
 
                 case '舎生大会・諸行事届用画像フォルダID変更':
-                    $this->supporter->pushMessage("舎生大会・諸行事届の証拠画像を保存するための、五役とボットのみに共有した共有Google Drive内のフォルダのURLまたはIDを入力してください。
+                    $this->supporter->pushText("舎生大会・諸行事届の証拠画像を保存するための、五役とボットのみに共有した共有Google Drive内のフォルダのURLまたはIDを入力してください。
 
 ※プライバシーに関わる画像がアップロードされる可能性があるため、五役とボットのみに共有したフォルダにしてください。
 また、ボットに画像の完全な削除権限を与えるために、ボットにコンテンツ管理者ではなく管理者の権限を与えてください。
 そのためには、個人所有のフォルダをボットに共有するのではなく、ボットとの間に作成した共有ドライブ内のフォルダを使用する必要があります。
 
 現在の舎生大会・諸行事届用画像フォルダ:
-https://drive.google.com/drive/u/0/folders/{$this->supporter->config['shogyojiImageFolder']}", true);
+https://drive.google.com/drive/u/0/folders/{$this->supporter->config['shogyojiImageFolderId']}", true);
                     break;
 
-                case '多目的室使用届用画像フォルダID変更':
-                    $this->supporter->pushMessage("多目的室使用届の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
-現在の多目的室使用届用画像フォルダ:
-https://drive.google.com/drive/u/0/folders/{$this->supporter->config['tamokutekiImageFolder']}", true);
-                    break;
+                case 'その他届出用画像フォルダID変更':
+                    $this->supporter->pushText("舎生大会・諸行事届以外の届出の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
+※このフォルダ内に各届出ごとにフォルダが作成され、それぞれに各届出の画像が保存されます。
 
-                case '踊り場私物配備届用画像フォルダID変更':
-                    $this->supporter->pushMessage("踊り場私物配備届の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
-現在の踊り場私物配備届用画像フォルダ:
-https://drive.google.com/drive/u/0/folders/{$this->supporter->config['odoribaImageFolder']}", true);
-                    break;
-
-                case '309私物配備届用画像フォルダID変更':
-                    $this->supporter->pushMessage("309私物配備届の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
-現在の309私物配備届用画像フォルダ:
-https://drive.google.com/drive/u/0/folders/{$this->supporter->config['309ImageFolder']}", true);
-                    break;
-
-                case '自転車・バイク配備届用画像フォルダID変更':
-                    $this->supporter->pushMessage("自転車・バイク配備届の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
-現在の自転車・バイク配備届用画像フォルダ:
-https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImageFolder']}", true);
+現在のその他届出用画像フォルダ:
+https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalImageFolderId']}", true);
                     break;
             }
 
@@ -170,12 +151,11 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
                     $this->supporter->fetchEvents(true);
 
                     // 返信
-                    $replyMessage = "行事データの再読み込みを行いました。
+                    $this->supporter->pushText("行事データの再読み込みを行いました。
 ※全ての行事が読み込まれているか、日付の年があっているか確認してください。
 
 読み込まれた行事(開始日順):
-" . $this->getEventListString();
-                    $this->supporter->pushMessage($replyMessage);
+" . $this->getEventListString());
                     $this->supporter->resetForm();
                     return;
                 default:
@@ -187,21 +167,21 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
                 return;
 
             // 返信
-            $this->supporter->pushMessage("最大外部来訪者数を変更しました。");
+            $this->supporter->pushText("最大外部来訪者数を変更しました。");
             $this->supporter->resetForm();
         } else if ($lastPhase === 'askingEndOfTerm') {
             if ($this->storeOrAskAgain('任期終了日', $message))
                 return;
 
             // 返信
-            $this->supporter->pushMessage('任期終了日変更を変更しました。');
+            $this->supporter->pushText('任期終了日変更を変更しました。');
             $this->supporter->resetForm();
         } else if ($lastPhase === 'askingPassword') {
             if ($this->storeOrAskAgain('合言葉', $message))
                 return;
 
             // 返信
-            $this->supporter->pushMessage("合言葉を設定しました。\n新たな管理者は合言葉をメッセージしてください。");
+            $this->supporter->pushText("合言葉を設定しました。\n新たな管理者は合言葉をメッセージしてください。");
             $this->supporter->resetForm();
         } else {
             if ($this->storeOrAskAgain('Google ID', $message))
@@ -223,11 +203,8 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
                     case '管理者変更':
                     case '行事スプレッドシートID変更':
                     case '出力先スプレッドシートID変更':
-                    case '多目的室使用届用画像フォルダID変更':
                     case '舎生大会・諸行事届用画像フォルダID変更':
-                    case '踊り場私物配備届用画像フォルダID変更':
-                    case '309私物配備届用画像フォルダID変更':
-                    case '自転車・バイク配備届用画像フォルダID変更':
+                    case 'その他届出用画像フォルダID変更':
                         $this->supporter->storage['unsavedAnswers']['設定項目'] = $message;
                         return '';
                 }
@@ -243,7 +220,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
                 }
 
                 $count = (int)$count;
-                $this->supporter->pushMessage("外部来訪者数:{$count}人");
+                $this->supporter->pushText("外部来訪者数:{$count}人");
                 $this->supporter->config['maxGaiburaihoushasuu'] = $count;
                 $this->supporter->storeConfig();
                 return '';
@@ -256,7 +233,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
                 }
 
                 $dateString = dateToDateStringWithDay($date);
-                $this->supporter->pushMessage("任期終了日:{$dateString}");
+                $this->supporter->pushText("任期終了日:{$dateString}");
 
                 $today = getDateAt0AM();
                 if ($date < $today) {
@@ -279,13 +256,13 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
                 $id = $this->extractId($message);
                 switch ($this->supporter->storage['unsavedAnswers']['設定項目']) {
                     case '行事スプレッドシートID変更':
-                        if ($this->supporter->checkValidGoogleItem('variableSheets', $id)) {
-                            $this->supporter->config['variableSheets'] = $id;
+                        if ($this->supporter->checkValidGoogleItem('eventSheetId', $id)) {
+                            $this->supporter->config['eventSheetId'] = $id;
                             $this->supporter->storeConfig();
                             $this->supporter->fetchEvents(true);
 
                             // 返信
-                            $this->supporter->pushMessage("設定を保存、行事データを更新しました。
+                            $this->supporter->pushText("設定を保存、行事データを更新しました。
 
 読み込まれた行事(開始日順):
 " . $this->getEventListString());
@@ -296,12 +273,12 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
 もう一度入力してください。");
                         return 'wrong-reply';
                     case '出力先スプレッドシートID変更':
-                        if ($this->supporter->checkValidGoogleItem('resultSheets', $id)) {
-                            $this->supporter->config['resultSheets'] = $id;
+                        if ($this->supporter->checkValidGoogleItem('outputSheetId', $id)) {
+                            $this->supporter->config['outputSheetId'] = $id;
                             $this->supporter->storeConfig();
 
                             // 返信
-                            $this->supporter->pushMessage('書き込み可能なスプレッドシートであることを確認、設定を保存しました。');
+                            $this->supporter->pushText('書き込み可能なスプレッドシートであることを確認、設定を保存しました。');
                             return '';
                         }
                         $this->supporter->askAgainBecauseWrongReply("入力されたIDのスプレッドシートへの書き込みに失敗しました。
@@ -309,12 +286,12 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
 もう一度入力してください。");
                         return 'wrong-reply';
                     case '舎生大会・諸行事届用画像フォルダID変更':
-                        if ($this->supporter->checkValidGoogleItem('shogyojiImageFolder', $id)) {
-                            $this->supporter->config['shogyojiImageFolder'] = $id;
+                        if ($this->supporter->checkValidGoogleItem('shogyojiImageFolderId', $id)) {
+                            $this->supporter->config['shogyojiImageFolderId'] = $id;
                             $this->supporter->storeConfig();
 
                             // 返信
-                            $this->supporter->pushMessage('テストファイルのアップロード後削除に成功、設定を保存しました。');
+                            $this->supporter->pushText('テストファイルのアップロード後削除に成功、設定を保存しました。');
                             return '';
                         }
                         $this->supporter->askAgainBecauseWrongReply("入力されたIDのフォルダへのテストファイルのアップロード、またはその削除に失敗しました。
@@ -322,52 +299,13 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
 ボットとの間に作成した共有ドライブ内のフォルダを使用し、ボットにコンテンツ管理者ではなく、管理者の権限を与えてください。
 もう一度入力してください。");
                         return 'wrong-reply';
-                    case '多目的室使用届用画像フォルダID変更':
-                        if ($this->supporter->checkValidGoogleItem('tamokutekiImageFolder', $id)) {
-                            $this->supporter->config['tamokutekiImageFolder'] = $id;
+                    case 'その他届出用画像フォルダID変更':
+                        if ($this->supporter->checkValidGoogleItem('generalImageFolderId', $id)) {
+                            $this->supporter->config['generalImageFolderId'] = $id;
                             $this->supporter->storeConfig();
 
                             // 返信
-                            $this->supporter->pushMessage('テストファイルのアップロードに成功、設定を保存しました。');
-                            return '';
-                        }
-                        $this->supporter->askAgainBecauseWrongReply("入力されたIDのフォルダへのテストファイルのアップロードに失敗しました。
-ボットにフォルダが共有されていないか、権限が与えられていない可能性があります。
-もう一度入力してください。");
-                        return 'wrong-reply';
-                    case '踊り場私物配備届用画像フォルダID変更':
-                        if ($this->supporter->checkValidGoogleItem('odoribaImageFolder', $id)) {
-                            $this->supporter->config['odoribaImageFolder'] = $id;
-                            $this->supporter->storeConfig();
-
-                            // 返信
-                            $this->supporter->pushMessage('テストファイルのアップロードに成功、設定を保存しました。');
-                            return '';
-                        }
-                        $this->supporter->askAgainBecauseWrongReply("入力されたIDのフォルダへのテストファイルのアップロードに失敗しました。
-ボットにフォルダが共有されていないか、権限が与えられていない可能性があります。
-もう一度入力してください。");
-                        return 'wrong-reply';
-                    case '309私物配備届用画像フォルダID変更':
-                        if ($this->supporter->checkValidGoogleItem('309ImageFolder', $id)) {
-                            $this->supporter->config['309ImageFolder'] = $id;
-                            $this->supporter->storeConfig();
-
-                            // 返信
-                            $this->supporter->pushMessage('テストファイルのアップロードに成功、設定を保存しました。');
-                            return '';
-                        }
-                        $this->supporter->askAgainBecauseWrongReply("入力されたIDのフォルダへのテストファイルのアップロードに失敗しました。
-ボットにフォルダが共有されていないか、権限が与えられていない可能性があります。
-もう一度入力してください。");
-                        return 'wrong-reply';
-                    case '自転車・バイク配備届用画像フォルダID変更':
-                        if ($this->supporter->checkValidGoogleItem('bikesImageFolder', $id)) {
-                            $this->supporter->config['bikesImageFolder'] = $id;
-                            $this->supporter->storeConfig();
-
-                            // 返信
-                            $this->supporter->pushMessage('テストファイルのアップロードに成功、設定を保存しました。');
+                            $this->supporter->pushText('テストファイルのアップロードに成功、設定を保存しました。');
                             return '';
                         }
                         $this->supporter->askAgainBecauseWrongReply("入力されたIDのフォルダへのテストファイルのアップロードに失敗しました。

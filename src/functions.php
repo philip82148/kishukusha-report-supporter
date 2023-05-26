@@ -32,11 +32,11 @@ function stringToTime(string $string, string $date = '2022/1/1'): int | false
     if (preg_match('/(?<hours>\d{1,2}):?(?<minutes>\d{1,2})/', $string, $matches) === 0)
         return false;
 
-    // 24時を0時に戻すために一旦
     $time = strtotime("{$matches['hours']}:{$matches['minutes']}");
     if ($time === false) return false;
 
-    $time = strtotime("$date " . date('H:i', $time));
+    // 24時を0時に戻してから日付とつなげる
+    $time = strtotime("{$date} " . date('H:i', $time));
     if ($time === false) return false;
 
     return $time;

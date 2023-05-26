@@ -48,7 +48,7 @@ class Shogyoji extends FormTemplate
             $passed_events_to_dates = array_slice(array_reverse($passed_events_to_dates), 0, 10);
 
             // 質問
-            $this->supporter->pushMessage('該当する委員会行事を選んでください。', true);
+            $this->supporter->pushText('該当する委員会行事を選んでください。', true);
 
             // 選択肢
             $this->supporter->pushOptions(array_keys($events_to_dates), true);
@@ -75,7 +75,7 @@ class Shogyoji extends FormTemplate
                     break;
                 case 'その他':
                     // 質問
-                    $this->supporter->pushMessage('具体的な委員会行事名を入力してください。', true);
+                    $this->supporter->pushText('具体的な委員会行事名を入力してください。', true);
 
                     // 選択肢
                     // 取得した行事を選択肢に加える(ただし、舎生大会と委員会は除く)
@@ -98,7 +98,7 @@ class Shogyoji extends FormTemplate
 
             // 質問
             $year = date('Y');
-            $this->supporter->pushMessage('開催日(の開始日)を選んでください。', true);
+            $this->supporter->pushText('開催日(の開始日)を選んでください。', true);
 
             // 選択肢
             $event = $this->supporter->storage['unsavedAnswers']['委員会行事'];
@@ -120,7 +120,7 @@ class Shogyoji extends FormTemplate
 
             // 質問
             $year = date('Y');
-            $this->supporter->pushMessage("開催日(の開始日)を4桁(年無し)または8桁(年有り)で入力してください。\n例:1006、{$year}1006", true);
+            $this->supporter->pushText("開催日(の開始日)を4桁(年無し)または8桁(年有り)で入力してください。\n例:1006、{$year}1006", true);
 
             // 選択肢
             $event = $this->supporter->storage['unsavedAnswers']['委員会行事'];
@@ -143,7 +143,7 @@ class Shogyoji extends FormTemplate
                 case 'その他':
                     // 質問
                     $year = date('Y');
-                    $this->supporter->pushMessage("開催日(の開始日)を4桁(年無し)または8桁(年有り)で入力してください。\n例:1006、{$year}1006", true);
+                    $this->supporter->pushText("開催日(の開始日)を4桁(年無し)または8桁(年有り)で入力してください。\n例:1006、{$year}1006", true);
 
                     // 選択肢
                     $event = $this->supporter->storage['unsavedAnswers']['委員会行事'];
@@ -161,7 +161,7 @@ class Shogyoji extends FormTemplate
             }
 
             // 質問
-            $this->supporter->pushMessage('出欠の種類を選択してください。', true);
+            $this->supporter->pushText('出欠の種類を選択してください。', true);
 
             // 選択肢
             $this->supporter->pushOptions([
@@ -188,7 +188,7 @@ class Shogyoji extends FormTemplate
             }
 
             // 質問
-            $this->supporter->pushMessage('出欠の種類を選択してください。', true);
+            $this->supporter->pushText('出欠の種類を選択してください。', true);
 
             // 選択肢
             $this->supporter->pushOptions([
@@ -215,7 +215,7 @@ class Shogyoji extends FormTemplate
             }
 
             // 質問
-            $this->supporter->pushMessage('理由を選択してください。', true);
+            $this->supporter->pushText('理由を選択してください。', true);
 
             // 選択肢
             $this->supporter->pushOptions(['疾病', '體育會', '冠婚葬祭', '資格試験', '就職活動'], true);
@@ -238,7 +238,7 @@ class Shogyoji extends FormTemplate
             }
 
             // 質問
-            $this->supporter->pushMessage("理由の詳細を入力してください。\n例:熱があるため欠席させていただきます。\nこの度は大変失礼しました。", true);
+            $this->supporter->pushText("理由の詳細を入力してください。\n例:熱があるため欠席させていただきます。\nこの度は大変失礼しました。", true);
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('理由の詳細');
@@ -259,7 +259,7 @@ class Shogyoji extends FormTemplate
             }
 
             // 質問
-            $this->supporter->pushMessage("証拠の画像を送信してください。
+            $this->supporter->pushText("証拠の画像を送信してください。
 ※「風紀に相談済み」として直接風紀に証拠画像や資料を送っても構いません。
 証拠画像がない場合も風紀に直接連絡してください。
 このボットを使用した場合、証拠画像は五役のみが閲覧可能なGoogle Driveのフォルダにアップロードされ、該当する委員会行事の開催日(の開始日)後一日以内に自動で削除されます。
@@ -302,7 +302,7 @@ class Shogyoji extends FormTemplate
 
             if ($this->supporter->storage['unsavedAnswers']['委員会行事'] === '舎生大会') {
                 // 質問
-                $this->supporter->pushMessage("舎内規定第5条の3、4、5により、舎生大会を欠席する場合は議決に関する一切を、
+                $this->supporter->pushText("舎内規定第5条の3、4、5により、舎生大会を欠席する場合は議決に関する一切を、
 遅刻する場合は風紀の出席確認を得て議決権を有するまでの間の議決に関する一切を、
 早退する場合は早退後の議決に関する一切を
 舎生大会に委任しなければなりません。
@@ -365,7 +365,7 @@ class Shogyoji extends FormTemplate
             $imageFileName = $answers['証拠画像'];
             $eventName = mb_substr($answers['委員会行事'], 0, 15);
             $driveFileName = "諸行事届_{$answers['開催日']}_{$eventName}_{$this->supporter->storage['userName']}.jpg";
-            $id = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['shogyojiImageFolder'], true);
+            $id = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['shogyojiImageFolderId'], null, true);
             $this->storeShogyojiImage($answers['開催日'], $id);
             $answers['証拠画像'] = $this->supporter->googleIdToUrl($id);
         }
@@ -394,11 +394,11 @@ class Shogyoji extends FormTemplate
         $unspacedName = preg_replace('/[\x00\s]++/u', '', $answers['氏名']);
         $simplifiedDate = date("m/d", $eventDate);
 
-        $this->supporter->pushMessage("<告知文 {$simplifiedDate} {$answers['委員会行事']} {$unspacedName}>
+        $this->supporter->pushText("<告知文 {$simplifiedDate} {$answers['委員会行事']} {$unspacedName}>
 ※(以下敬称略)を記載して使用すること。
 また、理由の詳細は適宜要約すること。");
 
-        $this->supporter->pushMessage("・{$unspacedName} {$answers['出欠']}
+        $this->supporter->pushText("・{$unspacedName} {$answers['出欠']}
 理由:{$answers['理由']}
 {$answers['理由の詳細']}");
 
@@ -476,7 +476,7 @@ class Shogyoji extends FormTemplate
             $message .= "\n{$label}:{$value}";
         }
 
-        $this->supporter->pushMessage($message, true, 'text', ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
+        $this->supporter->pushText($message, true, ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
         $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
         return true;
     }
@@ -510,7 +510,7 @@ class Shogyoji extends FormTemplate
                 }
 
                 $dateString = dateToDateStringWithDay($date);
-                $this->supporter->pushMessage("開催日:{$dateString}");
+                $this->supporter->pushText("開催日:{$dateString}");
                 $this->supporter->storage['unsavedAnswers']['開催日'] = $dateString;
                 return '';
             case '出欠':

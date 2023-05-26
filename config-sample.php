@@ -21,13 +21,10 @@ define('CHANNEL_SECRET', '...');
 define('DEFAULT_CONFIG', [
     // 'password' => 'パスワードをここに設定する(コメントアウト(//を消すこと)すること)',
     'adminId' => 'dummy',
-    'variableSheets' => 'dummy',
-    'resultSheets' => 'dummy',
-    'shogyojiImageFolder' => 'dummy',
-    'odoribaImageFolder' => 'dummy',
-    '309ImageFolder' => 'dummy',
-    'bikesImageFolder' => 'dummy',
-    'tamokutekiImageFolder' => 'dummy',
+    'eventSheetId' => 'dummy',
+    'outputSheetId' => 'dummy',
+    'shogyojiImageFolderId' => 'dummy',
+    'generalImageFolderId' => 'dummy',
     'maxGaiburaihoushasuu' => 0,
     'endOfTerm' => '2023/05/31(水)'
 ]);

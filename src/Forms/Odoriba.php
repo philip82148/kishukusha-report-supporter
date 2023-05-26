@@ -15,7 +15,7 @@ class Odoriba extends FormTemplate
             $this->supporter->storage['unsavedAnswers']['氏名'] = $this->supporter->storage['userName'];
 
             // 質問
-            $this->supporter->pushMessage("保管品を入力してください。\n例:赤いハードキャリーケース", true);
+            $this->supporter->pushText("保管品を入力してください。\n例:赤いハードキャリーケース", true);
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('保管品');
@@ -37,7 +37,7 @@ class Odoriba extends FormTemplate
                 $this->supporter->storage['unsavedAnswers']['保管品'] = $message;
 
             // 質問
-            $this->supporter->pushMessage("保管品の画像を送ってください。", true);
+            $this->supporter->pushText("保管品の画像を送ってください。", true);
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('保管品の画像', 'image');
@@ -83,7 +83,7 @@ class Odoriba extends FormTemplate
         $imageFileName = $answers['保管品の画像'];
         $itemName = mb_substr($answers['保管品'], 0, 15);
         $driveFileName = "踊り場_{$this->supporter->storage['userName']}_{$itemName}.jpg";
-        $answers['保管品の画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['odoribaImageFolder']);
+        $answers['保管品の画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['generalImageFolderId'], '踊り場私物配備届');
         $answersForSheets = array_values($answers);
 
         // 申請
@@ -92,7 +92,7 @@ class Odoriba extends FormTemplate
 
     public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
-        $this->supporter->pushMessage(
+        $this->supporter->pushText(
             "{$answers['氏名']}(`{$profile['displayName']}`)が踊り場私物配備届を提出しました。
 (TS:{$timeStamp})
 
@@ -104,7 +104,6 @@ class Odoriba extends FormTemplate
 {$answers['保管品の画像']}
 (ドライブに保存済み)",
             false,
-            'text',
             ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
         );
         $this->supporter->setLastQuestions();

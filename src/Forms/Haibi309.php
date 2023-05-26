@@ -15,7 +15,7 @@ class Haibi309 extends FormTemplate
             $this->supporter->storage['unsavedAnswers']['氏名'] = $this->supporter->storage['userName'];
 
             // 質問
-            $this->supporter->pushMessage("保管品を入力してください。\n※309では主に楽器の配備のみが許可されます。\n楽器以外の配備品については五役に確認を取ってから届出を提出してください。\n例:エレキギター", true);
+            $this->supporter->pushText("保管品を入力してください。\n※309では主に楽器の配備のみが許可されます。\n楽器以外の配備品については五役に確認を取ってから届出を提出してください。\n例:エレキギター", true);
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('保管品');
@@ -37,7 +37,7 @@ class Haibi309 extends FormTemplate
                 $this->supporter->storage['unsavedAnswers']['保管品'] = $message;
 
             // 質問
-            $this->supporter->pushMessage("保管品の画像を送ってください。", true);
+            $this->supporter->pushText("保管品の画像を送ってください。", true);
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('保管品の画像', 'image');
@@ -83,7 +83,7 @@ class Haibi309 extends FormTemplate
         $imageFileName = $answers['保管品の画像'];
         $itemName = mb_substr($answers['保管品'], 0, 15);
         $driveFileName = "309_{$this->supporter->storage['userName']}_{$itemName}.jpg";
-        $answers['保管品の画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['309ImageFolder']);
+        $answers['保管品の画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['generalImageFolderId'], '309私物配備届');
         $answersForSheets = array_values($answers);
 
         // 申請
@@ -92,7 +92,7 @@ class Haibi309 extends FormTemplate
 
     public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
-        $this->supporter->pushMessage(
+        $this->supporter->pushText(
             "{$answers['氏名']}(`{$profile['displayName']}`)が309私物配備届を提出しました。
 (TS:{$timeStamp})
 
@@ -104,7 +104,6 @@ class Haibi309 extends FormTemplate
 {$answers['保管品の画像']}
 (ドライブに保存済み)",
             false,
-            'text',
             ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
         );
         $this->supporter->setLastQuestions();

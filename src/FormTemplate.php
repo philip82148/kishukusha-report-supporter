@@ -37,11 +37,11 @@ abstract class FormTemplate extends FormTemplateBasic
             $reply .= ":{$value}\n";
         }
         $reply .= "で申請します。よろしいですか？";
-        $this->supporter->pushMessage($reply, true);
+        $this->supporter->pushText($reply, true);
 
         // 画像があれば画像も送信
         foreach ($images as $filename)
-            $this->supporter->pushMessage($this->supporter->getImageUrl($filename), true, 'image');
+            $this->supporter->pushImage($this->supporter->getImageUrl($filename), true);
 
         // 選択肢
         $this->supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);
