@@ -458,27 +458,27 @@ VERSION\n", true);
                 $sheetId = $this->getSheetId($spreadsheet, $this->storage['formType']);
 
                 // チェックボックス追加
-                $requestBody = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest();
-                $requestBody->setRequests([
-                    'setDataValidation' => [
-                        'range' =>  [
-                            'sheetId' => $sheetId,
-                            'startRowIndex' => $checkboxRowNo,
-                            'endRowIndex' => $checkboxRowNo + 1,
-                            'startColumnIndex' => $checkboxColumnNo,
-                            'endColumnIndex' => $checkboxColumnNo + 1
-                        ],
-                        'rule' => [
-                            'condition' => [
-                                'type' => 'BOOLEAN',
-                            ],
-                            'strict' => true
-                        ]
-                    ]
-                ]);
                 $spreadsheetService->spreadsheets->batchUpdate(
                     $this->config['resultSheets'],
-                    $requestBody
+                    new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
+                        'requests' => [
+                            'setDataValidation' => [
+                                'range' =>  [
+                                    'sheetId' => $sheetId,
+                                    'startRowIndex' => $checkboxRowNo,
+                                    'endRowIndex' => $checkboxRowNo + 1,
+                                    'startColumnIndex' => $checkboxColumnNo,
+                                    'endColumnIndex' => $checkboxColumnNo + 1
+                                ],
+                                'rule' => [
+                                    'condition' => [
+                                        'type' => 'BOOLEAN',
+                                    ],
+                                    'strict' => true
+                                ]
+                            ]
+                        ]
+                    ])
                 );
             }
         } catch (\Throwable $e) {
@@ -522,8 +522,9 @@ VERSION\n", true);
         // $formTypeのシートがあるか確認
         $spreadsheet = $spreadsheetService->spreadsheets->get($resultSheetId);
         $sheetId = $this->getSheetId($spreadsheet, $formType);
+
+        // 存在する->書き込み
         if (isset($sheetId)) {
-            // 存在する->書き込み
             $response = $spreadsheetService->spreadsheets_values->append(
                 $resultSheetId,
                 "'{$formType}'!A1",
@@ -537,50 +538,51 @@ VERSION\n", true);
         }
 
         // シートが存在しない->作成
-        $requestBody = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
-            'requests' => [
-                'addSheet' => [
-                    'properties' => [
-                        'title' => $formType
+        $response = $spreadsheetService->spreadsheets->batchUpdate(
+            $resultSheetId,
+            new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
+                'requests' => [
+                    'addSheet' => [
+                        'properties' => [
+                            'title' => $formType
+                        ]
                     ]
                 ]
-            ]
-        ]);
-        $response = $spreadsheetService->spreadsheets->batchUpdate($resultSheetId, $requestBody);
+            ])
+        );
         $sheetId = $response->getReplies()[0]->getAddSheet()->getProperties()->sheetId;
 
         // 一行目固定、セル幅指定
         $header = array_merge(['タイムスタンプ'], self::FORMS[$formType]::HEADER);
-        $requestBody = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
-            'requests' => [
-                new \Google_Service_Sheets_Request([
-                    'update_sheet_properties' => [
-                        'properties' => [
-                            'sheet_id' => $sheetId,
-                            'grid_properties' => ['frozen_row_count' => 1]
-                        ],
-                        'fields' => 'gridProperties.frozenRowCount'
-                    ]
-                ]),
-                new \Google_Service_Sheets_Request([
-                    'updateDimensionProperties' => [
-                        'range' =>  [
-                            'sheetId' => $sheetId,
-                            'dimension' => 'COLUMNS',
-                            'startIndex' => 0,
-                            'endIndex' => count($header)
-                        ],
-                        'properties' => [
-                            'pixelSize' => 150
-                        ],
-                        'fields' => 'pixelSize'
-                    ]
-                ])
-            ]
-        ]);
         $spreadsheetService->spreadsheets->batchUpdate(
             $this->config['resultSheets'],
-            $requestBody
+            new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
+                'requests' => [
+                    new \Google_Service_Sheets_Request([
+                        'update_sheet_properties' => [
+                            'properties' => [
+                                'sheet_id' => $sheetId,
+                                'grid_properties' => ['frozen_row_count' => 1]
+                            ],
+                            'fields' => 'gridProperties.frozenRowCount'
+                        ],
+                    ]),
+                    new \Google_Service_Sheets_Request([
+                        'updateDimensionProperties' => [
+                            'range' =>  [
+                                'sheetId' => $sheetId,
+                                'dimension' => 'COLUMNS',
+                                'startIndex' => 0,
+                                'endIndex' => count($header)
+                            ],
+                            'properties' => [
+                                'pixelSize' => 150
+                            ],
+                            'fields' => 'pixelSize'
+                        ]
+                    ])
+                ]
+            ])
         );
 
         // 見出しと共に書き込み
