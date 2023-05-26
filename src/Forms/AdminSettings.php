@@ -27,11 +27,8 @@ class AdminSettings extends FormTemplateBasic
                 '管理者変更',
                 '行事スプレッドシートID変更',
                 '出力先スプレッドシートID変更',
-                '多目的室使用届用画像フォルダID変更',
                 '舎生大会・諸行事届用画像フォルダID変更',
-                '踊り場私物配備届用画像フォルダID変更',
-                '309私物配備届用画像フォルダID変更',
-                '自転車・バイク配備届用画像フォルダID変更'
+                '一般届出用画像フォルダID変更',
             ], true);
             $this->supporter->pushOptions(['キャンセル']);
 
@@ -134,28 +131,10 @@ https://docs.google.com/spreadsheets/d/{$this->supporter->config['resultSheets']
 https://drive.google.com/drive/u/0/folders/{$this->supporter->config['shogyojiImageFolder']}", true);
                     break;
 
-                case '多目的室使用届用画像フォルダID変更':
-                    $this->supporter->pushText("多目的室使用届の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
-現在の多目的室使用届用画像フォルダ:
-https://drive.google.com/drive/u/0/folders/{$this->supporter->config['tamokutekiImageFolder']}", true);
-                    break;
-
-                case '踊り場私物配備届用画像フォルダID変更':
-                    $this->supporter->pushText("踊り場私物配備届の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
-現在の踊り場私物配備届用画像フォルダ:
-https://drive.google.com/drive/u/0/folders/{$this->supporter->config['odoribaImageFolder']}", true);
-                    break;
-
-                case '309私物配備届用画像フォルダID変更':
-                    $this->supporter->pushText("309私物配備届の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
-現在の309私物配備届用画像フォルダ:
-https://drive.google.com/drive/u/0/folders/{$this->supporter->config['309ImageFolder']}", true);
-                    break;
-
-                case '自転車・バイク配備届用画像フォルダID変更':
-                    $this->supporter->pushText("自転車・バイク配備届の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
-現在の自転車・バイク配備届用画像フォルダ:
-https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImageFolder']}", true);
+                case '一般届出用画像フォルダID変更':
+                    $this->supporter->pushText("一般の届出の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
+現在の一般届出用画像フォルダ:
+https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalImageFolder']}", true);
                     break;
             }
 
@@ -223,11 +202,8 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
                     case '管理者変更':
                     case '行事スプレッドシートID変更':
                     case '出力先スプレッドシートID変更':
-                    case '多目的室使用届用画像フォルダID変更':
                     case '舎生大会・諸行事届用画像フォルダID変更':
-                    case '踊り場私物配備届用画像フォルダID変更':
-                    case '309私物配備届用画像フォルダID変更':
-                    case '自転車・バイク配備届用画像フォルダID変更':
+                    case '一般届出用画像フォルダID変更':
                         $this->supporter->storage['unsavedAnswers']['設定項目'] = $message;
                         return '';
                 }
@@ -322,48 +298,9 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['bikesImage
 ボットとの間に作成した共有ドライブ内のフォルダを使用し、ボットにコンテンツ管理者ではなく、管理者の権限を与えてください。
 もう一度入力してください。");
                         return 'wrong-reply';
-                    case '多目的室使用届用画像フォルダID変更':
-                        if ($this->supporter->checkValidGoogleItem('tamokutekiImageFolder', $id)) {
-                            $this->supporter->config['tamokutekiImageFolder'] = $id;
-                            $this->supporter->storeConfig();
-
-                            // 返信
-                            $this->supporter->pushText('テストファイルのアップロードに成功、設定を保存しました。');
-                            return '';
-                        }
-                        $this->supporter->askAgainBecauseWrongReply("入力されたIDのフォルダへのテストファイルのアップロードに失敗しました。
-ボットにフォルダが共有されていないか、権限が与えられていない可能性があります。
-もう一度入力してください。");
-                        return 'wrong-reply';
-                    case '踊り場私物配備届用画像フォルダID変更':
-                        if ($this->supporter->checkValidGoogleItem('odoribaImageFolder', $id)) {
-                            $this->supporter->config['odoribaImageFolder'] = $id;
-                            $this->supporter->storeConfig();
-
-                            // 返信
-                            $this->supporter->pushText('テストファイルのアップロードに成功、設定を保存しました。');
-                            return '';
-                        }
-                        $this->supporter->askAgainBecauseWrongReply("入力されたIDのフォルダへのテストファイルのアップロードに失敗しました。
-ボットにフォルダが共有されていないか、権限が与えられていない可能性があります。
-もう一度入力してください。");
-                        return 'wrong-reply';
-                    case '309私物配備届用画像フォルダID変更':
-                        if ($this->supporter->checkValidGoogleItem('309ImageFolder', $id)) {
-                            $this->supporter->config['309ImageFolder'] = $id;
-                            $this->supporter->storeConfig();
-
-                            // 返信
-                            $this->supporter->pushText('テストファイルのアップロードに成功、設定を保存しました。');
-                            return '';
-                        }
-                        $this->supporter->askAgainBecauseWrongReply("入力されたIDのフォルダへのテストファイルのアップロードに失敗しました。
-ボットにフォルダが共有されていないか、権限が与えられていない可能性があります。
-もう一度入力してください。");
-                        return 'wrong-reply';
-                    case '自転車・バイク配備届用画像フォルダID変更':
-                        if ($this->supporter->checkValidGoogleItem('bikesImageFolder', $id)) {
-                            $this->supporter->config['bikesImageFolder'] = $id;
+                    case '一般届出用画像フォルダID変更':
+                        if ($this->supporter->checkValidGoogleItem('generalImageFolder', $id)) {
+                            $this->supporter->config['generalImageFolder'] = $id;
                             $this->supporter->storeConfig();
 
                             // 返信

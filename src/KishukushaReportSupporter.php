@@ -644,14 +644,46 @@ VERSION\n", true);
         return $receiptNo;
     }
 
-    public function saveToDrive(string $imageFilename, string $driveFilename, string $parentFolder, bool $returnId = false): string
+    public function saveToDrive(string $imageFilename, string $driveFilename, string $folderId, ?string $folderName = null, bool $returnId = false): string
     {
         try {
             // ドライブに保存
             $driveService = new \Google_Service_Drive(self::getGoogleClient());
+
+            // フォルダー名がある場合は検索、無い場合は作成する
+            if (isset($folderName)) {
+                // 検索
+                $escapedFolderName = str_replace("'", "\\'", $folderName);
+                $driveFiles = $driveService->files->listFiles([
+                    'q' => "'{$folderId}' in parents and name='{$escapedFolderName}' and mimeType='application/vnd.google-apps.folder'",
+                    'fields' => 'files(id)',
+                    'corpora' => 'allDrives',
+                    'includeItemsFromAllDrives' => true,
+                    'supportsAllDrives' => true,
+                ])->getFiles();
+
+                // あった
+                if (count($driveFiles)) {
+                    $parentFolderId = $driveFiles[0]->getId();
+                } else {
+                    // ない->作成
+                    $file = $driveService->files->create(new \Google_Service_Drive_DriveFile([
+                        'name' => $folderName, // なんかバリデーションは要らないらしい
+                        'mimeType' => 'application/vnd.google-apps.folder',
+                        'parents' => [$folderId],
+                    ]), [
+                        'fields' => 'id',
+                        'supportsAllDrives' => true,
+                    ]);
+                    $parentFolderId = $file->getId();
+                }
+            } else {
+                $parentFolderId = $folderId;
+            }
+
             $file = $driveService->files->create(new \Google_Service_Drive_DriveFile([
                 'name' => $driveFilename, // なんかバリデーションは要らないらしい
-                'parents' => [$parentFolder],
+                'parents' => [$parentFolderId],
             ]), [
                 'data' => file_get_contents(IMAGE_FOLDER_PATH . $imageFilename),
                 'mimeType' => 'image/jpeg',
@@ -756,15 +788,12 @@ VERSION\n", true);
                     }
                     break;
                 case 'shogyojiImageFolder':
-                case 'odoribaImageFolder':
-                case '309ImageFolder':
-                case 'bikesImageFolder':
-                case 'tamokutekiImageFolder':
-                    $fileId = $this->saveToDrive(TEST_IMAGE_FILENAME, 'TEST', $id, true);
-                    if ($type === 'shogyojiImageFolder') {
-                        $driveService = new \Google_Service_Drive(self::getGoogleClient());
-                        $driveService->files->delete($fileId, ['supportsAllDrives' => true]);
-                    }
+                    $fileId = $this->saveToDrive(TEST_IMAGE_FILENAME, 'テスト', $id, null, true);
+                    $driveService = new \Google_Service_Drive(self::getGoogleClient());
+                    $driveService->files->delete($fileId, ['supportsAllDrives' => true]);
+                    break;
+                case 'generalImageFolder':
+                    $fileId = $this->saveToDrive(TEST_IMAGE_FILENAME, 'テスト', $id, 'テスト', true);
                     break;
             }
             return true;

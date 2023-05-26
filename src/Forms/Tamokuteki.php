@@ -174,7 +174,7 @@ class Tamokuteki extends FormTemplate
         // ドライブに保存
         $imageFileName = $answers['使用後の状態'];
         $driveFileName = "{$answers['多目的室の種類']}_{$answers['使用開始日']}_{$answers['使用開始時刻']}-{$answers['使用終了時刻']}_{$this->supporter->storage['userName']}.jpg";
-        $answers['使用後の状態'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['tamokutekiImageFolder']);
+        $answers['使用後の状態'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['generalImageFolder'], '多目的室使用届');
 
         $answersForSheets = array_values($answers);
 

@@ -24,10 +24,7 @@ define('DEFAULT_CONFIG', [
     'variableSheets' => 'dummy',
     'resultSheets' => 'dummy',
     'shogyojiImageFolder' => 'dummy',
-    'odoribaImageFolder' => 'dummy',
-    '309ImageFolder' => 'dummy',
-    'bikesImageFolder' => 'dummy',
-    'tamokutekiImageFolder' => 'dummy',
+    'generalImageFolder' => 'dummy',
     'maxGaiburaihoushasuu' => 0,
     'endOfTerm' => '2023/05/31(水)'
 ]);
