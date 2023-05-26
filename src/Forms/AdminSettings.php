@@ -28,7 +28,7 @@ class AdminSettings extends FormTemplateBasic
                 '行事スプレッドシートID変更',
                 '出力先スプレッドシートID変更',
                 '舎生大会・諸行事届用画像フォルダID変更',
-                '一般届出用画像フォルダID変更',
+                'その他届出用画像フォルダID変更',
             ], true);
             $this->supporter->pushOptions(['キャンセル']);
 
@@ -131,9 +131,9 @@ https://docs.google.com/spreadsheets/d/{$this->supporter->config['resultSheets']
 https://drive.google.com/drive/u/0/folders/{$this->supporter->config['shogyojiImageFolder']}", true);
                     break;
 
-                case '一般届出用画像フォルダID変更':
-                    $this->supporter->pushText("一般の届出の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
-現在の一般届出用画像フォルダ:
+                case 'その他届出用画像フォルダID変更':
+                    $this->supporter->pushText("舎生大会・諸行事届以外の届出の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
+現在のその他届出用画像フォルダ:
 https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalImageFolder']}", true);
                     break;
             }
@@ -149,12 +149,11 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
                     $this->supporter->fetchEvents(true);
 
                     // 返信
-                    $replyMessage = "行事データの再読み込みを行いました。
+                    $this->supporter->pushText("行事データの再読み込みを行いました。
 ※全ての行事が読み込まれているか、日付の年があっているか確認してください。
 
 読み込まれた行事(開始日順):
-" . $this->getEventListString();
-                    $this->supporter->pushText($replyMessage);
+" . $this->getEventListString());
                     $this->supporter->resetForm();
                     return;
                 default:
@@ -203,7 +202,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
                     case '行事スプレッドシートID変更':
                     case '出力先スプレッドシートID変更':
                     case '舎生大会・諸行事届用画像フォルダID変更':
-                    case '一般届出用画像フォルダID変更':
+                    case 'その他届出用画像フォルダID変更':
                         $this->supporter->storage['unsavedAnswers']['設定項目'] = $message;
                         return '';
                 }
@@ -298,7 +297,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
 ボットとの間に作成した共有ドライブ内のフォルダを使用し、ボットにコンテンツ管理者ではなく、管理者の権限を与えてください。
 もう一度入力してください。");
                         return 'wrong-reply';
-                    case '一般届出用画像フォルダID変更':
+                    case 'その他届出用画像フォルダID変更':
                         if ($this->supporter->checkValidGoogleItem('generalImageFolder', $id)) {
                             $this->supporter->config['generalImageFolder'] = $id;
                             $this->supporter->storeConfig();
