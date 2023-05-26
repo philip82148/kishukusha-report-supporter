@@ -16,7 +16,7 @@ class Chokigaihaku extends FormTemplate
 
             // 質問
             $year = date('Y');
-            $this->supporter->pushMessage("出舎日を4桁(年無し)または8桁(年有り)で入力してください。\n例:0731、{$year}0731", true);
+            $this->supporter->pushText("出舎日を4桁(年無し)または8桁(年有り)で入力してください。\n例:0731、{$year}0731", true);
 
             // 選択肢
             $nextWeek = array_map(function ($i) {
@@ -45,7 +45,7 @@ class Chokigaihaku extends FormTemplate
 
             // 質問
             $year = date('Y');
-            $this->supporter->pushMessage("帰舎日を4桁(年無し)または8桁(年有り)で入力してください。\n例:0903、{$year}0903", true);
+            $this->supporter->pushText("帰舎日を4桁(年無し)または8桁(年有り)で入力してください。\n例:0903、{$year}0903", true);
 
             // 選択肢
             $startDate = stringToDate($this->supporter->storage['unsavedAnswers']['出舎日']);
@@ -76,7 +76,7 @@ class Chokigaihaku extends FormTemplate
             }
 
             // 質問
-            $this->supporter->pushMessage("外泊理由を選んでください。", true);
+            $this->supporter->pushText("外泊理由を選んでください。", true);
 
             // 選択肢
             $this->supporter->pushOptions(['帰省', '合宿', '旅行', 'その他'], true);
@@ -100,7 +100,7 @@ class Chokigaihaku extends FormTemplate
             }
 
             // 質問
-            $this->supporter->pushMessage("外泊理由を選んでください。", true);
+            $this->supporter->pushText("外泊理由を選んでください。", true);
 
             // 選択肢
             $this->supporter->pushOptions(['帰省', '合宿', '旅行', 'その他'], true);
@@ -123,7 +123,7 @@ class Chokigaihaku extends FormTemplate
             }
 
             // 質問
-            $this->supporter->pushMessage("外泊理由の詳細を入力してください。\n※延泊の場合は延泊である旨も記載してください。\n例:サークルの合宿で福島に行ってまいります。", true);
+            $this->supporter->pushText("外泊理由の詳細を入力してください。\n※延泊の場合は延泊である旨も記載してください。\n例:サークルの合宿で福島に行ってまいります。", true);
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('外泊理由の詳細');
@@ -141,7 +141,7 @@ class Chokigaihaku extends FormTemplate
                 $this->supporter->storage['unsavedAnswers']['外泊理由の詳細'] = $message;
 
             // 質問
-            $this->supporter->pushMessage("滞在先住所を入力してください。\n例:108-8345 東京都港区三田2-15-45", true);
+            $this->supporter->pushText("滞在先住所を入力してください。\n例:108-8345 東京都港区三田2-15-45", true);
 
             // 選択肢
             $this->supporter->pushPreviousAnswerOptions('滞在先住所');
@@ -161,7 +161,7 @@ class Chokigaihaku extends FormTemplate
             }
 
             // 質問
-            $this->supporter->pushMessage("連絡先電話番号を入力してください。\n例:09011223344", true);
+            $this->supporter->pushText("連絡先電話番号を入力してください。\n例:09011223344", true);
 
             // 選択肢
             $this->supporter->pushPreviousAnswerOptions('連絡先電話番号');
@@ -249,7 +249,7 @@ class Chokigaihaku extends FormTemplate
             $messageAboutDate = "※任期外の日付を含んでいます！\n{$messageAboutDate}";
 
         if ($conflictingEvents !== '' || !$isDateInTerm) {
-            $this->supporter->pushMessage(
+            $this->supporter->pushText(
                 "{$answers['氏名']}(`{$profile['displayName']}`)が長期外泊届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
@@ -269,14 +269,13 @@ class Chokigaihaku extends FormTemplate
 滞在先住所:{$answers['滞在先住所']}
 連絡先電話番号:{$answers['連絡先電話番号']}",
                 true,
-                'text',
                 ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
             );
             $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
             return true;
         }
 
-        $this->supporter->pushMessage(
+        $this->supporter->pushText(
             "{$answers['氏名']}(`{$profile['displayName']}`)が長期外泊届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
@@ -294,7 +293,6 @@ class Chokigaihaku extends FormTemplate
 滞在先住所:{$answers['滞在先住所']}
 連絡先電話番号:{$answers['連絡先電話番号']}",
             true,
-            'text',
             ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
         );
         $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
@@ -318,7 +316,7 @@ class Chokigaihaku extends FormTemplate
                 }
 
                 $dateString = dateToDateStringWithDay($date);
-                $this->supporter->pushMessage("{$type}:{$dateString}");
+                $this->supporter->pushText("{$type}:{$dateString}");
 
                 if ($type === '出舎日') {
                     $today = getDateAt0AM();
@@ -345,7 +343,7 @@ class Chokigaihaku extends FormTemplate
                 $endDate = $date;
                 $conflictingEvents = $this->getConflictingEvents($startDate, $endDate);
                 if ($conflictingEvents !== '') {
-                    $this->supporter->pushMessage("その期間は行事{$conflictingEvents}と被っています。
+                    $this->supporter->pushText("その期間は行事{$conflictingEvents}と被っています。
 よろしいですか？
 ※委員会行事を欠席または遅刻、早退する場合は舎生大会・諸行事届の届け出が必要になります。", true);
                     $this->supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);
@@ -379,7 +377,7 @@ class Chokigaihaku extends FormTemplate
 
                 $address = $message['address'];
                 if (isset($message['title'])) $address .= "({$message['title']})";
-                $this->supporter->pushMessage("滞在先住所:{$address}");
+                $this->supporter->pushText("滞在先住所:{$address}");
                 $this->supporter->storage['unsavedAnswers']['滞在先住所'] = $address;
                 return '';
             case '連絡先電話番号':

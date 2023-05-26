@@ -21,7 +21,7 @@ class Gaiburaihousha extends FormTemplate
             $this->supporter->storage['unsavedAnswers']['関係舎生の氏名'] = $this->supporter->storage['userName'];
 
             // 質問文送信
-            $this->supporter->pushMessage("外部来訪者の名前を「、」か改行で区切ってすべて入力してください。\n例:山田太郎、佐藤花子", true);
+            $this->supporter->pushText("外部来訪者の名前を「、」か改行で区切ってすべて入力してください。\n例:山田太郎、佐藤花子", true);
 
             // 選択肢表示
             $this->supporter->pushPreviousAnswerOptions('外部来訪者名');
@@ -40,7 +40,7 @@ class Gaiburaihousha extends FormTemplate
             }
 
             // 質問文送信
-            $this->supporter->pushMessage('外部来訪者の人数を数値で入力してください。', true);
+            $this->supporter->pushText('外部来訪者の人数を数値で入力してください。', true);
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('外部来訪者数');
@@ -56,7 +56,7 @@ class Gaiburaihousha extends FormTemplate
 
             // 質問文
             $year = date('Y');
-            $this->supporter->pushMessage("来訪日を4桁(年無し)または8桁(年有り)で入力してください。\n例:0506、{$year}0506", true);
+            $this->supporter->pushText("来訪日を4桁(年無し)または8桁(年有り)で入力してください。\n例:0506、{$year}0506", true);
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('来訪日');
@@ -70,7 +70,7 @@ class Gaiburaihousha extends FormTemplate
             }
 
             // 質問文
-            $this->supporter->pushMessage("滞在開始時刻を4桁で入力してください。\n例:1030", true);
+            $this->supporter->pushText("滞在開始時刻を4桁で入力してください。\n例:1030", true);
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('滞在開始時刻');
@@ -87,7 +87,7 @@ class Gaiburaihousha extends FormTemplate
             }
 
             // 質問文送信
-            $this->supporter->pushMessage("滞在終了時刻を4桁で入力してください。\n例:1700", true);
+            $this->supporter->pushText("滞在終了時刻を4桁で入力してください。\n例:1700", true);
 
             // 選択肢
             // unsavedAnswerOption
@@ -120,7 +120,7 @@ class Gaiburaihousha extends FormTemplate
                 return;
 
             // 質問
-            $this->supporter->pushMessage('最後に、女性の数を入力すると舎生Lineへの告知文を生成します。', true);
+            $this->supporter->pushText('最後に、女性の数を入力すると舎生Lineへの告知文を生成します。', true);
 
             // 選択肢
             $this->supporter->pushPreviousAnswerOptions('外部来訪者の女性の数');
@@ -155,7 +155,7 @@ class Gaiburaihousha extends FormTemplate
 
     public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
-        $this->supporter->pushMessage(
+        $this->supporter->pushText(
             "{$answers['関係舎生の氏名']}(`{$profile['displayName']}`)が外部来訪者届を提出しました。
 (TS:{$timeStamp})
 
@@ -167,7 +167,6 @@ class Gaiburaihousha extends FormTemplate
 未チェックの項目:
 外部来訪者名:{$answers['外部来訪者名']}",
             false,
-            'text',
             ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
         );
         $this->supporter->setLastQuestions();
@@ -196,7 +195,7 @@ class Gaiburaihousha extends FormTemplate
 
                 $count = (int)$count;
                 if ($type === '外部来訪者数') {
-                    $this->supporter->pushMessage("外部来訪者数:{$count}人");
+                    $this->supporter->pushText("外部来訪者数:{$count}人");
 
                     if ($count === 0) {
                         $this->supporter->askAgainBecauseWrongReply("正しくない人数です。\nもう一度入力してください。");
@@ -224,7 +223,7 @@ class Gaiburaihousha extends FormTemplate
                 if ($maleCount) $announcement .= "男性{$maleCount}名、";
                 if ($femaleCount) $announcement .= "女性{$femaleCount}名、";
                 $announcement .= "{$this->supporter->storage['unsavedAnswers']['滞在開始時刻']}~{$this->supporter->storage['unsavedAnswers']['滞在終了時刻']}です。\nよろしくお願いいたします。";
-                $this->supporter->pushMessage($announcement);
+                $this->supporter->pushText($announcement);
                 $this->supporter->pushPreviousAnswer('外部来訪者の女性の数', $femaleCount . '人');
                 return '';
             case '来訪日':
@@ -236,7 +235,7 @@ class Gaiburaihousha extends FormTemplate
                 }
 
                 $dateString = dateToDateStringWithDay($date);
-                $this->supporter->pushMessage("来訪日:{$dateString}");
+                $this->supporter->pushText("来訪日:{$dateString}");
                 $this->supporter->storage['unsavedAnswers']['来訪日'] = $dateString;
                 return '';
             case '滞在開始時刻':
@@ -252,7 +251,7 @@ class Gaiburaihousha extends FormTemplate
                 }
 
                 $stayTimeString = date('H:i', $stayTime);
-                $this->supporter->pushMessage("{$type}:" . $stayTimeString);
+                $this->supporter->pushText("{$type}:" . $stayTimeString);
 
                 if (!$this->checkIfGaiburaihouAllowed($stayTimeString)) {
                     $this->supporter->askAgainBecauseWrongReply("外部来訪者が認められない時刻です。\nもう一度入力してください。");

@@ -15,7 +15,7 @@ class Bikes extends FormTemplate
             $this->supporter->storage['unsavedAnswers']['届出提出者名'] = $this->supporter->storage['userName'];
 
             // 質問
-            $this->supporter->pushMessage('登録するものを選んでください。', true);
+            $this->supporter->pushText('登録するものを選んでください。', true);
 
             // 選択肢
             $this->supporter->pushOptions(['自転車', 'バイク', '原付'], true);
@@ -42,17 +42,17 @@ class Bikes extends FormTemplate
             // 質問
             switch ($this->supporter->storage['unsavedAnswers']['車体の種類']) {
                 case '自転車':
-                    $this->supporter->pushMessage('防犯登録者名を入力してください。', true);
+                    $this->supporter->pushText('防犯登録者名を入力してください。', true);
                     // 選択肢
                     $this->supporter->pushUnsavedAnswerOption('防犯登録者名');
                     break;
                 case 'バイク':
-                    $this->supporter->pushMessage('バイクの名義人の名前を入力してください。', true);
+                    $this->supporter->pushText('バイクの名義人の名前を入力してください。', true);
                     // 選択肢
                     $this->supporter->pushUnsavedAnswerOption('名義人名');
                     break;
                 case '原付':
-                    $this->supporter->pushMessage('原付の名義人の名前を入力してください。', true);
+                    $this->supporter->pushText('原付の名義人の名前を入力してください。', true);
                     // 選択肢
                     $this->supporter->pushUnsavedAnswerOption('名義人名');
                     break;
@@ -76,7 +76,7 @@ class Bikes extends FormTemplate
                         unset($this->supporter->storage['unsavedAnswers']['名義人名']);
                         insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 2, ['防犯登録者名' => $message]);
                     }
-                    $this->supporter->pushMessage('防犯登録番号を入力してください。', true);
+                    $this->supporter->pushText('防犯登録番号を入力してください。', true);
                     $this->supporter->pushUnsavedAnswerOption('防犯登録番号');
                     break;
                 case 'バイク':
@@ -85,7 +85,7 @@ class Bikes extends FormTemplate
                         unset($this->supporter->storage['unsavedAnswers']['防犯登録者名']);
                         insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 2, ['名義人名' => $message]);
                     }
-                    $this->supporter->pushMessage('ナンバーの画像を送ってください。', true);
+                    $this->supporter->pushText('ナンバーの画像を送ってください。', true);
                     $this->supporter->pushUnsavedAnswerOption('ナンバーの画像', 'image');
                     $this->supporter->pushImageOption();
                     break;
@@ -127,7 +127,7 @@ class Bikes extends FormTemplate
             }
 
             // 質問
-            $this->supporter->pushMessage('車体全体の画像を送ってください。', true);
+            $this->supporter->pushText('車体全体の画像を送ってください。', true);
 
             // 選択肢
             $this->supporter->pushUnsavedAnswerOption('車体の画像', 'image');
@@ -200,7 +200,7 @@ class Bikes extends FormTemplate
     {
         switch ($answers['車体の種類']) {
             case '自転車':
-                $this->supporter->pushMessage(
+                $this->supporter->pushText(
                     "{$answers['届出提出者名']}(`{$profile['displayName']}`)が自転車・バイク配備届を提出しました。
 (TS:{$timeStamp})
 
@@ -214,14 +214,13 @@ class Bikes extends FormTemplate
 {$answers['車体の画像']}
 (ドライブに保存済み)",
                     false,
-                    'text',
                     ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
                 );
-                $this->supporter->pushMessage($answers['車体の画像'], false, 'image', ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
+                $this->supporter->pushImage($answers['車体の画像'], false,  ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
                 break;
             case 'バイク':
             case '原付':
-                $this->supporter->pushMessage(
+                $this->supporter->pushText(
                     "{$answers['届出提出者名']}(`{$profile['displayName']}`)が自転車・バイク配備届を提出しました。
 (TS:{$timeStamp})
 
@@ -237,11 +236,10 @@ class Bikes extends FormTemplate
 {$answers['車体の画像']}
 (ドライブに保存済み)",
                     false,
-                    'text',
                     ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
                 );
-                $this->supporter->pushMessage($answers['防犯登録番号またはナンバーの画像'], false, 'image', ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
-                $this->supporter->pushMessage($answers['車体の画像'], false, 'image', ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
+                $this->supporter->pushImage($answers['防犯登録番号またはナンバーの画像'], false, ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
+                $this->supporter->pushImage($answers['車体の画像'], false, ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
                 break;
         }
         $this->supporter->setLastQuestions();

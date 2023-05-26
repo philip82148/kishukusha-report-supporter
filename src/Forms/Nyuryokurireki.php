@@ -17,7 +17,7 @@ class Nyuryokurireki extends FormTemplateBasic
         // 一番最初
         if (count($this->supporter->storage['phases']) === 0) {
             // 質問文送信
-            $this->supporter->pushMessage("ボットに保存された入力履歴を削除します。\nよろしいですか？", true);
+            $this->supporter->pushText("ボットに保存された入力履歴を削除します。\nよろしいですか？", true);
 
             // 選択肢表示
             $this->supporter->pushOptions(['はい', 'キャンセル']);
@@ -30,7 +30,7 @@ class Nyuryokurireki extends FormTemplateBasic
         switch ($message) {
             case 'はい':
                 $this->supporter->storage['previousAnswers'] = [];
-                $this->supporter->pushMessage("入力履歴を削除しました。");
+                $this->supporter->pushText("入力履歴を削除しました。");
                 $this->supporter->resetForm();
                 break;
             default:

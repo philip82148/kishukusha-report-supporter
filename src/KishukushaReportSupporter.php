@@ -83,7 +83,7 @@ class KishukushaReportSupporter
             $this->confirmReply();
             $this->storeStorage();
         } catch (\Throwable $e) {
-            $this->pushMessage("エラー内容:
+            $this->pushText("エラー内容:
 {$e}
 
 エラーが発生しました。
@@ -133,7 +133,7 @@ class KishukushaReportSupporter
             } else if ($text === 'キャンセル') {
                 if ($this->storage['userName'] !== '') {
                     if ($this->storage['formType'] !== '')
-                        $this->pushMessage('キャンセルしました。');
+                        $this->pushText('キャンセルしました。');
                     $this->resetForm();
                     return;
                 } else {
@@ -159,7 +159,7 @@ class KishukushaReportSupporter
 
         switch ($this->storage['formType']) {
             case '回答を始める':
-                $this->pushMessage('申請するものを選んでください。', true);
+                $this->pushText('申請するものを選んでください。', true);
                 $this->pushOptions(array_keys(self::FORMS), true);
                 if ($this->isThisAdmin())
                     $this->pushOptions(['管理者設定'], true);
@@ -189,10 +189,10 @@ class KishukushaReportSupporter
         $this->resetStorage();
 
         // 質問
-        $this->pushMessage("新しくフォームに入力を始める場合は「回答を始める」と入力してください。
+        $this->pushText("新しくフォームに入力を始める場合は「回答を始める」と入力してください。
 
 このボットを使用した場合、風紀への報告は自動で行われるため不要です。", true);
-        $this->pushMessage("※クイックリプライはスマホでのみ利用できます。
+        $this->pushText("※クイックリプライはスマホでのみ利用できます。
 ※何らかのエラーが起こったときは佐々木に報告して、Google Formsを使用してください。
 
 VERSION\n", true);
@@ -237,7 +237,7 @@ VERSION\n", true);
                     // 申請した本人への通知
                     $this->initPush($lastPhase['userId']);
                     $adminProfile = $this->fetchProfile();
-                    $this->pushMessage("{$lastPhase['formType']}が承認されました。\n(届出番号:{$lastPhase['receiptNo']})", false, 'text', ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com/']);
+                    $this->pushText("{$lastPhase['formType']}が承認されました。\n(届出番号:{$lastPhase['receiptNo']})", false, ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com/']);
                     $this->pushOptions(['OK']);
                     $this->confirmPush(true);
                 } catch (\Throwable $e) {
@@ -253,23 +253,23 @@ VERSION\n", true);
 
                 // 管理者への通知
                 $this->initReply();
-                $this->pushMessage("{$lastPhase['userName']}の{$lastPhase['formType']}を承認しました。\nスプレッドシートへのチェックと、本人への通知を行いました。\n(届出番号:{$lastPhase['receiptNo']})");
+                $this->pushText("{$lastPhase['userName']}の{$lastPhase['formType']}を承認しました。\nスプレッドシートへのチェックと、本人への通知を行いました。\n(届出番号:{$lastPhase['receiptNo']})");
                 break;
             case '直接伝えた':
                 try {
                     // 申請した本人への通知
                     $this->initPush($lastPhase['userId']);
                     $adminProfile = $this->fetchProfile();
-                    $this->pushMessage("届出番号{$lastPhase['receiptNo']}の{$lastPhase['formType']}を風紀は確認しましたが、ボットを使用した承認は行われませんでした。
+                    $this->pushText("届出番号{$lastPhase['receiptNo']}の{$lastPhase['formType']}を風紀は確認しましたが、ボットを使用した承認は行われませんでした。
 
 これについて風紀から直接連絡がなかった場合は手動でスプレッドシートにチェックを入れた可能性があります。
 
-まず、スプレッドシートにチェックが入っているかを確認し、入っていない場合は風紀に直接問い合わせてください。", false, 'text', ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com/']);
+まず、スプレッドシートにチェックが入っているかを確認し、入っていない場合は風紀に直接問い合わせてください。", false, ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com/']);
                     $this->pushOptions(['OK']);
                     $this->confirmPush(true);
                 } catch (\Throwable $e) {
                     $this->initReply();
-                    $this->pushMessage("{$e}\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}について、ボットを使用した承認が行われなかった旨の本人への通知中にエラーが発生しました。\n必要ならば手動で本人に通知してください。");
+                    $this->pushText("{$e}\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}について、ボットを使用した承認が行われなかった旨の本人への通知中にエラーが発生しました。\n必要ならば手動で本人に通知してください。");
                     break;
                 }
 
@@ -281,13 +281,13 @@ VERSION\n", true);
 
                 // 管理者への通知
                 $this->initReply();
-                $this->pushMessage("{$lastPhase['userName']}の{$lastPhase['formType']}について、ボットを使用した承認が行われなかった旨を本人へ通知しました。\n(届出番号:{$lastPhase['receiptNo']})");
+                $this->pushText("{$lastPhase['userName']}の{$lastPhase['formType']}について、ボットを使用した承認が行われなかった旨を本人へ通知しました。\n(届出番号:{$lastPhase['receiptNo']})");
                 break;
             case '一番最後に見る':
                 if (count($this->storage['adminPhase']) === 1) {
                     // 次の質問は承認するかどうかの質問ではない
                     // もう一度同じ質問を聞く
-                    $this->pushMessage('他に承認が必要な届出はありません。');
+                    $this->pushText('他に承認が必要な届出はありません。');
                     $this->setLastQuestions();
                     return true;
                 }
@@ -353,7 +353,7 @@ VERSION\n", true);
             try {
                 $this->admin->initPush();
                 $newAdminProfile = $this->fetchProfile();
-                $this->admin->pushMessage('管理者が変更されました。', false, 'text', ['name' => $newAdminProfile['displayName'], 'iconUrl' => $newAdminProfile['pictureUrl'] ?? 'https://dummy.com/']);
+                $this->admin->pushText('管理者が変更されました。', false, ['name' => $newAdminProfile['displayName'], 'iconUrl' => $newAdminProfile['pictureUrl'] ?? 'https://dummy.com/']);
                 $this->admin->pushOptions(['OK']);
                 $this->admin->confirmPush(true);
             } catch (\Throwable $e) {
@@ -361,10 +361,10 @@ VERSION\n", true);
         }
 
         // 新管理者への通知とマニュアルの表示
-        $this->pushMessage('管理者が変更されました。');
-        $this->pushMessage(ADMIN_MANUAL);
-        $this->pushMessage(SERVER_MANUAL);
-        $this->pushMessage('これらのマニュアルは「管理者設定」>「管理者用マニュアル表示」からいつでも確認できます。');
+        $this->pushText('管理者が変更されました。');
+        $this->pushText(ADMIN_MANUAL);
+        $this->pushText(SERVER_MANUAL);
+        $this->pushText('これらのマニュアルは「管理者設定」>「管理者用マニュアル表示」からいつでも確認できます。');
         $this->pushOptions(['OK']);
 
         // adminPhaseの移動(なおここで$this->adminは元管理者)
@@ -419,7 +419,7 @@ VERSION\n", true);
             $this->admin = $this;
 
             // 通知
-            $this->pushMessage("ボットに登録された管理者のアカウントの存在が確認できませんでした。
+            $this->pushText("ボットに登録された管理者のアカウントの存在が確認できませんでした。
 管理者がボットのブロックやLINEアカウントの削除等をした可能性があります。
 管理者のアカウントの存在確認が出来なくなってから初めて承認が必要な届出を行ったあなたのアカウントに管理者権限を移行しました。
 あなたが風紀でない場合は風紀に連絡、あなたが現役舎生でない場合はボットをブロックしてください。");
@@ -497,19 +497,19 @@ VERSION\n", true);
         // ユーザーへの通知
         if ($this->isThisAdmin()) {
             if ($needCheckbox) {
-                $this->pushMessage("{$this->storage['formType']}を提出しました。\n(※承認済み)");
+                $this->pushText("{$this->storage['formType']}を提出しました。\n(※承認済み)");
             } else {
                 if ($message !== '')
                     $message = "\n{$message}";
-                $this->pushMessage("{$this->storage['formType']}を提出しました。{$message}");
+                $this->pushText("{$this->storage['formType']}を提出しました。{$message}");
             }
         } else {
             if ($needCheckbox) {
-                $this->pushMessage("{$this->storage['formType']}を申請しました。\n風紀の承認をお待ちください。\n(届出番号:{$receiptNo})");
+                $this->pushText("{$this->storage['formType']}を申請しました。\n風紀の承認をお待ちください。\n(届出番号:{$receiptNo})");
             } else {
                 if ($message !== '')
                     $message = "\n{$message}";
-                $this->pushMessage("{$this->storage['formType']}を提出しました。{$message}\n※この届出に風紀の承認はありません。");
+                $this->pushText("{$this->storage['formType']}を提出しました。{$message}\n※この届出に風紀の承認はありません。");
             }
         }
     }
@@ -846,31 +846,37 @@ VERSION\n", true);
         $this->uniqueTextOptions = [];
     }
 
-    public function pushMessage(string $item, bool $isQuestion = false, string $type = 'text', ?array $sender = null): void
+    public function pushText(string $text, bool $isQuestion = false, ?array $sender = null): void
     {
-        switch ($type) {
-            case 'text':
-                // 回答は4500文字以下に
-                // (サロゲートペアは2文字以上とカウントされるので、本来5000文字まで許容できるが余裕をもって4500文字とする)
-                if (mb_strlen($item) > 4500)
-                    $item = mb_substr($item, 0, 4500) . "…\n\n送信する文字数が多すぎるため、残りの文字が省略されました。";
-                $message = [
-                    'type' => 'text',
-                    'text' => $item
-                ];
-                break;
-            case 'image':
-                // なお$itemは2000文字以下とすること
-                $message = [
-                    'type' => 'image',
-                    'originalContentUrl' => $item,
-                    'previewImageUrl' => $item
-                ];
-                break;
-            default:
-                return;
-        }
+        // 回答は4500文字以下に
+        // (サロゲートペアは2文字以上とカウントされるので、本来5000文字まで許容できるが余裕をもって4500文字とする)
+        if (mb_strlen($text) > 4500)
+            $text = mb_substr($text, 0, 4500) . "…\n\n送信する文字数が多すぎるため、残りの文字が省略されました。";
+        $message = [
+            'type' => 'text',
+            'text' => $text
+        ];
+
         if (isset($sender)) $message['sender'] = $sender;
+
+        if ($isQuestion) {
+            $this->questions[] = $message;
+        } else {
+            $this->messages[] = $message;
+        }
+    }
+
+    public function pushImage(string $url, bool $isQuestion = false, ?array $sender = null): void
+    {
+        // なお$urlは2000文字以下とすること
+        $message = [
+            'type' => 'image',
+            'originalContentUrl' => $url,
+            'previewImageUrl' => $url
+        ];
+
+        if (isset($sender)) $message['sender'] = $sender;
+
         if ($isQuestion) {
             $this->questions[] = $message;
         } else {
@@ -1076,7 +1082,7 @@ VERSION\n", true);
             if (!empty($undisplayedOptions))
                 $message .= "\n\n" . implode("、\n", $undisplayedOptions) . 'と入力してください。';
         }*/
-        $this->pushMessage($message);
+        $this->pushText($message);
         $this->setLastQuestions();
     }
 
