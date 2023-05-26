@@ -648,8 +648,8 @@ VERSION\n", true);
     {
         try {
             // ドライブに保存
-            $drive_service = new \Google_Service_Drive(self::getGoogleClient());
-            $file = $drive_service->files->create(new \Google_Service_Drive_DriveFile([
+            $driveService = new \Google_Service_Drive(self::getGoogleClient());
+            $file = $driveService->files->create(new \Google_Service_Drive_DriveFile([
                 'name' => $driveFilename, // なんかバリデーションは要らないらしい
                 'parents' => [$parentFolder],
             ]), [
@@ -762,8 +762,8 @@ VERSION\n", true);
                 case 'tamokutekiImageFolder':
                     $fileId = $this->saveToDrive(TEST_IMAGE_FILENAME, 'TEST', $id, true);
                     if ($type === 'shogyojiImageFolder') {
-                        $drive_service = new \Google_Service_Drive(self::getGoogleClient());
-                        $drive_service->files->delete($fileId, ['supportsAllDrives' => true]);
+                        $driveService = new \Google_Service_Drive(self::getGoogleClient());
+                        $driveService->files->delete($fileId, ['supportsAllDrives' => true]);
                     }
                     break;
             }
