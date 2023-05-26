@@ -133,6 +133,8 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['shogyojiIm
 
                 case 'その他届出用画像フォルダID変更':
                     $this->supporter->pushText("舎生大会・諸行事届以外の届出の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
+※このフォルダ内に各届出ごとにフォルダが作成され、それぞれに各届出の画像が保存されます。
+
 現在のその他届出用画像フォルダ:
 https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalImageFolderId']}", true);
                     break;
