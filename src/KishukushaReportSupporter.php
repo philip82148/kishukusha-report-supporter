@@ -218,10 +218,10 @@ VERSION\n", true);
         switch ($message) {
             case '承認する':
                 try {
-                    $spreadsheet_service = new \Google_Service_Sheets(self::getGoogleClient());
+                    $spreadsheetService = new \Google_Service_Sheets(self::getGoogleClient());
 
                     // 書き込み
-                    $spreadsheet_service->spreadsheets_values->update(
+                    $spreadsheetService->spreadsheets_values->update(
                         $this->config['resultSheets'],
                         $lastPhase['checkboxRange'],
                         new \Google_Service_Sheets_ValueRange([
@@ -438,10 +438,10 @@ VERSION\n", true);
             }
 
             // スプレッドシートに書き込み
-            $spreadsheet_service = new \Google_Service_Sheets(self::getGoogleClient());
+            $spreadsheetService = new \Google_Service_Sheets(self::getGoogleClient());
 
             // 結果を追加
-            $response = $this->appendToResultSheets($this->storage['formType'], $appendRow, $spreadsheet_service);
+            $response = $this->appendToResultSheets($this->storage['formType'], $appendRow, $spreadsheetService);
 
             // チェックボックスを追加
             if ($needCheckbox) {
@@ -454,8 +454,8 @@ VERSION\n", true);
                 $checkboxRange = $matches['sheetName'] . $matches['columnAlphabet'] . $matches['rowNo'];
 
                 // シートIDを取得(追加直後なので存在するはず)
-                $response = $spreadsheet_service->spreadsheets->get($this->config['resultSheets']);
-                $sheetId = $this->getSheetId($response->getSheets(), $this->storage['formType']);
+                $spreadsheet = $spreadsheetService->spreadsheets->get($this->config['resultSheets']);
+                $sheetId = $this->getSheetId($spreadsheet, $this->storage['formType']);
 
                 // チェックボックス追加
                 $requestBody = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest();
@@ -476,7 +476,7 @@ VERSION\n", true);
                         ]
                     ]
                 ]);
-                $response = $spreadsheet_service->spreadsheets->batchUpdate(
+                $spreadsheetService->spreadsheets->batchUpdate(
                     $this->config['resultSheets'],
                     $requestBody
                 );
@@ -514,14 +514,17 @@ VERSION\n", true);
         }
     }
 
-    private function appendToResultSheets(string $formType, array $row, $spreadsheet_service, string $resultSheetId = null)
+    private function appendToResultSheets(string $formType, array $row, \Google_Service_Sheets $spreadsheetService, string $resultSheetId = null): \Google_Service_Sheets_AppendValuesResponse
     {
         if (!isset($resultSheetId))
             $resultSheetId = $this->config['resultSheets'];
 
-        try {
-            // 書き込み
-            $response = $spreadsheet_service->spreadsheets_values->append(
+        // $formTypeのシートがあるか確認
+        $spreadsheet = $spreadsheetService->spreadsheets->get($resultSheetId);
+        $sheetId = $this->getSheetId($spreadsheet, $formType);
+        if (isset($sheetId)) {
+            // 存在する->書き込み
+            $response = $spreadsheetService->spreadsheets_values->append(
                 $resultSheetId,
                 "'{$formType}'!A1",
                 new \Google_Service_Sheets_ValueRange([
@@ -531,72 +534,71 @@ VERSION\n", true);
             );
 
             return $response;
-        } catch (\Throwable $e) {
-            $header = array_merge(['タイムスタンプ'], self::FORMS[$formType]::HEADER);
+        }
 
-            // シートが存在しない場合作成
-            $requestBody = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
-                'requests' => [
-                    'addSheet' => [
-                        'properties' => [
-                            'title' => $formType
-                        ]
+        // シートが存在しない->作成
+        $requestBody = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
+            'requests' => [
+                'addSheet' => [
+                    'properties' => [
+                        'title' => $formType
                     ]
                 ]
-            ]);
-            $response = $spreadsheet_service->spreadsheets->batchUpdate($resultSheetId, $requestBody);
-            $sheetId = $response->getReplies()[0]->getAddSheet()->getProperties()->sheetId;
+            ]
+        ]);
+        $response = $spreadsheetService->spreadsheets->batchUpdate($resultSheetId, $requestBody);
+        $sheetId = $response->getReplies()[0]->getAddSheet()->getProperties()->sheetId;
 
-            // 一行目固定、セル幅指定
-            $requestBody = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
-                'requests' => [
-                    new \Google_Service_Sheets_Request([
-                        'update_sheet_properties' => [
-                            'properties' => [
-                                'sheet_id' => $sheetId,
-                                'grid_properties' => ['frozen_row_count' => 1]
-                            ],
-                            'fields' => 'gridProperties.frozenRowCount'
-                        ]
-                    ]),
-                    new \Google_Service_Sheets_Request([
-                        'updateDimensionProperties' => [
-                            'range' =>  [
-                                'sheetId' => $sheetId,
-                                'dimension' => 'COLUMNS',
-                                'startIndex' => 0,
-                                'endIndex' => count($header)
-                            ],
-                            'properties' => [
-                                'pixelSize' => 150
-                            ],
-                            'fields' => 'pixelSize'
-                        ]
-                    ])
-                ]
-            ]);
-            $spreadsheet_service->spreadsheets->batchUpdate(
-                $this->config['resultSheets'],
-                $requestBody
-            );
-
-            // 見出しと共に書き込み
-            $response = $spreadsheet_service->spreadsheets_values->append(
-                $resultSheetId,
-                "'{$formType}'!A1",
-                new \Google_Service_Sheets_ValueRange([
-                    'values' => [$header, $row]
+        // 一行目固定、セル幅指定
+        $header = array_merge(['タイムスタンプ'], self::FORMS[$formType]::HEADER);
+        $requestBody = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
+            'requests' => [
+                new \Google_Service_Sheets_Request([
+                    'update_sheet_properties' => [
+                        'properties' => [
+                            'sheet_id' => $sheetId,
+                            'grid_properties' => ['frozen_row_count' => 1]
+                        ],
+                        'fields' => 'gridProperties.frozenRowCount'
+                    ]
                 ]),
-                ['valueInputOption' => 'USER_ENTERED']
-            );
+                new \Google_Service_Sheets_Request([
+                    'updateDimensionProperties' => [
+                        'range' =>  [
+                            'sheetId' => $sheetId,
+                            'dimension' => 'COLUMNS',
+                            'startIndex' => 0,
+                            'endIndex' => count($header)
+                        ],
+                        'properties' => [
+                            'pixelSize' => 150
+                        ],
+                        'fields' => 'pixelSize'
+                    ]
+                ])
+            ]
+        ]);
+        $spreadsheetService->spreadsheets->batchUpdate(
+            $this->config['resultSheets'],
+            $requestBody
+        );
 
-            return $response;
-        }
+        // 見出しと共に書き込み
+        $response = $spreadsheetService->spreadsheets_values->append(
+            $resultSheetId,
+            "'{$formType}'!A1",
+            new \Google_Service_Sheets_ValueRange([
+                'values' => [$header, $row]
+            ]),
+            ['valueInputOption' => 'USER_ENTERED']
+        );
+
+        return $response;
     }
 
-    private function getSheetId($sheets, $sheetName): ?int
+    private function getSheetId(\Google_Service_Sheets_Spreadsheet $spreadsheet, string $sheetName): ?int
     {
-        foreach ($sheets as $sheet) {
+        foreach ($spreadsheet->getSheets() as $sheet) {
             if ($sheet['properties']['title'] !== $sheetName) continue;
             return $sheet['properties']['sheetId'];
         }
@@ -681,14 +683,14 @@ VERSION\n", true);
         try {
             // データベースに無かった
             // スプレッドシートから取得
-            $spreadsheet_service = new \Google_Service_Sheets(self::getGoogleClient());
+            $spreadsheetService = new \Google_Service_Sheets(self::getGoogleClient());
 
             // 読み取り
-            $response = $spreadsheet_service->spreadsheets_values->get($this->config['variableSheets'], "'行事'!A1:C", [
+            $valueRange = $spreadsheetService->spreadsheets_values->get($this->config['variableSheets'], "'行事'!A1:C", [
                 'valueRenderOption' => 'UNFORMATTED_VALUE',
                 'dateTimeRenderOption' => 'SERIAL_NUMBER'
             ]);
-            $rows = $response->getValues();
+            $rows = $valueRange->getValues();
 
             // 有効な日付であれば配列にする
             $events = [];
@@ -739,16 +741,16 @@ VERSION\n", true);
             switch ($type) {
                 case 'variableSheets':
                 case 'resultSheets':
-                    $spreadsheet_service = new \Google_Service_Sheets(self::getGoogleClient());
+                    $spreadsheetService = new \Google_Service_Sheets(self::getGoogleClient());
                     if ($type === 'variableSheets') {
                         // 読み取り
-                        $response = $spreadsheet_service->spreadsheets_values->get($id, "'行事'!A1:C");
+                        $valueRange = $spreadsheetService->spreadsheets_values->get($id, "'行事'!A1:C");
                     } else {
                         // 何か一つ届出のシートを書き込む
                         foreach (self::FORMS as $formType => $formClass) {
                             if (is_subclass_of($formClass, FormTemplate::class)) break;
                         }
-                        $this->appendToResultSheets($formType, [], $spreadsheet_service, $id);
+                        $this->appendToResultSheets($formType, [], $spreadsheetService, $id);
                     }
                     break;
                 case 'shogyojiImageFolder':
