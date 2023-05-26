@@ -222,7 +222,7 @@ VERSION\n", true);
 
                     // 書き込み
                     $spreadsheetService->spreadsheets_values->update(
-                        $this->config['resultSheets'],
+                        $this->config['outputSheetId'],
                         $lastPhase['checkboxRange'],
                         new \Google_Service_Sheets_ValueRange([
                             'values' => [['TRUE']]
@@ -454,12 +454,12 @@ VERSION\n", true);
                 $checkboxRange = $matches['sheetName'] . $matches['columnAlphabet'] . $matches['rowNo'];
 
                 // シートIDを取得(追加直後なので存在するはず)
-                $spreadsheet = $spreadsheetService->spreadsheets->get($this->config['resultSheets']);
+                $spreadsheet = $spreadsheetService->spreadsheets->get($this->config['outputSheetId']);
                 $sheetId = $this->getSheetId($spreadsheet, $this->storage['formType']);
 
                 // チェックボックス追加
                 $spreadsheetService->spreadsheets->batchUpdate(
-                    $this->config['resultSheets'],
+                    $this->config['outputSheetId'],
                     new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
                         'requests' => [
                             'setDataValidation' => [
@@ -517,7 +517,7 @@ VERSION\n", true);
     private function appendToResultSheets(string $formType, array $row, \Google_Service_Sheets $spreadsheetService, string $resultSheetId = null): \Google_Service_Sheets_AppendValuesResponse
     {
         if (!isset($resultSheetId))
-            $resultSheetId = $this->config['resultSheets'];
+            $resultSheetId = $this->config['outputSheetId'];
 
         // $formTypeのシートがあるか確認
         $spreadsheet = $spreadsheetService->spreadsheets->get($resultSheetId);
@@ -555,7 +555,7 @@ VERSION\n", true);
         // 一行目固定、セル幅指定
         $header = array_merge(['タイムスタンプ'], self::FORMS[$formType]::HEADER);
         $spreadsheetService->spreadsheets->batchUpdate(
-            $this->config['resultSheets'],
+            $this->config['outputSheetId'],
             new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
                 'requests' => [
                     new \Google_Service_Sheets_Request([
@@ -720,7 +720,7 @@ VERSION\n", true);
             $spreadsheetService = new \Google_Service_Sheets(self::getGoogleClient());
 
             // 読み取り
-            $valueRange = $spreadsheetService->spreadsheets_values->get($this->config['variableSheets'], "'行事'!A1:C", [
+            $valueRange = $spreadsheetService->spreadsheets_values->get($this->config['eventSheetId'], "'行事'!A1:C", [
                 'valueRenderOption' => 'UNFORMATTED_VALUE',
                 'dateTimeRenderOption' => 'SERIAL_NUMBER'
             ]);
@@ -773,10 +773,10 @@ VERSION\n", true);
     {
         try {
             switch ($type) {
-                case 'variableSheets':
-                case 'resultSheets':
+                case 'eventSheetId':
+                case 'outputSheetId':
                     $spreadsheetService = new \Google_Service_Sheets(self::getGoogleClient());
-                    if ($type === 'variableSheets') {
+                    if ($type === 'eventSheetId') {
                         // 読み取り
                         $valueRange = $spreadsheetService->spreadsheets_values->get($id, "'行事'!A1:C");
                     } else {
@@ -787,12 +787,12 @@ VERSION\n", true);
                         $this->appendToResultSheets($formType, [], $spreadsheetService, $id);
                     }
                     break;
-                case 'shogyojiImageFolder':
+                case 'shogyojiImageFolderId':
                     $fileId = $this->saveToDrive(TEST_IMAGE_FILENAME, 'テスト', $id, null, true);
                     $driveService = new \Google_Service_Drive(self::getGoogleClient());
                     $driveService->files->delete($fileId, ['supportsAllDrives' => true]);
                     break;
-                case 'generalImageFolder':
+                case 'generalImageFolderId':
                     $fileId = $this->saveToDrive(TEST_IMAGE_FILENAME, 'テスト', $id, 'テスト', true);
                     break;
             }

@@ -180,7 +180,7 @@ class Bikes extends FormTemplate
             case '原付':
                 $imageFileName = $answers['ナンバーの画像'];
                 $driveFileName = "{$bodyType}_{$this->supporter->storage['userName']}_ナンバー.jpg";
-                $answers['防犯登録番号またはナンバーの画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['generalImageFolder'], '自転車・バイク配備届');
+                $answers['防犯登録番号またはナンバーの画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['generalImageFolderId'], '自転車・バイク配備届');
                 unset($answers['ナンバーの画像']);
                 break;
         }
@@ -188,7 +188,7 @@ class Bikes extends FormTemplate
         $imageFileName = $answers['車体の画像'];
         $driveFileName = "{$bodyType}_{$this->supporter->storage['userName']}_車体.jpg";
         unset($answers['車体の画像']); // 順番を最後にするため
-        $answers['車体の画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['generalImageFolder'], '自転車・バイク配備届');
+        $answers['車体の画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['generalImageFolderId'], '自転車・バイク配備届');
 
         $answersForSheets = array_values($answers);
 

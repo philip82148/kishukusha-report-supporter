@@ -56,7 +56,7 @@ class AdminSettings extends FormTemplateBasic
 再読み込み後に全ての行事が読み込まれているか確認してください。
 
 読み込み先のスプレッドシート:
-https://docs.google.com/spreadsheets/d/{$this->supporter->config['variableSheets']}
+https://docs.google.com/spreadsheets/d/{$this->supporter->config['eventSheetId']}
 
 現在読み込まれている行事(開始日順):
 " . $this->getEventListString(), true);
@@ -111,13 +111,13 @@ https://docs.google.com/spreadsheets/d/{$this->supporter->config['variableSheets
                 case '行事スプレッドシートID変更':
                     $this->supporter->pushText("行事の読み込み先のスプレッドシートのURLまたはIDを入力してください。
 現在の行事スプレッドシート:
-https://docs.google.com/spreadsheets/d/{$this->supporter->config['variableSheets']}", true);
+https://docs.google.com/spreadsheets/d/{$this->supporter->config['eventSheetId']}", true);
                     break;
 
                 case '出力先スプレッドシートID変更':
                     $this->supporter->pushText("提出された届出の内容を記録するスプレッドシートのURLまたはIDを入力してください。
 現在の出力先スプレッドシート:
-https://docs.google.com/spreadsheets/d/{$this->supporter->config['resultSheets']}", true);
+https://docs.google.com/spreadsheets/d/{$this->supporter->config['outputSheetId']}", true);
                     break;
 
                 case '舎生大会・諸行事届用画像フォルダID変更':
@@ -128,13 +128,13 @@ https://docs.google.com/spreadsheets/d/{$this->supporter->config['resultSheets']
 そのためには、個人所有のフォルダをボットに共有するのではなく、ボットとの間に作成した共有ドライブ内のフォルダを使用する必要があります。
 
 現在の舎生大会・諸行事届用画像フォルダ:
-https://drive.google.com/drive/u/0/folders/{$this->supporter->config['shogyojiImageFolder']}", true);
+https://drive.google.com/drive/u/0/folders/{$this->supporter->config['shogyojiImageFolderId']}", true);
                     break;
 
                 case 'その他届出用画像フォルダID変更':
                     $this->supporter->pushText("舎生大会・諸行事届以外の届出の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
 現在のその他届出用画像フォルダ:
-https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalImageFolder']}", true);
+https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalImageFolderId']}", true);
                     break;
             }
 
@@ -254,8 +254,8 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
                 $id = $this->extractId($message);
                 switch ($this->supporter->storage['unsavedAnswers']['設定項目']) {
                     case '行事スプレッドシートID変更':
-                        if ($this->supporter->checkValidGoogleItem('variableSheets', $id)) {
-                            $this->supporter->config['variableSheets'] = $id;
+                        if ($this->supporter->checkValidGoogleItem('eventSheetId', $id)) {
+                            $this->supporter->config['eventSheetId'] = $id;
                             $this->supporter->storeConfig();
                             $this->supporter->fetchEvents(true);
 
@@ -271,8 +271,8 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
 もう一度入力してください。");
                         return 'wrong-reply';
                     case '出力先スプレッドシートID変更':
-                        if ($this->supporter->checkValidGoogleItem('resultSheets', $id)) {
-                            $this->supporter->config['resultSheets'] = $id;
+                        if ($this->supporter->checkValidGoogleItem('outputSheetId', $id)) {
+                            $this->supporter->config['outputSheetId'] = $id;
                             $this->supporter->storeConfig();
 
                             // 返信
@@ -284,8 +284,8 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
 もう一度入力してください。");
                         return 'wrong-reply';
                     case '舎生大会・諸行事届用画像フォルダID変更':
-                        if ($this->supporter->checkValidGoogleItem('shogyojiImageFolder', $id)) {
-                            $this->supporter->config['shogyojiImageFolder'] = $id;
+                        if ($this->supporter->checkValidGoogleItem('shogyojiImageFolderId', $id)) {
+                            $this->supporter->config['shogyojiImageFolderId'] = $id;
                             $this->supporter->storeConfig();
 
                             // 返信
@@ -298,8 +298,8 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
 もう一度入力してください。");
                         return 'wrong-reply';
                     case 'その他届出用画像フォルダID変更':
-                        if ($this->supporter->checkValidGoogleItem('generalImageFolder', $id)) {
-                            $this->supporter->config['generalImageFolder'] = $id;
+                        if ($this->supporter->checkValidGoogleItem('generalImageFolderId', $id)) {
+                            $this->supporter->config['generalImageFolderId'] = $id;
                             $this->supporter->storeConfig();
 
                             // 返信

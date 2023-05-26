@@ -83,7 +83,7 @@ class Haibi309 extends FormTemplate
         $imageFileName = $answers['保管品の画像'];
         $itemName = mb_substr($answers['保管品'], 0, 15);
         $driveFileName = "309_{$this->supporter->storage['userName']}_{$itemName}.jpg";
-        $answers['保管品の画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['generalImageFolder'], '309私物配備届');
+        $answers['保管品の画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['generalImageFolderId'], '309私物配備届');
         $answersForSheets = array_values($answers);
 
         // 申請

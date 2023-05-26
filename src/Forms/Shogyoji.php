@@ -365,7 +365,7 @@ class Shogyoji extends FormTemplate
             $imageFileName = $answers['証拠画像'];
             $eventName = mb_substr($answers['委員会行事'], 0, 15);
             $driveFileName = "諸行事届_{$answers['開催日']}_{$eventName}_{$this->supporter->storage['userName']}.jpg";
-            $id = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['shogyojiImageFolder'], null, true);
+            $id = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['shogyojiImageFolderId'], null, true);
             $this->storeShogyojiImage($answers['開催日'], $id);
             $answers['証拠画像'] = $this->supporter->googleIdToUrl($id);
         }
