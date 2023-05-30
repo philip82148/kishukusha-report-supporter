@@ -74,3 +74,5 @@ foreach ($events as $event) {
         };
     }
 }
+
+include __DIR__ . '/delete-shogyoji-images.php';
