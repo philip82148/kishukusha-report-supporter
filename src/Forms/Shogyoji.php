@@ -18,45 +18,42 @@ class Shogyoji extends FormTemplate
             $this->supporter->storage['unsavedAnswers']['氏名'] = $this->supporter->storage['userName'];
 
             // 行事名に対する日付の辞書を作る
-            $events = $this->supporter->fetchEvents();
+            $events = $this->supporter->fetchEvents(); // 日付順にソート済み
             $today = getDateAt0AM();
-            $events_to_dates = ['舎生大会' => [], '委員会' => []]; // 最初に表示させる
-            $passed_events_to_dates = []; // 同時に過ぎた行事の辞書も作る
+            $unpassedEventsToDates = ['舎生大会' => [], '委員会' => []]; // 最初に表示させる
+            $passedEventsToDates = []; // 同時に過ぎた行事の辞書も作る
             foreach ($events as $event) {
                 // 今日以降の行事でなければ過ぎた行事の辞書へ
                 if (stringToDate($event['開始日']) >= $today) {
-                    if (!isset($events_to_dates[$event['行事名']])) {
-                        if (count($events_to_dates) < 11)
-                            $events_to_dates[$event['行事名']] = [$event['開始日']];
-                        continue;
+                    if (isset($unpassedEventsToDates[$event['行事名']])) {
+                        $unpassedEventsToDates[$event['行事名']][] = $event['開始日'];
+                    } else {
+                        $unpassedEventsToDates[$event['行事名']] = [$event['開始日']];
                     }
-
-                    if (count($events_to_dates[$event['行事名']]) >= 10) continue;
-                    $events_to_dates[$event['行事名']][] = $event['開始日'];
                 } else {
-                    if (!isset($passed_events_to_dates[$event['行事名']])) {
-                        if (count($passed_events_to_dates) < 11)
-                            $passed_events_to_dates[$event['行事名']] = [$event['開始日']];
-                        continue;
+                    if (isset($passedEventsToDates[$event['行事名']])) {
+                        $passedEventsToDates[$event['行事名']][] = $event['開始日'];
+                    } else {
+                        $passedEventsToDates[$event['行事名']] = [$event['開始日']];
                     }
-
-                    if (count($passed_events_to_dates[$event['行事名']]) >= 10) continue;
-                    $passed_events_to_dates[$event['行事名']][] = $event['開始日'];
                 }
             }
-            // 過ぎた方は最新の方から並べる
-            $passed_events_to_dates = array_slice(array_reverse($passed_events_to_dates), 0, 10);
+
+            // 過ぎた方は新しい順に並べる
+            $passedEventsToDates = array_reverse($passedEventsToDates);
+            $passedEventsToDates = array_map(fn ($dates) => array_reverse($dates), $passedEventsToDates);
 
             // 質問
             $this->supporter->pushText('該当する委員会行事を選んでください。', true);
 
             // 選択肢
-            $this->supporter->pushOptions(array_keys($events_to_dates), true);
+            $events = array_slice(array_keys($unpassedEventsToDates), 0, 11);
+            $this->supporter->pushOptions($events, true);
             $this->supporter->pushOptions(['その他'], true);
             $this->supporter->pushOptions(['キャンセル']);
 
-            $this->supporter->storage['cache']['eventsToDates'] = $events_to_dates;
-            $this->supporter->storage['cache']['passedEventsToDates'] = $passed_events_to_dates;
+            $this->supporter->storage['cache']['unpassedEventsToDates'] = $unpassedEventsToDates;
+            $this->supporter->storage['cache']['passedEventsToDates'] = $passedEventsToDates;
 
             $this->supporter->storage['phases'][] = 'askingEvent';
             return;
@@ -83,6 +80,8 @@ class Shogyoji extends FormTemplate
                     $events = array_filter($events, function ($event) {
                         return $event !== '舎生大会' && $event !== '委員会';
                     });
+                    $events = array_slice($events, 0, 10);
+
                     $this->supporter->pushUnsavedAnswerOption('委員会行事');
                     $this->supporter->pushOptions($events);
                     $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
@@ -102,7 +101,9 @@ class Shogyoji extends FormTemplate
 
             // 選択肢
             $event = $this->supporter->storage['unsavedAnswers']['委員会行事'];
-            $this->supporter->pushOptions($this->supporter->storage['cache']['eventsToDates'][$event] ?? [], true);
+            $dates = array_slice($this->supporter->storage['cache']['unpassedEventsToDates'][$event] ?? [], 0, 10);
+
+            $this->supporter->pushOptions($dates, true);
             $this->supporter->pushOptions(['その他'], true);
             $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
@@ -124,8 +125,10 @@ class Shogyoji extends FormTemplate
 
             // 選択肢
             $event = $this->supporter->storage['unsavedAnswers']['委員会行事'];
+            $dates = array_slice($this->supporter->storage['cache']['passedEventsToDates'][$event] ?? [], 0, 10);
+
             $this->supporter->pushUnsavedAnswerOption('開催日');
-            $this->supporter->pushOptions($this->supporter->storage['cache']['passedEventsToDates'][$event] ?? []);
+            $this->supporter->pushOptions($dates);
             $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
             $this->supporter->storage['phases'][] = 'askingStartManually';
@@ -147,8 +150,10 @@ class Shogyoji extends FormTemplate
 
                     // 選択肢
                     $event = $this->supporter->storage['unsavedAnswers']['委員会行事'];
+                    $dates = array_slice($this->supporter->storage['cache']['passedEventsToDates'][$event] ?? [], 0, 10);
+
                     $this->supporter->pushUnsavedAnswerOption('開催日');
-                    $this->supporter->pushOptions($this->supporter->storage['cache']['passedEventsToDates'][$event] ?? []);
+                    $this->supporter->pushOptions($dates);
                     $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
                     // 次その他にはならないのでここの質問に戻ってこないようにする
@@ -491,7 +496,7 @@ class Shogyoji extends FormTemplate
     {
         switch ($type) {
             case '委員会行事':
-                if (isset($this->supporter->storage['cache']['eventsToDates'][$message]) || $message === 'その他') {
+                if (isset($this->supporter->storage['cache']['unpassedEventsToDates'][$message]) || $message === 'その他') {
                     $this->supporter->storage['unsavedAnswers']['委員会行事'] = $message;
                     return '';
                 }
@@ -500,7 +505,7 @@ class Shogyoji extends FormTemplate
                 return 'wrong-reply';
             case '開催日':
                 $event = $this->supporter->storage['unsavedAnswers']['委員会行事'];
-                if (in_array($message, $this->supporter->storage['cache']['eventsToDates'][$event] ?? [], true)) {
+                if (in_array($message, $this->supporter->storage['cache']['unpassedEventsToDates'][$event] ?? [], true)) {
                     $this->supporter->storage['unsavedAnswers']['開催日'] = $message;
                     return '';
                 }
