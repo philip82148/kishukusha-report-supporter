@@ -356,7 +356,7 @@ class Shogyoji extends FormTemplate
         }
     }
 
-    protected function applyForm(): void
+    protected function submitForm(): void
     {
         $answers = $this->supporter->storage['unsavedAnswers'];
 
@@ -383,7 +383,7 @@ class Shogyoji extends FormTemplate
         unset($answersForSheets[6]);
 
         // 申請
-        $this->supporter->applyForm($answers, $answersForSheets, true);
+        $this->supporter->submitForm($answers, $answersForSheets, true);
     }
 
     public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool

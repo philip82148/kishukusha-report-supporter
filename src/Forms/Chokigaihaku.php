@@ -195,7 +195,7 @@ class Chokigaihaku extends FormTemplate
         }
     }
 
-    protected function applyForm(): void
+    protected function submitForm(): void
     {
         $answers = $this->supporter->storage['unsavedAnswers'];
         $answersForSheets = array_values($answers);
@@ -208,7 +208,7 @@ class Chokigaihaku extends FormTemplate
         $answersForSheets[6] = "'" . $answersForSheets[6];
 
         // 申請
-        $this->supporter->applyForm($answers, $answersForSheets, true);
+        $this->supporter->submitForm($answers, $answersForSheets, true);
 
         // 次回のための回答の記録
         $this->supporter->pushPreviousAnswer('滞在先住所', $answers['滞在先住所']);

@@ -75,7 +75,7 @@ class Haibi309 extends FormTemplate
         }
     }
 
-    protected function applyForm(): void
+    protected function submitForm(): void
     {
         $answers = $this->supporter->storage['unsavedAnswers'];
 
@@ -87,7 +87,7 @@ class Haibi309 extends FormTemplate
         $answersForSheets = array_values($answers);
 
         // 申請
-        $this->supporter->applyForm($answers, $answersForSheets);
+        $this->supporter->submitForm($answers, $answersForSheets);
     }
 
     public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool

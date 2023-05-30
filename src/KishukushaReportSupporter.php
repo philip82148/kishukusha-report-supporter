@@ -405,7 +405,7 @@ VERSION\n", true);
         return true;
     }
 
-    public function applyForm(array $answers, array $answersForSheets, bool $needCheckbox = false, string $message = ''): void
+    public function submitForm(array $answers, array $answersForSheets, bool $needCheckbox = false, string $message = ''): void
     {
         // 承認が必要な届出だが、管理者の存在が確認できない場合
         if ($needCheckbox && !$this->isThisAdmin() && !$this->admin->doesThisExist()) {
