@@ -488,7 +488,7 @@ VERSION\n", true);
         // 自分が管理者でない、かつ、承認が必要なら、管理者に通知
         if (!$this->isThisAdmin() && $needCheckbox) {
             try {
-                $receiptNo = $this->admin->notifyAppliedForm($this, $answers, $timeStamp, $checkboxRange ?? '');
+                $receiptNo = $this->admin->notifySubmittedForm($this, $answers, $timeStamp, $checkboxRange ?? '');
             } catch (\Throwable $e) {
                 throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書き込みは成功しましたが、風紀への通知中にエラーが発生しました。");
             }
@@ -607,7 +607,7 @@ VERSION\n", true);
         return null;
     }
 
-    private function notifyAppliedForm(self $supporter, array $answers, string $timeStamp, string $checkboxRange): string
+    private function notifySubmittedForm(self $supporter, array $answers, string $timeStamp, string $checkboxRange): string
     {
         $timeStamp = date('Y/m/d H:i', strtotime($timeStamp));
         $profile = $supporter->fetchProfile();
