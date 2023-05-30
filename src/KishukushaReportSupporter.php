@@ -25,11 +25,10 @@ class KishukushaReportSupporter
     public const MAX_PREVIOUS_ANSWERS = 5;
 
     public string $userId;
-    public array $config;
     public JsonDatabase $database;
-    public self $admin;
-
+    public array $config;
     public array $storage;
+    public self $admin;
 
     private string $replyToken;
     private string $pushUserId;
@@ -48,17 +47,17 @@ class KishukushaReportSupporter
     private static string $lastPushUserId;
     private static array $lastPushMessages;
 
-    public function __construct(string $userId, JsonDatabase $database, ?self $admin = null)
+    public function __construct(string $userId, JsonDatabase $database, ?array $config = null, ?self $admin = null)
     {
         $this->userId = $userId;
         $this->database = $database;
-        $this->restoreConfig();
+        $this->restoreConfig($config);
         $this->restoreStorage();
 
         $this->admin = match (true) {
             $userId === $this->config['adminId'] => $this,
             isset($admin) => $admin,
-            default => new self($this->config['adminId'], $this->database)
+            default => new self($this->config['adminId'], $this->database, $this->config)
         };
 
         // storageの方が書き換わっても、setLastQuestions()したときは必ず前回の質問になる
@@ -1390,9 +1389,9 @@ VERSION\n", true);
         return 'storage' . $this->userId;
     }
 
-    public function restoreConfig(): void
+    public function restoreConfig(?array $config = null): void
     {
-        $config = $this->database->restore('config');
+        $config = $config ?? $this->database->restore('config');
         if (isset($config)) {
             $this->config = $config;
             return;
