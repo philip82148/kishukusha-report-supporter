@@ -167,7 +167,7 @@ class Tamokuteki extends FormTemplate
         }
     }
 
-    protected function applyForm(): void
+    protected function submitForm(): void
     {
         $answers = $this->supporter->storage['unsavedAnswers'];
 
@@ -183,7 +183,7 @@ class Tamokuteki extends FormTemplate
         $answersForSheets[4] = deleteParentheses($answersForSheets[4]);
 
         // 申請
-        $this->supporter->applyForm($answers, $answersForSheets);
+        $this->supporter->submitForm($answers, $answersForSheets);
 
         // 次回のための回答の記録
         $this->supporter->pushPreviousAnswer('目的・備考', $answers['目的・備考']);

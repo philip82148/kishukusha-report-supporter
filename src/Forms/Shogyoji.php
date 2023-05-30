@@ -262,7 +262,7 @@ class Shogyoji extends FormTemplate
             $this->supporter->pushText("証拠の画像を送信してください。
 ※「風紀に相談済み」として直接風紀に証拠画像や資料を送っても構いません。
 証拠画像がない場合も風紀に直接連絡してください。
-このボットを使用した場合、証拠画像は五役のみが閲覧可能なGoogle Driveのフォルダにアップロードされ、該当する委員会行事の開催日(の開始日)後一日以内に自動で削除されます。
+このボットを使用した場合、証拠画像は五役のみが閲覧可能なGoogle Driveのフォルダにアップロードされ、該当する委員会行事の開催日(の開始日)か今日のどちらか遅い方から1週間後に自動で削除されます。
 証拠資料が画像形式でない場合はスクリーンショット等で証拠として十分な部分を画像化してください。", true);
 
             // 選択肢
@@ -356,7 +356,7 @@ class Shogyoji extends FormTemplate
         }
     }
 
-    protected function applyForm(): void
+    protected function submitForm(): void
     {
         $answers = $this->supporter->storage['unsavedAnswers'];
 
@@ -365,8 +365,14 @@ class Shogyoji extends FormTemplate
             $imageFileName = $answers['証拠画像'];
             $eventName = mb_substr($answers['委員会行事'], 0, 15);
             $driveFileName = "諸行事届_{$answers['開催日']}_{$eventName}_{$this->supporter->storage['userName']}.jpg";
+
             $id = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['shogyojiImageFolderId'], null, true);
-            $this->storeShogyojiImage($answers['開催日'], $id);
+
+            $eventDate = stringToDate($answers['開催日']);
+            $today = getDateAt0AM();
+            $deleteDate = strtotime('+1 week', max($eventDate, $today));
+            $this->storeShogyojiImage(date('Y/m/d', $deleteDate), $id);
+
             $answers['証拠画像'] = $this->supporter->googleIdToUrl($id);
         }
 
@@ -383,7 +389,7 @@ class Shogyoji extends FormTemplate
         unset($answersForSheets[6]);
 
         // 申請
-        $this->supporter->applyForm($answers, $answersForSheets, true);
+        $this->supporter->submitForm($answers, $answersForSheets, true);
     }
 
     public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
@@ -563,14 +569,13 @@ class Shogyoji extends FormTemplate
         }
     }
 
-    private function storeShogyojiImage(string $eventDate, string $id): void
+    private function storeShogyojiImage(string $deleteDate, string $id): void
     {
-        $eventDate = deleteParentheses($eventDate);
         $shogyojiImages = $this->supporter->database->restore('shogyojiImages') ?? [];
-        if (isset($shogyojiImages[$eventDate])) {
-            $shogyojiImages[$eventDate][] = $id;
+        if (isset($shogyojiImages[$deleteDate])) {
+            $shogyojiImages[$deleteDate][] = $id;
         } else {
-            $shogyojiImages[$eventDate] = [$id];
+            $shogyojiImages[$deleteDate] = [$id];
         }
         $this->supporter->database->store('shogyojiImages', $shogyojiImages);
     }
@@ -579,12 +584,12 @@ class Shogyoji extends FormTemplate
     {
         // 昨日の0:00より前の行事の写真を取得
         $shogyojiImages = $database->restore('shogyojiImages') ?? [];
-        $yesterday =  getDateAt0AM(time() - 60 * 60 * 24);
+        $today = getDateAt0AM();
         $idsToDelete = [];
-        foreach ($shogyojiImages as $eventDate => $ids) {
-            if (strtotime($eventDate) < $yesterday) {
+        foreach ($shogyojiImages as $deleteDate => $ids) {
+            if (strtotime($deleteDate) <= $today) {
                 $idsToDelete = array_merge($idsToDelete, $ids);
-                unset($shogyojiImages[$eventDate]);
+                unset($shogyojiImages[$deleteDate]);
             }
         }
 

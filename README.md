@@ -56,11 +56,12 @@ WordPress が載った **サーバー**なら**MySQL データベース**も付�
 
 ### 1.**PHP プログラム**を**サーバー**上に配置する
 
-FTP で kishukusha-report-supporter/フォルダを元サーバーからダウンロードし、新サーバーの public_html/配下のどこかにアップロードする。
+FTP で kishukusha-report-supporter/フォルダを元サーバーからダウンロードし、新サーバーの public_html/配下のどこかにアップロードする。  
+※アップロードに数時間ほどかかるが、コマンドラインを使う場合(このページ最下部参照)は数分で終わらせることができる。
 
 ### 2.**Google サービスアカウント**を**PHP プログラム**が使えるようにする
 
-※前のものを流用する場合はこのステップは飛ばす。  
+※前のものを流用する場合はこのステップは飛ばしてよい。ただし、前のステップでコマンドラインを使用した場合は前のサーバーの credentials.json を手動でアップロードする必要がある。  
 認証情報を含んだ json ファイルを credentials.json という名前にして kishukusha-report-supporter/配下に FTP でアップロードする(して、前のものがある場合は上書きする)。
 
 ### 3.**LINE BOT アカウント**に**PHP プログラム**と**サーバー**の場所を教える
@@ -81,19 +82,19 @@ kishukusha-report-supporter/フォルダの中に config.php があるので、�
 
 ### 5.諸行事届の画像の削除を一日 1 回行う設定
 
+ボットにアクセスされる(メッセージが送られる)度に、委員会行事の開催日(の開始日)か、アップロードされた日のどちらか遅い方から 1 週間経った諸行事届の画像が削除されるようになっているが、アクセスされなかった場合でも削除されるようにする。  
 **サーバー**に cron というサービスがあるので、それに kishukusha-report-supporter/配下の delete-shogyoji-images.php という**PHP プログラムファイル**を設定し、一日 1 回稼働させるようする。
 
-## git clone で行う場合
+## 手順 1.でコマンドラインを使う場合
 
-元サーバーのファイルが壊れている場合等で、手順 1 からできない場合やコマンドラインが使える場合は下記を実行する。
+サーバーに SSH 接続できる(そしてサーバーに git と composer(コマンド名)がインストールされている)場合はサーバー上で下記を実行する。  
+※SSH 接続はパソコンからリモートのサーバーのコマンドラインにアクセスする方法である。やり方はネットで調べること。
 
 ```shell
+cd "public_html/のパス"
 git clone https://github.com/philip82148/kishukusha-report-supporter
 cd kishukusha-report-supporter
 composer install
 ```
 
-※git や composer(、php)は適宜インストールすること。
-
-composer というコマンドにより vendor/というフォルダができる。  
-これをサーバー上で実行するか、ローカルで手順 3 まで行って、kishukusha-report-supporter/ごとサーバーにアップロードする。
+これにより public_html/直下に kishukusha-report-supporter/というフォルダができ、composer というコマンドにより kishukusha-report-supporter/直下に vendor/というフォルダができる。

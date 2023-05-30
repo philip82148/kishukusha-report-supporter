@@ -75,7 +75,7 @@ class Odoriba extends FormTemplate
         }
     }
 
-    protected function applyForm(): void
+    protected function submitForm(): void
     {
         $answers = $this->supporter->storage['unsavedAnswers'];
 
@@ -87,7 +87,7 @@ class Odoriba extends FormTemplate
         $answersForSheets = array_values($answers);
 
         // 申請
-        $this->supporter->applyForm($answers, $answersForSheets, false, '保管品はロビーの踊り場私物配備許可証を記入の上貼り付けて保管してください。');
+        $this->supporter->submitForm($answers, $answersForSheets, false, '保管品はロビーの踊り場私物配備許可証を記入の上貼り付けて保管してください。');
     }
 
     public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool

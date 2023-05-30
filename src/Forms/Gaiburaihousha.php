@@ -137,7 +137,7 @@ class Gaiburaihousha extends FormTemplate
         }
     }
 
-    protected function applyForm(): void
+    protected function submitForm(): void
     {
         $answers = $this->supporter->storage['unsavedAnswers'];
         unset($answers['外部来訪者数']);
@@ -147,7 +147,7 @@ class Gaiburaihousha extends FormTemplate
         $answersForSheets[2] = deleteParentheses($answersForSheets[2]);
 
         // 申請
-        $this->supporter->applyForm($answers, $answersForSheets);
+        $this->supporter->submitForm($answers, $answersForSheets);
 
         // 次回のための回答の記録
         $this->supporter->pushPreviousAnswer('外部来訪者名', $answers['外部来訪者名']);

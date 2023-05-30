@@ -6,7 +6,7 @@ use KishukushaReportSupporter\Forms;
 
 class KishukushaReportSupporter
 {
-    public const VERSION = '9.1.0';
+    public const VERSION = '9.2.0';
 
     /* 届出を追加する際はここの編集とsrc/Formsフォルダへのファイルの追加が必要 */
     public const FORMS = [
@@ -25,11 +25,10 @@ class KishukushaReportSupporter
     public const MAX_PREVIOUS_ANSWERS = 5;
 
     public string $userId;
-    public array $config;
     public JsonDatabase $database;
-    public self $admin;
-
+    public array $config;
     public array $storage;
+    public self $admin;
 
     private string $replyToken;
     private string $pushUserId;
@@ -48,17 +47,17 @@ class KishukushaReportSupporter
     private static string $lastPushUserId;
     private static array $lastPushMessages;
 
-    public function __construct(string $userId, JsonDatabase $database, ?self $admin = null)
+    public function __construct(string $userId, JsonDatabase $database, ?array $config = null, ?self $admin = null)
     {
         $this->userId = $userId;
         $this->database = $database;
-        $this->restoreConfig();
+        $this->restoreConfig($config);
         $this->restoreStorage();
 
         $this->admin = match (true) {
             $userId === $this->config['adminId'] => $this,
             isset($admin) => $admin,
-            default => new self($this->config['adminId'], $this->database)
+            default => new self($this->config['adminId'], $this->database, $this->config)
         };
 
         // storageの方が書き換わっても、setLastQuestions()したときは必ず前回の質問になる
@@ -405,7 +404,7 @@ VERSION\n", true);
         return true;
     }
 
-    public function applyForm(array $answers, array $answersForSheets, bool $needCheckbox = false, string $message = ''): void
+    public function submitForm(array $answers, array $answersForSheets, bool $needCheckbox = false, string $message = ''): void
     {
         // 承認が必要な届出だが、管理者の存在が確認できない場合
         if ($needCheckbox && !$this->isThisAdmin() && !$this->admin->doesThisExist()) {
@@ -488,7 +487,7 @@ VERSION\n", true);
         // 自分が管理者でない、かつ、承認が必要なら、管理者に通知
         if (!$this->isThisAdmin() && $needCheckbox) {
             try {
-                $receiptNo = $this->admin->notifyAppliedForm($this, $answers, $timeStamp, $checkboxRange ?? '');
+                $receiptNo = $this->admin->notifySubmittedForm($this, $answers, $timeStamp, $checkboxRange ?? '');
             } catch (\Throwable $e) {
                 throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書き込みは成功しましたが、風紀への通知中にエラーが発生しました。");
             }
@@ -607,7 +606,7 @@ VERSION\n", true);
         return null;
     }
 
-    private function notifyAppliedForm(self $supporter, array $answers, string $timeStamp, string $checkboxRange): string
+    private function notifySubmittedForm(self $supporter, array $answers, string $timeStamp, string $checkboxRange): string
     {
         $timeStamp = date('Y/m/d H:i', strtotime($timeStamp));
         $profile = $supporter->fetchProfile();
@@ -1390,9 +1389,9 @@ VERSION\n", true);
         return 'storage' . $this->userId;
     }
 
-    public function restoreConfig(): void
+    public function restoreConfig(?array $config = null): void
     {
-        $config = $this->database->restore('config');
+        $config = $config ?? $this->database->restore('config');
         if (isset($config)) {
             $this->config = $config;
             return;

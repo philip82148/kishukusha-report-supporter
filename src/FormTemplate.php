@@ -6,7 +6,7 @@ abstract class FormTemplate extends FormTemplateBasic
 {
     public const HEADER = [];
 
-    abstract protected function applyForm(): void;
+    abstract protected function submitForm(): void;
     abstract public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool;
 
     protected function confirm(array $types = []): void
@@ -51,7 +51,7 @@ abstract class FormTemplate extends FormTemplateBasic
     {
         switch ($message) {
             case 'はい':
-                $this->applyForm();
+                $this->submitForm();
                 if ($reset) $this->supporter->resetForm();
                 return true;
             default:
