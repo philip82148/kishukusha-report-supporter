@@ -10,7 +10,6 @@ class KishukushaReportSupporter
 
     /* 届出を追加する際はここの編集とsrc/Formsフォルダへのファイルの追加が必要 */
     public const FORMS = [
-        '多目的室使用届' => Forms\Tamokuteki::class,
         '外部来訪者届' => Forms\Gaiburaihousha::class,
         '長期外泊届' => Forms\Chokigaihaku::class,
         '舎生大会・諸行事届' => Forms\Shogyoji::class,
