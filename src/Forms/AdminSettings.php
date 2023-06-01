@@ -25,10 +25,10 @@ class AdminSettings extends FormTemplateBasic
                 '最大外部来訪者数変更',
                 '任期終了日変更',
                 '管理者変更',
-                '行事スプレッドシートID変更',
-                '出力先スプレッドシートID変更',
-                '舎生大会・諸行事届用画像フォルダID変更',
-                'その他届出用画像フォルダID変更',
+                '行事スプレッドシート変更',
+                '出力先スプレッドシート変更',
+                '舎生大会・諸行事届用画像フォルダ変更',
+                'その他届出用画像フォルダ変更',
             ], true);
             $this->supporter->pushOptions(['キャンセル']);
 
@@ -105,23 +105,23 @@ https://docs.google.com/spreadsheets/d/{$this->supporter->config['eventSheetId']
                     return;
             }
 
-            // ID変更類
+            // Google変更類
             // 質問
             switch ($this->supporter->storage['unsavedAnswers']['設定項目']) {
-                case '行事スプレッドシートID変更':
-                    $this->supporter->pushText("行事の読み込み先のスプレッドシートのURLまたはIDを入力してください。
+                case '行事スプレッドシート変更':
+                    $this->supporter->pushText("行事の読み込み先のスプレッドシートのURLを入力してください。
 現在の行事スプレッドシート:
 https://docs.google.com/spreadsheets/d/{$this->supporter->config['eventSheetId']}", true);
                     break;
 
-                case '出力先スプレッドシートID変更':
-                    $this->supporter->pushText("提出された届出の内容を記録するスプレッドシートのURLまたはIDを入力してください。
+                case '出力先スプレッドシート変更':
+                    $this->supporter->pushText("提出された届出の内容を記録するスプレッドシートのURLを入力してください。
 現在の出力先スプレッドシート:
 https://docs.google.com/spreadsheets/d/{$this->supporter->config['outputSheetId']}", true);
                     break;
 
-                case '舎生大会・諸行事届用画像フォルダID変更':
-                    $this->supporter->pushText("舎生大会・諸行事届の証拠画像を保存するための、五役とボットのみに共有した共有Google Drive内のフォルダのURLまたはIDを入力してください。
+                case '舎生大会・諸行事届用画像フォルダ変更':
+                    $this->supporter->pushText("舎生大会・諸行事届の証拠画像を保存するための、五役とボットのみに共有した共有Google Drive内のフォルダのURLを入力してください。
 
 ※プライバシーに関わる画像がアップロードされる可能性があるため、五役とボットのみに共有したフォルダにしてください。
 また、ボットに画像の完全な削除権限を与えるために、ボットにコンテンツ管理者ではなく管理者の権限を与えてください。
@@ -131,8 +131,8 @@ https://docs.google.com/spreadsheets/d/{$this->supporter->config['outputSheetId'
 https://drive.google.com/drive/u/0/folders/{$this->supporter->config['shogyojiImageFolderId']}", true);
                     break;
 
-                case 'その他届出用画像フォルダID変更':
-                    $this->supporter->pushText("舎生大会・諸行事届以外の届出の画像を保存するためのGoogle DriveのフォルダのURLまたはIDを入力してください。
+                case 'その他届出用画像フォルダ変更':
+                    $this->supporter->pushText("舎生大会・諸行事届以外の届出の画像を保存するためのGoogle DriveのフォルダのURLを入力してください。
 ※このフォルダ内に各届出ごとにフォルダが作成され、それぞれに各届出の画像が保存されます。
 
 現在のその他届出用画像フォルダ:
@@ -143,7 +143,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
             // 選択肢
             $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingID';
+            $this->supporter->storage['phases'][] = 'askingGoogleUrl';
         } else if ($lastPhase === 'confirmingReloadEvents') {
             switch ($message) {
                 case 'はい':
@@ -184,7 +184,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
             $this->supporter->pushText("合言葉を設定しました。\n新たな管理者は合言葉をメッセージしてください。");
             $this->supporter->resetForm();
         } else {
-            if ($this->storeOrAskAgain('Google ID', $message))
+            if ($this->storeOrAskAgain('Google URL', $message))
                 return;
 
             $this->supporter->resetForm();
@@ -201,10 +201,10 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
                     case '最大外部来訪者数変更':
                     case '任期終了日変更':
                     case '管理者変更':
-                    case '行事スプレッドシートID変更':
-                    case '出力先スプレッドシートID変更':
-                    case '舎生大会・諸行事届用画像フォルダID変更':
-                    case 'その他届出用画像フォルダID変更':
+                    case '行事スプレッドシート変更':
+                    case '出力先スプレッドシート変更':
+                    case '舎生大会・諸行事届用画像フォルダ変更':
+                    case 'その他届出用画像フォルダ変更':
                         $this->supporter->storage['unsavedAnswers']['設定項目'] = $message;
                         return '';
                 }
@@ -252,10 +252,10 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
                 $this->supporter->config['password'] = $message;
                 $this->supporter->storeConfig();
                 return '';
-            case 'Google ID':
+            case 'Google URL':
                 $id = $this->extractId($message);
                 switch ($this->supporter->storage['unsavedAnswers']['設定項目']) {
-                    case '行事スプレッドシートID変更':
+                    case '行事スプレッドシート変更':
                         if ($this->supporter->checkValidGoogleItem('eventSheetId', $id)) {
                             $this->supporter->config['eventSheetId'] = $id;
                             $this->supporter->storeConfig();
@@ -268,11 +268,11 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
 " . $this->getEventListString());
                             return '';
                         }
-                        $this->supporter->askAgainBecauseWrongReply("入力されたIDのスプレッドシートにアクセスできませんでした。
+                        $this->supporter->askAgainBecauseWrongReply("入力されたURLのスプレッドシートにアクセスできませんでした。
 ボットにスプレッドシートが共有されていないか、「行事」シートがない可能性があります。
 もう一度入力してください。");
                         return 'wrong-reply';
-                    case '出力先スプレッドシートID変更':
+                    case '出力先スプレッドシート変更':
                         if ($this->supporter->checkValidGoogleItem('outputSheetId', $id)) {
                             $this->supporter->config['outputSheetId'] = $id;
                             $this->supporter->storeConfig();
@@ -281,11 +281,11 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
                             $this->supporter->pushText('書き込み可能なスプレッドシートであることを確認、設定を保存しました。');
                             return '';
                         }
-                        $this->supporter->askAgainBecauseWrongReply("入力されたIDのスプレッドシートへの書き込みに失敗しました。
+                        $this->supporter->askAgainBecauseWrongReply("入力されたURLのスプレッドシートへの書き込みに失敗しました。
 ボットにスプレッドシートが共有されていないか、編集権限が与えられていない可能性があります。
 もう一度入力してください。");
                         return 'wrong-reply';
-                    case '舎生大会・諸行事届用画像フォルダID変更':
+                    case '舎生大会・諸行事届用画像フォルダ変更':
                         if ($this->supporter->checkValidGoogleItem('shogyojiImageFolderId', $id)) {
                             $this->supporter->config['shogyojiImageFolderId'] = $id;
                             $this->supporter->storeConfig();
@@ -294,12 +294,12 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
                             $this->supporter->pushText('テストファイルのアップロード後削除に成功、設定を保存しました。');
                             return '';
                         }
-                        $this->supporter->askAgainBecauseWrongReply("入力されたIDのフォルダへのテストファイルのアップロード、またはその削除に失敗しました。
+                        $this->supporter->askAgainBecauseWrongReply("入力されたURLのフォルダへのテストファイルのアップロード、またはその削除に失敗しました。
 ボットにフォルダが共有されていないか、管理者権限が与えられていない可能性があります。
 ボットとの間に作成した共有ドライブ内のフォルダを使用し、ボットにコンテンツ管理者ではなく、管理者の権限を与えてください。
 もう一度入力してください。");
                         return 'wrong-reply';
-                    case 'その他届出用画像フォルダID変更':
+                    case 'その他届出用画像フォルダ変更':
                         if ($this->supporter->checkValidGoogleItem('generalImageFolderId', $id)) {
                             $this->supporter->config['generalImageFolderId'] = $id;
                             $this->supporter->storeConfig();
@@ -308,7 +308,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
                             $this->supporter->pushText('テストファイルのアップロードに成功、設定を保存しました。');
                             return '';
                         }
-                        $this->supporter->askAgainBecauseWrongReply("入力されたIDのフォルダへのテストファイルのアップロードに失敗しました。
+                        $this->supporter->askAgainBecauseWrongReply("入力されたURLのフォルダへのテストファイルのアップロードに失敗しました。
 ボットにフォルダが共有されていないか、権限が与えられていない可能性があります。
 もう一度入力してください。");
                         return 'wrong-reply';
