@@ -1,10 +1,10 @@
 <?php
 
 // ↓サーバー移動の際はこの項目の変更が必要
-// webhook.phpが配置されている親フォルダのURL(https://...で始まること)
+// webhook.phpが配置されている親フォルダのURL(https://...で始まり、最後は/をつけない)
 // (WEBHOOK_PARENT_URL/webhook.phpとしてブラウザでアクセスすると「ここが webhook.php です」と表示されるURL。
 // ただし、このファイルがアップロードされていないと表示されない)
-define('WEBHOOK_PARENT_URL', 'https://.../kishukusha-report-supporter/');
+define('WEBHOOK_PARENT_URL', 'https://.../kishukusha-report-supporter');
 // MySQLデータベースの設定
 define('DB_HOST', '...');
 define('DB_NAME', '...');
@@ -46,7 +46,7 @@ define('CREDENTIALS_PATH', __DIR__ . '/credentials.json');
 
 // 画像用フォルダ
 define('IMAGE_FOLDER_PATH', __DIR__ . '/image/');
-define('IMAGE_FOLDER_URL', WEBHOOK_PARENT_URL . 'image/');
+define('IMAGE_FOLDER_URL', WEBHOOK_PARENT_URL . '/image/');
 
 // Googleドライブへアップロードできるかを試すテスト画像
 define('TEST_IMAGE_FILENAME', 'user-manual.jpg');
