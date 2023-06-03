@@ -63,7 +63,7 @@ FTP で kishukusha-report-supporter/フォルダを元サーバーからダウ�
 
 kishukusha-report-supporter/フォルダの中に config.php があるので、それを FTP でダウンロードし、
 
-- WEBHOOK_PARENT_URL(webhook.php が配置されている親フォルダの URL)
+- WEBHOOK_PARENT_URL(kishukusha-report-supporter/フォルダの URL(webhook.php が配置されている親フォルダの URL))
 - DB\_...(**MySQL データベース**の認証情報)
 - CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET(**LINE BOT アカウント**から取得したチャネルアクセストークンとチャネルシークレット)
 - BOT_EMAIL(**Google サービスアカウント**のメールアドレス)

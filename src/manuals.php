@@ -43,7 +43,7 @@ define(
 https://github.com/philip82148/kishukusha-report-supporter
 
 ここで、分かりやすいように具体例を上げると、次のようになっています。
-現在のwebhook.phpのURL: " . WEBHOOK_PARENT_URL . "webhook.php
+現在のwebhook.phpのURL: " . WEBHOOK_PARENT_URL . "/webhook.php
 現在のkishukusha-report-supporter/のサーバー内のファイルパス: " . __DIR__ . "/
 現在のwebhook.phpのサーバー内のファイルパス: " . __DIR__ . "/webhook.php
 
