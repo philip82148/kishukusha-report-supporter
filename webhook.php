@@ -68,7 +68,7 @@ foreach ($events as $event) {
 
 <Processing Time>
 {$processingTimeMs}ms";
-        $headers = 'From: supporter@kishukusha-report-supporter.iam.gserviceaccount.com';
+        $headers = 'From: ' . BOT_EMAIL;
         if (!mb_send_mail($to, $subject, $message, $headers)) {
             $logDatabase->log("Failed in sending an error mail.");
         };
