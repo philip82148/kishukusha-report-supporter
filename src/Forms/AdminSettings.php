@@ -110,22 +110,33 @@ https://docs.google.com/spreadsheets/d/{$this->supporter->config['eventSheetId']
             switch ($this->supporter->storage['unsavedAnswers']['設定項目']) {
                 case '行事スプレッドシート変更':
                     $this->supporter->pushText("行事の読み込み先のスプレッドシートのURLを入力してください。
+
+共有するボットのGoogleアカウント:
+" . BOT_EMAIL . "
+
 現在の行事スプレッドシート:
 https://docs.google.com/spreadsheets/d/{$this->supporter->config['eventSheetId']}", true);
                     break;
 
                 case '出力先スプレッドシート変更':
                     $this->supporter->pushText("提出された届出の内容を記録するスプレッドシートのURLを入力してください。
+
+共有するボットのGoogleアカウント:
+" . BOT_EMAIL . "
+
 現在の出力先スプレッドシート:
 https://docs.google.com/spreadsheets/d/{$this->supporter->config['outputSheetId']}", true);
                     break;
 
                 case '舎生大会・諸行事届用画像フォルダ変更':
-                    $this->supporter->pushText("舎生大会・諸行事届の証拠画像を保存するための、五役とボットのみに共有した共有Google Drive内のフォルダのURLを入力してください。
+                    $this->supporter->pushText("舎生大会・諸行事届の証拠画像を保存するための、五役とボットのGoogleアカウントのみに共有した共有Google Drive内のフォルダのURLを入力してください。
 
 ※プライバシーに関わる画像がアップロードされる可能性があるため、五役とボットのみに共有したフォルダにしてください。
 また、ボットに画像の完全な削除権限を与えるために、ボットにコンテンツ管理者ではなく管理者の権限を与えてください。
 そのためには、個人所有のフォルダをボットに共有するのではなく、ボットとの間に作成した共有ドライブ内のフォルダを使用する必要があります。
+
+共有するボットのGoogleアカウント:
+" . BOT_EMAIL . "
 
 現在の舎生大会・諸行事届用画像フォルダ:
 https://drive.google.com/drive/u/0/folders/{$this->supporter->config['shogyojiImageFolderId']}", true);
@@ -134,6 +145,9 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['shogyojiIm
                 case 'その他届出用画像フォルダ変更':
                     $this->supporter->pushText("舎生大会・諸行事届以外の届出の画像を保存するためのGoogle DriveのフォルダのURLを入力してください。
 ※このフォルダ内に各届出ごとにフォルダが作成され、それぞれに各届出の画像が保存されます。
+
+共有するボットのGoogleアカウント:
+" . BOT_EMAIL . "
 
 現在のその他届出用画像フォルダ:
 https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalImageFolderId']}", true);
@@ -269,7 +283,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
                             return '';
                         }
                         $this->supporter->askAgainBecauseWrongReply("入力されたURLのスプレッドシートにアクセスできませんでした。
-ボットにスプレッドシートが共有されていないか、「行事」シートがない可能性があります。
+ボットのGoogleアカウントにスプレッドシートが共有されていないか、「行事」シートがない可能性があります。
 もう一度入力してください。");
                         return 'wrong-reply';
                     case '出力先スプレッドシート変更':
@@ -282,7 +296,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
                             return '';
                         }
                         $this->supporter->askAgainBecauseWrongReply("入力されたURLのスプレッドシートへの書き込みに失敗しました。
-ボットにスプレッドシートが共有されていないか、編集権限が与えられていない可能性があります。
+ボットのGoogleアカウントにスプレッドシートが共有されていないか、編集権限が与えられていない可能性があります。
 もう一度入力してください。");
                         return 'wrong-reply';
                     case '舎生大会・諸行事届用画像フォルダ変更':
@@ -295,7 +309,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
                             return '';
                         }
                         $this->supporter->askAgainBecauseWrongReply("入力されたURLのフォルダへのテストファイルのアップロード、またはその削除に失敗しました。
-ボットにフォルダが共有されていないか、管理者権限が与えられていない可能性があります。
+ボットのGoogleアカウントにフォルダが共有されていないか、管理者権限が与えられていない可能性があります。
 ボットとの間に作成した共有ドライブ内のフォルダを使用し、ボットにコンテンツ管理者ではなく、管理者の権限を与えてください。
 もう一度入力してください。");
                         return 'wrong-reply';
@@ -309,7 +323,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
                             return '';
                         }
                         $this->supporter->askAgainBecauseWrongReply("入力されたURLのフォルダへのテストファイルのアップロードに失敗しました。
-ボットにフォルダが共有されていないか、権限が与えられていない可能性があります。
+ボットのGoogleアカウントにフォルダが共有されていないか、ファイルの作成権限が与えられていない可能性があります。
 もう一度入力してください。");
                         return 'wrong-reply';
                 }

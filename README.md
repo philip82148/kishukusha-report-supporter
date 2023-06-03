@@ -59,10 +59,16 @@ WordPress が載った **サーバー**なら**MySQL データベース**も付�
 FTP で kishukusha-report-supporter/フォルダを元サーバーからダウンロードし、新サーバーの public_html/配下のどこかにアップロードする。  
 ※アップロードに数時間ほどかかるが、コマンドラインを使う場合(このページ最下部参照)は数分で終わらせることができる。
 
-### 2.**Google サービスアカウント**を**PHP プログラム**が使えるようにする
+### 2.**PHP プログラム**が他の登場人物を操作できるようにする
 
-※前のものを流用する場合はこのステップは飛ばしてよい。ただし、前のステップでコマンドラインを使用した場合は前のサーバーの credentials.json を手動でアップロードする必要がある。  
-認証情報を含んだ json ファイルを credentials.json という名前にして kishukusha-report-supporter/配下に FTP でアップロードする(して、前のものがある場合は上書きする)。
+kishukusha-report-supporter/フォルダの中に config.php があるので、それを FTP でダウンロードし、
+
+- WEBHOOK_PARENT_URL(webhook.php が配置されている親フォルダの URL)
+- DB\_...(**MySQL データベース**の認証情報)
+- CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET(**LINE BOT アカウント**から取得したチャネルアクセストークンとチャネルシークレット)
+- BOT_EMAIL(**Google サービスアカウント**のメールアドレス)
+
+を書き換えて、FTP で同じ場所にアップロードして上書きする。
 
 ### 3.**LINE BOT アカウント**に**PHP プログラム**と**サーバー**の場所を教える
 
@@ -70,15 +76,10 @@ FTP で kishukusha-report-supporter/フォルダを元サーバーからダウ�
 ※ブラウザでアクセスすると「ここが webhook.php です」と表示される URL。  
 設定する際は「https://...」で始まるようにする(して、**サーバー**も SSL の設定が必要)。
 
-### 4.**MySQL データベース**と**LINE BOT アカウント**を**PHP プログラム**が使えるようにする
+### 4.**PHP プログラム**が**Google サービスアカウント**を使えるようにする
 
-kishukusha-report-supporter/フォルダの中に config.php があるので、それを FTP でダウンロードし、
-
-- WEBHOOK_PARENT_URL(webhook.php が配置されている親フォルダの URL)
-- DB\_...(**MySQL データベース**の認証情報)
-- CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET(**LINE BOT アカウント**から取得したチャネルアクセストークンとチャネルシークレット)
-
-を書き換えて、FTP で同じ場所にアップロードして上書きする。
+※前のものを流用する場合はこのステップは飛ばしてよい。ただし、ステップ 1.でコマンドラインを使用した場合は前のサーバーの credentials.json を手動でアップロードする必要がある。  
+認証情報を含んだ json ファイルを credentials.json という名前にして kishukusha-report-supporter/配下に FTP でアップロードする(して、前のものがある場合は上書きする)。
 
 ### 5.諸行事届の画像の削除を一日 1 回行う設定
 
