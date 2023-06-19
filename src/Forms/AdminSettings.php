@@ -332,8 +332,11 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
 
     private function extractId(string $url): string
     {
+        // ?,#以降を取り去る
+        $pureUrl = preg_split('/[\?#]/', $url, 2)[0];
+
         // '/'で分割して最も長い部分をidとする
-        $splits = explode('/', $url);
+        $splits = explode('/', $pureUrl);
 
         $longestSplit = '';
         $longestLength = 0;
