@@ -50,11 +50,13 @@ foreach ($events as $event) {
     $end = hrtime(true);
 
     // ログの記録
-    $processingTimeMs = (($end - $start) / 1000000);
-    $eventInfo = $supporter->getEventInfo();
-    $logDatabase = new LogDatabase(LOG_TABLE_NAME);
-    if ($errorMessage) $logDatabase->log("An error occurred:\n" . $errorMessage);
-    $logDatabase->log("Handled the event in {$processingTimeMs} ms. {$eventInfo}");
+    if (ENABLE_LOGGING) {
+        $processingTimeMs = (($end - $start) / 1000000);
+        $eventInfo = $supporter->getEventInfo();
+        $logDatabase = new LogDatabase(LOG_TABLE_NAME);
+        if ($errorMessage) $logDatabase->log("An error occurred:\n" . $errorMessage);
+        $logDatabase->log("Handled the event in {$processingTimeMs} ms. {$eventInfo}");
+    }
 
     // エラーメールの送信
     if ($errorMessage) {
@@ -70,7 +72,8 @@ foreach ($events as $event) {
 {$processingTimeMs}ms";
         $headers = 'From: ' . BOT_EMAIL;
         if (!mb_send_mail($to, $subject, $message, $headers)) {
-            $logDatabase->log("Failed in sending an error mail.");
+            if (ENABLE_LOGGING)
+                $logDatabase->log("Failed in sending an error mail.");
         };
     }
 }

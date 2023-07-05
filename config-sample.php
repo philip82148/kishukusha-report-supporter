@@ -56,3 +56,4 @@ define('SSK_EMAIL', '...');
 
 // デバッグ時はtrue
 define('DEBUGGING', false);
+define('ENABLE_LOGGING', false);
