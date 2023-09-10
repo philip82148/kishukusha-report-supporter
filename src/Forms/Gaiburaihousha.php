@@ -254,7 +254,7 @@ class Gaiburaihousha extends FormTemplate
                 $this->supporter->pushText("{$type}:" . $stayTimeString);
 
                 if (!$this->checkIfGaiburaihouAllowed($stayTimeString)) {
-                    $this->supporter->askAgainBecauseWrongReply("外部来訪者が認められない時刻です。\nもう一度入力してください。");
+                    $this->supporter->askAgainBecauseWrongReply("外部来訪者が認められているのは8:00~22:30です。\nもう一度入力してください。");
                     return 'wrong-reply';
                 }
 
