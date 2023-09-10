@@ -5,6 +5,7 @@
   "autoload": {
     "files": [
       "src/config-selector.php",
+      "src/const.php",
       "src/manuals.php",
       "src/functions.php"
     ],
