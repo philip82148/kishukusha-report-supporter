@@ -99,7 +99,7 @@ class KishukushaReportSupporter
     private function _handleEvent(array $event): void
     {
         if ($event['type'] === 'follow') {
-            (new Forms\AskName($this))->form([]);
+            Forms\AskName::form($this, []);
             return;
         } else if ($event['type'] === 'unfollow') {
             $this->deleteStorage();
@@ -166,13 +166,13 @@ class KishukushaReportSupporter
                 break;
             case '管理者設定':
                 if ($this->isThisAdmin()) {
-                    (new Forms\AdminSettings($this))->form($message);
+                    Forms\AdminSettings::form($this, $message);
                     break;
                 }
             default:
                 $formClass = self::FORMS[$this->storage['formType']] ?? '';
                 if ($formClass !== '') {
-                    (new $formClass($this))->form($message);
+                    $formClass::form($this, $message);
                     break;
                 }
                 $this->askAgainBecauseWrongReply();
@@ -620,7 +620,7 @@ VERSION\n", true);
         $receiptNo = sprintf('#%d%02d', $unapprovedFormCount, $pushMessageCount);
 
         $formClass = self::FORMS[$supporter->storage['formType']];
-        $needApproval = (new $formClass($this))->pushAdminMessages($profile, $answers, $timeStamp, $receiptNo);
+        $needApproval = $formClass::pushAdminMessages($this, $profile, $answers, $timeStamp, $receiptNo);
 
         // 通知
         if ($needApproval) {
@@ -780,7 +780,7 @@ VERSION\n", true);
                     } else {
                         // 何か一つ届出のシートを書き込む
                         foreach (self::FORMS as $formType => $formClass) {
-                            if (is_subclass_of($formClass, FormTemplate::class)) break;
+                            if (is_subclass_of($formClass, SubmittableForm::class)) break;
                         }
                         $this->appendToResultSheets($formType, [], $spreadsheetService, $id);
                     }

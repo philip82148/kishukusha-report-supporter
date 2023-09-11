@@ -6,10 +6,10 @@ define('MAIN_TABLE_NAME', 'bot_objects');
 define('LOG_TABLE_NAME', 'bot_logs');
 
 // Googleアカウントボットの設定
-define('CREDENTIALS_PATH', __DIR__ . '/credentials.json');
+define('CREDENTIALS_PATH', dirname(__DIR__) . '/credentials.json');
 
 // 画像用フォルダ
-define('IMAGE_FOLDER_PATH', __DIR__ . '/images/');
+define('IMAGE_FOLDER_PATH', dirname(__DIR__) . '/images/');
 define('IMAGE_FOLDER_URL', WEBHOOK_PARENT_URL . '/images/');
 
 // Googleドライブへアップロードできるかを試すテスト画像

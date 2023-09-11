@@ -2,123 +2,124 @@
 
 namespace KishukushaReportSupporter\Forms;
 
-use KishukushaReportSupporter\FormTemplate;
+use KishukushaReportSupporter\KishukushaReportSupporter;
+use KishukushaReportSupporter\SubmittableForm;
 
-class Bikes extends FormTemplate
+class Bikes extends SubmittableForm
 {
     public const HEADER = ['届出提出者名', '車体の種類', '防犯登録者名または名義人名', '防犯登録番号またはナンバーの画像', '車体の画像'];
 
-    public function form(array $message): void
+    public static function form(KishukushaReportSupporter $supporter, array $message): void
     {
         // 一番最初
-        if (count($this->supporter->storage['phases']) === 0) {
-            $this->supporter->storage['unsavedAnswers']['届出提出者名'] = $this->supporter->storage['userName'];
+        if (count($supporter->storage['phases']) === 0) {
+            $supporter->storage['unsavedAnswers']['届出提出者名'] = $supporter->storage['userName'];
 
             // 質問
-            $this->supporter->pushText('登録するものを選んでください。', true);
+            $supporter->pushText('登録するものを選んでください。', true);
 
             // 選択肢
-            $this->supporter->pushOptions(['自転車', 'バイク', '原付'], true);
-            $this->supporter->pushUnsavedAnswerOption('車体の種類');
-            $this->supporter->pushOptions(['キャンセル']);
+            $supporter->pushOptions(['自転車', 'バイク', '原付'], true);
+            $supporter->pushUnsavedAnswerOption('車体の種類');
+            $supporter->pushOptions(['キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingItem';
+            $supporter->storage['phases'][] = 'askingItem';
             return;
         }
 
-        $lastPhase = $this->supporter->storage['phases'][count($this->supporter->storage['phases']) - 1];
+        $lastPhase = $supporter->storage['phases'][count($supporter->storage['phases']) - 1];
         if ($lastPhase === 'askingItem') {
             if ($message['type'] !== 'text') {
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return;
             }
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する') {
-                if ($this->storeOrAskAgain('車体の種類', $message))
+                if (self::storeOrAskAgain($supporter, '車体の種類', $message))
                     return;
             }
 
             // 質問
-            switch ($this->supporter->storage['unsavedAnswers']['車体の種類']) {
+            switch ($supporter->storage['unsavedAnswers']['車体の種類']) {
                 case '自転車':
-                    $this->supporter->pushText('防犯登録者名を入力してください。', true);
+                    $supporter->pushText('防犯登録者名を入力してください。', true);
                     // 選択肢
-                    $this->supporter->pushUnsavedAnswerOption('防犯登録者名');
+                    $supporter->pushUnsavedAnswerOption('防犯登録者名');
                     break;
                 case 'バイク':
-                    $this->supporter->pushText('バイクの名義人の名前を入力してください。', true);
+                    $supporter->pushText('バイクの名義人の名前を入力してください。', true);
                     // 選択肢
-                    $this->supporter->pushUnsavedAnswerOption('名義人名');
+                    $supporter->pushUnsavedAnswerOption('名義人名');
                     break;
                 case '原付':
-                    $this->supporter->pushText('原付の名義人の名前を入力してください。', true);
+                    $supporter->pushText('原付の名義人の名前を入力してください。', true);
                     // 選択肢
-                    $this->supporter->pushUnsavedAnswerOption('名義人名');
+                    $supporter->pushUnsavedAnswerOption('名義人名');
                     break;
             }
 
             // 選択肢
-            $this->supporter->pushOptions([$this->supporter->storage['userName'], '前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([$supporter->storage['userName'], '前の項目を修正する', 'キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingRegistrantName';
+            $supporter->storage['phases'][] = 'askingRegistrantName';
         } else if ($lastPhase === 'askingRegistrantName') {
             if ($message['type'] !== 'text') {
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return;
             }
             $message = $message['text'];
 
             // 答えの格納・質問・選択肢
-            switch ($this->supporter->storage['unsavedAnswers']['車体の種類']) {
+            switch ($supporter->storage['unsavedAnswers']['車体の種類']) {
                 case '自転車':
                     if ($message !== '前の項目を修正する') {
-                        unset($this->supporter->storage['unsavedAnswers']['名義人名']);
-                        insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 2, ['防犯登録者名' => $message]);
+                        unset($supporter->storage['unsavedAnswers']['名義人名']);
+                        insertToAssociativeArray($supporter->storage['unsavedAnswers'], 2, ['防犯登録者名' => $message]);
                     }
-                    $this->supporter->pushText('防犯登録番号を入力してください。', true);
-                    $this->supporter->pushUnsavedAnswerOption('防犯登録番号');
+                    $supporter->pushText('防犯登録番号を入力してください。', true);
+                    $supporter->pushUnsavedAnswerOption('防犯登録番号');
                     break;
                 case 'バイク':
                 case '原付':
                     if ($message !== '前の項目を修正する') {
-                        unset($this->supporter->storage['unsavedAnswers']['防犯登録者名']);
-                        insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 2, ['名義人名' => $message]);
+                        unset($supporter->storage['unsavedAnswers']['防犯登録者名']);
+                        insertToAssociativeArray($supporter->storage['unsavedAnswers'], 2, ['名義人名' => $message]);
                     }
-                    $this->supporter->pushText('ナンバーの画像を送ってください。', true);
-                    $this->supporter->pushUnsavedAnswerOption('ナンバーの画像', 'image');
-                    $this->supporter->pushImageOption();
+                    $supporter->pushText('ナンバーの画像を送ってください。', true);
+                    $supporter->pushUnsavedAnswerOption('ナンバーの画像', 'image');
+                    $supporter->pushImageOption();
                     break;
             }
 
             // 選択肢(続き)
-            $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingNumber';
+            $supporter->storage['phases'][] = 'askingNumber';
         } else if ($lastPhase === 'askingNumber') {
             if ($message['type'] !== 'text' || $message['text'] !== '前の項目を修正する') {
-                switch ($this->supporter->storage['unsavedAnswers']['車体の種類']) {
+                switch ($supporter->storage['unsavedAnswers']['車体の種類']) {
                     case '自転車':
                         if ($message['type'] !== 'text') {
-                            $this->supporter->askAgainBecauseWrongReply();
+                            $supporter->askAgainBecauseWrongReply();
                             return;
                         }
                         $message = $message['text'];
 
-                        unset($this->supporter->storage['unsavedAnswers']['ナンバーの画像']);
-                        insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 3, ['防犯登録番号' => $message]);
+                        unset($supporter->storage['unsavedAnswers']['ナンバーの画像']);
+                        insertToAssociativeArray($supporter->storage['unsavedAnswers'], 3, ['防犯登録番号' => $message]);
                         break;
                     case 'バイク':
                     case '原付':
                         if ($message['type'] === 'image') {
-                            if ($this->storeOrAskAgain('ナンバーの画像', $message))
+                            if (self::storeOrAskAgain($supporter, 'ナンバーの画像', $message))
                                 return;
                         } else {
                             if ($message['type'] !== 'text' || $message['text'] !== '最後に送信した画像') {
-                                $this->supporter->askAgainBecauseWrongReply();
+                                $supporter->askAgainBecauseWrongReply();
                                 return;
-                            } else if (!isset($this->supporter->storage['unsavedAnswers']['ナンバーの画像'])) {
-                                $this->supporter->askAgainBecauseWrongReply();
+                            } else if (!isset($supporter->storage['unsavedAnswers']['ナンバーの画像'])) {
+                                $supporter->askAgainBecauseWrongReply();
                                 return;
                             }
                         }
@@ -127,50 +128,50 @@ class Bikes extends FormTemplate
             }
 
             // 質問
-            $this->supporter->pushText('車体全体の画像を送ってください。', true);
+            $supporter->pushText('車体全体の画像を送ってください。', true);
 
             // 選択肢
-            $this->supporter->pushUnsavedAnswerOption('車体の画像', 'image');
-            $this->supporter->pushImageOption();
-            $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushUnsavedAnswerOption('車体の画像', 'image');
+            $supporter->pushImageOption();
+            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingImage';
+            $supporter->storage['phases'][] = 'askingImage';
         } else if ($lastPhase === 'askingImage') {
             if ($message['type'] === 'image') {
-                if ($this->storeOrAskAgain('車体の画像', $message))
+                if (self::storeOrAskAgain($supporter, '車体の画像', $message))
                     return;
             } else {
                 if ($message['type'] !== 'text' || $message['text'] !== '最後に送信した画像') {
-                    $this->supporter->askAgainBecauseWrongReply();
+                    $supporter->askAgainBecauseWrongReply();
                     return;
-                } else if (!isset($this->supporter->storage['unsavedAnswers']['車体の画像'])) {
-                    $this->supporter->askAgainBecauseWrongReply();
+                } else if (!isset($supporter->storage['unsavedAnswers']['車体の画像'])) {
+                    $supporter->askAgainBecauseWrongReply();
                     return;
                 }
             }
 
             // 質問・選択肢
-            $this->confirm(['ナンバーの画像' => 'image', '車体の画像' => 'image']);
+            self::confirm($supporter, ['ナンバーの画像' => 'image', '車体の画像' => 'image']);
 
-            $this->supporter->storage['phases'][] = 'confirming';
+            $supporter->storage['phases'][] = 'confirming';
         } else {
             if ($message['type'] !== 'text') {
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return;
             }
             $message = $message['text'];
 
             // 質問・選択肢
-            $this->confirming($message);
+            self::confirming($supporter, $message);
         }
     }
 
-    protected function submitForm(): void
+    protected static function submitForm(KishukushaReportSupporter $supporter): void
     {
-        $answers = $this->supporter->storage['unsavedAnswers'];
+        $answers = $supporter->storage['unsavedAnswers'];
 
         // ドライブに保存
-        $bodyType = $this->supporter->storage['unsavedAnswers']['車体の種類'];
+        $bodyType = $supporter->storage['unsavedAnswers']['車体の種類'];
         switch ($bodyType) {
             case '自転車':
                 $answers['防犯登録番号またはナンバーの画像'] = $answers['防犯登録番号'];
@@ -179,28 +180,28 @@ class Bikes extends FormTemplate
             case 'バイク':
             case '原付':
                 $imageFileName = $answers['ナンバーの画像'];
-                $driveFileName = "{$bodyType}_{$this->supporter->storage['userName']}_ナンバー.jpg";
-                $answers['防犯登録番号またはナンバーの画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['generalImageFolderId'], '自転車・バイク配備届');
+                $driveFileName = "{$bodyType}_{$supporter->storage['userName']}_ナンバー.jpg";
+                $answers['防犯登録番号またはナンバーの画像'] = $supporter->saveToDrive($imageFileName, $driveFileName, $supporter->config['generalImageFolderId'], '自転車・バイク配備届');
                 unset($answers['ナンバーの画像']);
                 break;
         }
 
         $imageFileName = $answers['車体の画像'];
-        $driveFileName = "{$bodyType}_{$this->supporter->storage['userName']}_車体.jpg";
+        $driveFileName = "{$bodyType}_{$supporter->storage['userName']}_車体.jpg";
         unset($answers['車体の画像']); // 順番を最後にするため
-        $answers['車体の画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['generalImageFolderId'], '自転車・バイク配備届');
+        $answers['車体の画像'] = $supporter->saveToDrive($imageFileName, $driveFileName, $supporter->config['generalImageFolderId'], '自転車・バイク配備届');
 
         $answersForSheets = array_values($answers);
 
         // 申請
-        $this->supporter->submitForm($answers, $answersForSheets);
+        $supporter->submitForm($answers, $answersForSheets);
     }
 
-    public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
+    public static function pushAdminMessages(KishukushaReportSupporter $supporter, array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
         switch ($answers['車体の種類']) {
             case '自転車':
-                $this->supporter->pushText(
+                $supporter->pushText(
                     "{$answers['届出提出者名']}(`{$profile['displayName']}`)が自転車・バイク配備届を提出しました。
 (TS:{$timeStamp})
 
@@ -216,11 +217,11 @@ class Bikes extends FormTemplate
                     false,
                     ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
                 );
-                $this->supporter->pushImage($answers['車体の画像'], false,  ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
+                $supporter->pushImage($answers['車体の画像'], false,  ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
                 break;
             case 'バイク':
             case '原付':
-                $this->supporter->pushText(
+                $supporter->pushText(
                     "{$answers['届出提出者名']}(`{$profile['displayName']}`)が自転車・バイク配備届を提出しました。
 (TS:{$timeStamp})
 
@@ -238,15 +239,15 @@ class Bikes extends FormTemplate
                     false,
                     ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
                 );
-                $this->supporter->pushImage($answers['防犯登録番号またはナンバーの画像'], false, ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
-                $this->supporter->pushImage($answers['車体の画像'], false, ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
+                $supporter->pushImage($answers['防犯登録番号またはナンバーの画像'], false, ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
+                $supporter->pushImage($answers['車体の画像'], false, ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
                 break;
         }
-        $this->supporter->setLastQuestions();
+        $supporter->setLastQuestions();
         return false;
     }
 
-    protected function storeOrAskAgain(string $type, string|array $message): string
+    protected static function storeOrAskAgain(KishukushaReportSupporter $supporter, string $type, string|array $message): string
     {
         switch ($type) {
             case '車体の種類':
@@ -254,25 +255,25 @@ class Bikes extends FormTemplate
                     case '自転車':
                     case 'バイク':
                     case '原付':
-                        $this->supporter->storage['unsavedAnswers']['車体の種類'] = $message;
+                        $supporter->storage['unsavedAnswers']['車体の種類'] = $message;
                         return '';
                 }
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return 'wrong-reply';
             case 'ナンバーの画像':
             case '車体の画像':
-                $fileName = $this->supporter->downloadContent($message);
+                $fileName = $supporter->downloadContent($message);
                 if ($type === 'ナンバーの画像') {
-                    unset($this->supporter->storage['unsavedAnswers']['防犯登録番号']);
-                    insertToAssociativeArray($this->supporter->storage['unsavedAnswers'], 3, ['ナンバーの画像' => $fileName]);
+                    unset($supporter->storage['unsavedAnswers']['防犯登録番号']);
+                    insertToAssociativeArray($supporter->storage['unsavedAnswers'], 3, ['ナンバーの画像' => $fileName]);
                 } else {
-                    $this->supporter->storage['unsavedAnswers'][$type] = $fileName;
+                    $supporter->storage['unsavedAnswers'][$type] = $fileName;
                 }
 
                 // 将来的にゴミ箱へ移動するための予約
-                if (!isset($this->supporter->storage['cache']['一時ファイル']))
-                    $this->supporter->storage['cache']['一時ファイル'] = [];
-                $this->supporter->storage['cache']['一時ファイル'][] = $fileName;
+                if (!isset($supporter->storage['cache']['一時ファイル']))
+                    $supporter->storage['cache']['一時ファイル'] = [];
+                $supporter->storage['cache']['一時ファイル'][] = $fileName;
                 return '';
         }
     }

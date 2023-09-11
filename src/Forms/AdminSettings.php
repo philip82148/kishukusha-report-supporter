@@ -2,24 +2,25 @@
 
 namespace KishukushaReportSupporter\Forms;
 
-use KishukushaReportSupporter\FormTemplateBasic;
+use KishukushaReportSupporter\KishukushaReportSupporter;
+use KishukushaReportSupporter\UnsubmittableForm;
 
-class AdminSettings extends FormTemplateBasic
+class AdminSettings extends UnsubmittableForm
 {
-    public function form(array $message): void
+    public static function form(KishukushaReportSupporter $supporter, array $message): void
     {
         if ($message['type'] !== 'text') {
-            $this->supporter->askAgainBecauseWrongReply();
+            $supporter->askAgainBecauseWrongReply();
             return;
         }
         $message = $message['text'];
 
-        if (count($this->supporter->storage['phases']) === 0) {
+        if (count($supporter->storage['phases']) === 0) {
             // 質問
-            $this->supporter->pushText('項目を選んでください。', true);
+            $supporter->pushText('項目を選んでください。', true);
 
             // 選択肢
-            $this->supporter->pushOptions([
+            $supporter->pushOptions([
                 '管理者用マニュアル表示',
                 '行事データ再読み込み',
                 '最大外部来訪者数変更',
@@ -30,106 +31,106 @@ class AdminSettings extends FormTemplateBasic
                 '舎生大会・諸行事届用画像フォルダ変更',
                 'その他届出用画像フォルダ変更',
             ], true);
-            $this->supporter->pushOptions(['キャンセル']);
+            $supporter->pushOptions(['キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingSetting';
+            $supporter->storage['phases'][] = 'askingSetting';
             return;
         }
 
-        $lastPhase = $this->supporter->storage['phases'][count($this->supporter->storage['phases']) - 1];
+        $lastPhase = $supporter->storage['phases'][count($supporter->storage['phases']) - 1];
         if ($lastPhase === 'askingSetting') {
             if ($message !== '前の項目を修正する') {
-                if ($this->storeOrAskAgain('設定項目', $message))
+                if (self::storeOrAskAgain($supporter, '設定項目', $message))
                     return;
             }
 
-            switch ($this->supporter->storage['unsavedAnswers']['設定項目']) {
+            switch ($supporter->storage['unsavedAnswers']['設定項目']) {
                 case '管理者用マニュアル表示':
-                    $this->supporter->pushText(ADMIN_MANUAL);
-                    $this->supporter->pushText(SERVER_MANUAL);
-                    $this->supporter->resetForm();
+                    $supporter->pushText(ADMIN_MANUAL);
+                    $supporter->pushText(SERVER_MANUAL);
+                    $supporter->resetForm();
                     return;
                 case '行事データ再読み込み':
                     // 質問
-                    $this->supporter->pushText("行事データの再読み込みを行いますか？
+                    $supporter->pushText("行事データの再読み込みを行いますか？
 ※開始日(B列)が日付の形式でない行、終了日(C列)が設定されている行で、終了日が開始日より前の行はスキップされます。
 再読み込み後に全ての行事が読み込まれているか確認してください。
 
 読み込み先のスプレッドシート:
-https://docs.google.com/spreadsheets/d/{$this->supporter->config['eventSheetId']}
+https://docs.google.com/spreadsheets/d/{$supporter->config['eventSheetId']}
 
 現在読み込まれている行事(開始日順):
-" . $this->getEventListString(), true);
+" . self::getEventListString($supporter), true);
 
                     // 選択肢
-                    $this->supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);
 
-                    $this->supporter->storage['phases'][] = 'confirmingReloadEvents';
+                    $supporter->storage['phases'][] = 'confirmingReloadEvents';
                     return;
                 case '最大外部来訪者数変更':
                     // 質問
-                    $this->supporter->pushText("許容する外部来訪者の最大数を数値で入力してください。
+                    $supporter->pushText("許容する外部来訪者の最大数を数値で入力してください。
 0人にすると人数の制限がなくなります。
-現在の最大外部来訪者数:{$this->supporter->config['maxGaiburaihoushasuu']}人", true);
+現在の最大外部来訪者数:{$supporter->config['maxGaiburaihoushasuu']}人", true);
 
                     // 選択肢
-                    $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
-                    $this->supporter->storage['phases'][] = 'askingMaxGaiburaihoushasuu';
+                    $supporter->storage['phases'][] = 'askingMaxGaiburaihoushasuu';
                     return;
                 case '任期終了日変更':
                     // 質問
                     $year = date('Y');
-                    $this->supporter->pushText("任期終了日を4桁(年無し)または8桁(年有り)で入力してください。
+                    $supporter->pushText("任期終了日を4桁(年無し)または8桁(年有り)で入力してください。
 例:1130、{$year}1130
 ※任期終了日は任期が終了する度に次の5/31または11/30に自動で更新されます。
-現在の設定値:{$this->supporter->config['endOfTerm']}", true);
+現在の設定値:{$supporter->config['endOfTerm']}", true);
 
                     // 選択肢
-                    $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
-                    $this->supporter->storage['phases'][] = 'askingEndOfTerm';
+                    $supporter->storage['phases'][] = 'askingEndOfTerm';
                     return;
                 case '管理者変更':
                     // 質問
-                    $password = $this->supporter->config['password'] ?? 'なし';
-                    $this->supporter->pushText("新しい管理者が入力するための8文字以上の合言葉を入力してください。
+                    $password = $supporter->config['password'] ?? 'なし';
+                    $supporter->pushText("新しい管理者が入力するための8文字以上の合言葉を入力してください。
 ※前後の改行やスペースは無視されます。
 ※現在の設定値を削除するには、この画面をキャンセルして管理者自身が合言葉を入力してください。
 現在の設定値:{$password}", true);
 
                     // 選択肢
-                    $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
-                    $this->supporter->storage['phases'][] = 'askingPassword';
+                    $supporter->storage['phases'][] = 'askingPassword';
                     return;
             }
 
             // Google変更類
             // 質問
-            switch ($this->supporter->storage['unsavedAnswers']['設定項目']) {
+            switch ($supporter->storage['unsavedAnswers']['設定項目']) {
                 case '行事スプレッドシート変更':
-                    $this->supporter->pushText("行事の読み込み先のスプレッドシートのURLを入力してください。
+                    $supporter->pushText("行事の読み込み先のスプレッドシートのURLを入力してください。
 
 共有するボットのGoogleアカウント:
 " . BOT_EMAIL . "
 
 現在の行事スプレッドシート:
-https://docs.google.com/spreadsheets/d/{$this->supporter->config['eventSheetId']}", true);
+https://docs.google.com/spreadsheets/d/{$supporter->config['eventSheetId']}", true);
                     break;
 
                 case '出力先スプレッドシート変更':
-                    $this->supporter->pushText("提出された届出の内容を記録するスプレッドシートのURLを入力してください。
+                    $supporter->pushText("提出された届出の内容を記録するスプレッドシートのURLを入力してください。
 
 共有するボットのGoogleアカウント:
 " . BOT_EMAIL . "
 
 現在の出力先スプレッドシート:
-https://docs.google.com/spreadsheets/d/{$this->supporter->config['outputSheetId']}", true);
+https://docs.google.com/spreadsheets/d/{$supporter->config['outputSheetId']}", true);
                     break;
 
                 case '舎生大会・諸行事届用画像フォルダ変更':
-                    $this->supporter->pushText("舎生大会・諸行事届の証拠画像を保存するための、五役とボットのGoogleアカウントのみに共有した共有Google Drive内のフォルダのURLを入力してください。
+                    $supporter->pushText("舎生大会・諸行事届の証拠画像を保存するための、五役とボットのGoogleアカウントのみに共有した共有Google Drive内のフォルダのURLを入力してください。
 
 ※プライバシーに関わる画像がアップロードされる可能性があるため、五役とボットのみに共有したフォルダにしてください。
 また、ボットに画像の完全な削除権限を与えるために、ボットにコンテンツ管理者ではなく管理者の権限を与えてください。
@@ -139,73 +140,73 @@ https://docs.google.com/spreadsheets/d/{$this->supporter->config['outputSheetId'
 " . BOT_EMAIL . "
 
 現在の舎生大会・諸行事届用画像フォルダ:
-https://drive.google.com/drive/u/0/folders/{$this->supporter->config['shogyojiImageFolderId']}", true);
+https://drive.google.com/drive/u/0/folders/{$supporter->config['shogyojiImageFolderId']}", true);
                     break;
 
                 case 'その他届出用画像フォルダ変更':
-                    $this->supporter->pushText("舎生大会・諸行事届以外の届出の画像を保存するためのGoogle DriveのフォルダのURLを入力してください。
+                    $supporter->pushText("舎生大会・諸行事届以外の届出の画像を保存するためのGoogle DriveのフォルダのURLを入力してください。
 ※このフォルダ内に各届出ごとにフォルダが作成され、それぞれに各届出の画像が保存されます。
 
 共有するボットのGoogleアカウント:
 " . BOT_EMAIL . "
 
 現在のその他届出用画像フォルダ:
-https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalImageFolderId']}", true);
+https://drive.google.com/drive/u/0/folders/{$supporter->config['generalImageFolderId']}", true);
                     break;
             }
 
             // 選択肢
-            $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingGoogleUrl';
+            $supporter->storage['phases'][] = 'askingGoogleUrl';
         } else if ($lastPhase === 'confirmingReloadEvents') {
             switch ($message) {
                 case 'はい':
                     // 再読み込み
-                    $this->supporter->fetchEvents(true);
+                    $supporter->fetchEvents(true);
 
                     // 返信
-                    $this->supporter->pushText("行事データの再読み込みを行いました。
+                    $supporter->pushText("行事データの再読み込みを行いました。
 ※全ての行事が読み込まれているか、日付の年があっているか確認してください。
 
 読み込まれた行事(開始日順):
-" . $this->getEventListString());
-                    $this->supporter->resetForm();
+" . self::getEventListString($supporter));
+                    $supporter->resetForm();
                     return;
                 default:
-                    $this->supporter->askAgainBecauseWrongReply();
+                    $supporter->askAgainBecauseWrongReply();
                     return;
             }
         } else if ($lastPhase === 'askingMaxGaiburaihoushasuu') {
-            if ($this->storeOrAskAgain('最大外部来訪者数', $message))
+            if (self::storeOrAskAgain($supporter, '最大外部来訪者数', $message))
                 return;
 
             // 返信
-            $this->supporter->pushText("最大外部来訪者数を変更しました。");
-            $this->supporter->resetForm();
+            $supporter->pushText("最大外部来訪者数を変更しました。");
+            $supporter->resetForm();
         } else if ($lastPhase === 'askingEndOfTerm') {
-            if ($this->storeOrAskAgain('任期終了日', $message))
+            if (self::storeOrAskAgain($supporter, '任期終了日', $message))
                 return;
 
             // 返信
-            $this->supporter->pushText('任期終了日変更を変更しました。');
-            $this->supporter->resetForm();
+            $supporter->pushText('任期終了日変更を変更しました。');
+            $supporter->resetForm();
         } else if ($lastPhase === 'askingPassword') {
-            if ($this->storeOrAskAgain('合言葉', $message))
+            if (self::storeOrAskAgain($supporter, '合言葉', $message))
                 return;
 
             // 返信
-            $this->supporter->pushText("合言葉を設定しました。\n新たな管理者は合言葉をメッセージしてください。");
-            $this->supporter->resetForm();
+            $supporter->pushText("合言葉を設定しました。\n新たな管理者は合言葉をメッセージしてください。");
+            $supporter->resetForm();
         } else {
-            if ($this->storeOrAskAgain('Google URL', $message))
+            if (self::storeOrAskAgain($supporter, 'Google URL', $message))
                 return;
 
-            $this->supporter->resetForm();
+            $supporter->resetForm();
         }
     }
 
-    protected function storeOrAskAgain(string $type, string|array $message): string
+    protected static function storeOrAskAgain(KishukushaReportSupporter $supporter, string $type, string|array $message): string
     {
         switch ($type) {
             case '設定項目':
@@ -219,110 +220,110 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
                     case '出力先スプレッドシート変更':
                     case '舎生大会・諸行事届用画像フォルダ変更':
                     case 'その他届出用画像フォルダ変更':
-                        $this->supporter->storage['unsavedAnswers']['設定項目'] = $message;
+                        $supporter->storage['unsavedAnswers']['設定項目'] = $message;
                         return '';
                 }
                 // 有効でなかった、もう一度質問文送信
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return 'wrong-reply';
             case '最大外部来訪者数':
                 $message = toHalfWidth($message);
                 $count = preg_replace('/\D+/', '', $message);
                 if ($count === '') {
-                    $this->supporter->askAgainBecauseWrongReply("入力が不正です。\n数値で答えてください。");
+                    $supporter->askAgainBecauseWrongReply("入力が不正です。\n数値で答えてください。");
                     return 'wrong-reply';
                 }
 
                 $count = (int)$count;
-                $this->supporter->pushText("外部来訪者数:{$count}人");
-                $this->supporter->config['maxGaiburaihoushasuu'] = $count;
-                $this->supporter->storeConfig();
+                $supporter->pushText("外部来訪者数:{$count}人");
+                $supporter->config['maxGaiburaihoushasuu'] = $count;
+                $supporter->storeConfig();
                 return '';
             case '任期終了日':
                 $date = stringToDate($message);
                 if ($date === false) {
                     $year = date('Y');
-                    $this->supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な日付です。\n「1130」または「{$year}1130」のように4桁または8桁で入力してください。");
+                    $supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な日付です。\n「1130」または「{$year}1130」のように4桁または8桁で入力してください。");
                     return 'wrong-reply';
                 }
 
                 $dateString = dateToDateStringWithDay($date);
-                $this->supporter->pushText("任期終了日:{$dateString}");
+                $supporter->pushText("任期終了日:{$dateString}");
 
                 $today = getDateAt0AM();
                 if ($date < $today) {
-                    $this->supporter->askAgainBecauseWrongReply("その日付はすでに過ぎています。\nもう一度入力してください。");
+                    $supporter->askAgainBecauseWrongReply("その日付はすでに過ぎています。\nもう一度入力してください。");
                     return 'wrong-reply';
                 }
 
-                $this->supporter->config['endOfTerm'] = $dateString;
-                $this->supporter->storeConfig();
+                $supporter->config['endOfTerm'] = $dateString;
+                $supporter->storeConfig();
                 return '';
             case '合言葉':
                 if (mb_strlen($message) < 8) {
-                    $this->supporter->askAgainBecauseWrongReply('合言葉は8文字以上としてください。');
+                    $supporter->askAgainBecauseWrongReply('合言葉は8文字以上としてください。');
                     return 'wrong-reply';
                 }
-                $this->supporter->config['password'] = $message;
-                $this->supporter->storeConfig();
+                $supporter->config['password'] = $message;
+                $supporter->storeConfig();
                 return '';
             case 'Google URL':
-                $id = $this->extractId($message);
-                switch ($this->supporter->storage['unsavedAnswers']['設定項目']) {
+                $id = self::extractId($message);
+                switch ($supporter->storage['unsavedAnswers']['設定項目']) {
                     case '行事スプレッドシート変更':
-                        if ($this->supporter->checkValidGoogleItem('eventSheetId', $id)) {
-                            $this->supporter->config['eventSheetId'] = $id;
-                            $this->supporter->storeConfig();
-                            $this->supporter->fetchEvents(true);
+                        if ($supporter->checkValidGoogleItem('eventSheetId', $id)) {
+                            $supporter->config['eventSheetId'] = $id;
+                            $supporter->storeConfig();
+                            $supporter->fetchEvents(true);
 
                             // 返信
-                            $this->supporter->pushText("設定を保存、行事データを更新しました。
+                            $supporter->pushText("設定を保存、行事データを更新しました。
 
 読み込まれた行事(開始日順):
-" . $this->getEventListString());
+" . self::getEventListString($supporter,));
                             return '';
                         }
-                        $this->supporter->askAgainBecauseWrongReply("入力されたURLのスプレッドシートにアクセスできませんでした。
+                        $supporter->askAgainBecauseWrongReply("入力されたURLのスプレッドシートにアクセスできませんでした。
 ボットのGoogleアカウントにスプレッドシートが共有されていないか、「行事」シートがない可能性があります。
 もう一度入力してください。");
                         return 'wrong-reply';
                     case '出力先スプレッドシート変更':
-                        if ($this->supporter->checkValidGoogleItem('outputSheetId', $id)) {
-                            $this->supporter->config['outputSheetId'] = $id;
-                            $this->supporter->storeConfig();
+                        if ($supporter->checkValidGoogleItem('outputSheetId', $id)) {
+                            $supporter->config['outputSheetId'] = $id;
+                            $supporter->storeConfig();
 
                             // 返信
-                            $this->supporter->pushText('書き込み可能なスプレッドシートであることを確認、設定を保存しました。');
+                            $supporter->pushText('書き込み可能なスプレッドシートであることを確認、設定を保存しました。');
                             return '';
                         }
-                        $this->supporter->askAgainBecauseWrongReply("入力されたURLのスプレッドシートへの書き込みに失敗しました。
+                        $supporter->askAgainBecauseWrongReply("入力されたURLのスプレッドシートへの書き込みに失敗しました。
 ボットのGoogleアカウントにスプレッドシートが共有されていないか、編集権限が与えられていない可能性があります。
 もう一度入力してください。");
                         return 'wrong-reply';
                     case '舎生大会・諸行事届用画像フォルダ変更':
-                        if ($this->supporter->checkValidGoogleItem('shogyojiImageFolderId', $id)) {
-                            $this->supporter->config['shogyojiImageFolderId'] = $id;
-                            $this->supporter->storeConfig();
+                        if ($supporter->checkValidGoogleItem('shogyojiImageFolderId', $id)) {
+                            $supporter->config['shogyojiImageFolderId'] = $id;
+                            $supporter->storeConfig();
 
                             // 返信
-                            $this->supporter->pushText('テストファイルのアップロード後削除に成功、設定を保存しました。');
+                            $supporter->pushText('テストファイルのアップロード後削除に成功、設定を保存しました。');
                             return '';
                         }
-                        $this->supporter->askAgainBecauseWrongReply("入力されたURLのフォルダへのテストファイルのアップロード、またはその削除に失敗しました。
+                        $supporter->askAgainBecauseWrongReply("入力されたURLのフォルダへのテストファイルのアップロード、またはその削除に失敗しました。
 ボットのGoogleアカウントにフォルダが共有されていないか、管理者権限が与えられていない可能性があります。
 ボットとの間に作成した共有ドライブ内のフォルダを使用し、ボットにコンテンツ管理者ではなく、管理者の権限を与えてください。
 もう一度入力してください。");
                         return 'wrong-reply';
                     case 'その他届出用画像フォルダ変更':
-                        if ($this->supporter->checkValidGoogleItem('generalImageFolderId', $id)) {
-                            $this->supporter->config['generalImageFolderId'] = $id;
-                            $this->supporter->storeConfig();
+                        if ($supporter->checkValidGoogleItem('generalImageFolderId', $id)) {
+                            $supporter->config['generalImageFolderId'] = $id;
+                            $supporter->storeConfig();
 
                             // 返信
-                            $this->supporter->pushText('テストファイルのアップロードに成功、設定を保存しました。');
+                            $supporter->pushText('テストファイルのアップロードに成功、設定を保存しました。');
                             return '';
                         }
-                        $this->supporter->askAgainBecauseWrongReply("入力されたURLのフォルダへのテストファイルのアップロードに失敗しました。
+                        $supporter->askAgainBecauseWrongReply("入力されたURLのフォルダへのテストファイルのアップロードに失敗しました。
 ボットのGoogleアカウントにフォルダが共有されていないか、ファイルの作成権限が与えられていない可能性があります。
 もう一度入力してください。");
                         return 'wrong-reply';
@@ -330,7 +331,7 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
         }
     }
 
-    private function extractId(string $url): string
+    private static function extractId(string $url): string
     {
         // ?,#以降を取り去る
         $pureUrl = preg_split('/[\?#]/', $url, 2)[0];
@@ -351,9 +352,9 @@ https://drive.google.com/drive/u/0/folders/{$this->supporter->config['generalIma
         return $longestSplit;
     }
 
-    private function getEventListString(): string
+    private static function getEventListString(KishukushaReportSupporter $supporter): string
     {
-        $events = $this->supporter->fetchEvents();
+        $events = $supporter->fetchEvents();
         if (count($events) === 0) {
             return 'なし';
         }

@@ -2,14 +2,15 @@
 
 namespace KishukushaReportSupporter\Forms;
 
-use KishukushaReportSupporter\FormTemplateBasic;
+use KishukushaReportSupporter\KishukushaReportSupporter;
+use KishukushaReportSupporter\UnsubmittableForm;
 
-class UserManual extends FormTemplateBasic
+class UserManual extends UnsubmittableForm
 {
-    public function form(array $message): void
+    public static function form(KishukushaReportSupporter $supporter, array $message): void
     {
-        $this->supporter->pushText(USER_MANUAL);
-        $this->supporter->pushImage(USER_MANUAL_PHOTO_URL);
-        $this->supporter->resetForm();
+        $supporter->pushText(USER_MANUAL);
+        $supporter->pushImage(USER_MANUAL_PHOTO_URL);
+        $supporter->resetForm();
     }
 }

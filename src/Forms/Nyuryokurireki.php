@@ -2,39 +2,40 @@
 
 namespace KishukushaReportSupporter\Forms;
 
-use KishukushaReportSupporter\FormTemplateBasic;
+use KishukushaReportSupporter\KishukushaReportSupporter;
+use KishukushaReportSupporter\UnsubmittableForm;
 
-class Nyuryokurireki extends FormTemplateBasic
+class Nyuryokurireki extends UnsubmittableForm
 {
-    public function form(array $message): void
+    public static function form(KishukushaReportSupporter $supporter, array $message): void
     {
         if ($message['type'] !== 'text') {
-            $this->supporter->askAgainBecauseWrongReply();
+            $supporter->askAgainBecauseWrongReply();
             return;
         }
         $message = $message['text'];
 
         // 一番最初
-        if (count($this->supporter->storage['phases']) === 0) {
+        if (count($supporter->storage['phases']) === 0) {
             // 質問文送信
-            $this->supporter->pushText("ボットに保存された入力履歴を削除します。\nよろしいですか？", true);
+            $supporter->pushText("ボットに保存された入力履歴を削除します。\nよろしいですか？", true);
 
             // 選択肢表示
-            $this->supporter->pushOptions(['はい', 'キャンセル']);
+            $supporter->pushOptions(['はい', 'キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'confirming';
+            $supporter->storage['phases'][] = 'confirming';
             return;
         }
 
         // 確認
         switch ($message) {
             case 'はい':
-                $this->supporter->storage['previousAnswers'] = [];
-                $this->supporter->pushText("入力履歴を削除しました。");
-                $this->supporter->resetForm();
+                $supporter->storage['previousAnswers'] = [];
+                $supporter->pushText("入力履歴を削除しました。");
+                $supporter->resetForm();
                 break;
             default:
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 break;
         }
     }

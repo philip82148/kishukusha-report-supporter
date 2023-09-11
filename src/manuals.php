@@ -44,8 +44,8 @@ https://github.com/philip82148/kishukusha-report-supporter
 
 ここで、分かりやすいように具体例を上げると、次のようになっています。
 現在のwebhook.phpのURL: " . WEBHOOK_PARENT_URL . "/webhook.php
-現在のkishukusha-report-supporter/のサーバー内のファイルパス: " . __DIR__ . "/
-現在のwebhook.phpのサーバー内のファイルパス: " . __DIR__ . "/webhook.php
+現在のkishukusha-report-supporter/のサーバー内のフォルダパス: " . dirname(__DIR__) . "/
+現在のwebhook.phpのサーバー内のファイルパス: " . dirname(__DIR__) . "/webhook.php
 
 webhook.phpのURLのドメイン({$_SERVER['SERVER_NAME']})が寄宿舎のHPと違う場合は寄宿舎のHPのサーバーにはもう一つドメインがある可能性があります。
 サーバー管理画面を参照してください。

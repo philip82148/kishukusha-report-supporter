@@ -2,91 +2,92 @@
 
 namespace KishukushaReportSupporter\Forms;
 
-use KishukushaReportSupporter\FormTemplate;
+use KishukushaReportSupporter\KishukushaReportSupporter;
+use KishukushaReportSupporter\SubmittableForm;
 
-class Chokigaihaku extends FormTemplate
+class Chokigaihaku extends SubmittableForm
 {
     public const HEADER = ['氏名', '出舎日', '帰舎日', '外泊理由', '外泊理由の詳細', '滞在先住所', '連絡先電話番号', '風紀の承認'];
 
-    public function form(array $message): void
+    public static function form(KishukushaReportSupporter $supporter, array $message): void
     {
         // 一番最初
-        if (count($this->supporter->storage['phases']) === 0) {
-            $this->supporter->storage['unsavedAnswers']['氏名'] = $this->supporter->storage['userName'];
+        if (count($supporter->storage['phases']) === 0) {
+            $supporter->storage['unsavedAnswers']['氏名'] = $supporter->storage['userName'];
 
             // 質問
             $year = date('Y');
-            $this->supporter->pushText("出舎日を4桁(年無し)または8桁(年有り)で入力してください。\n例:0731、{$year}0731", true);
+            $supporter->pushText("出舎日を4桁(年無し)または8桁(年有り)で入力してください。\n例:0731、{$year}0731", true);
 
             // 選択肢
             $nextWeek = array_map(function ($i) {
                 return dateToDateStringWithDay(strtotime("+{$i} day"));
             }, range(0, 6));
-            $this->supporter->pushOptions($nextWeek);
-            $this->supporter->pushUnsavedAnswerOption('出舎日'); // ラベル変更
-            $this->supporter->pushOptions(['キャンセル']);
+            $supporter->pushOptions($nextWeek);
+            $supporter->pushUnsavedAnswerOption('出舎日'); // ラベル変更
+            $supporter->pushOptions(['キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingStart';
+            $supporter->storage['phases'][] = 'askingStart';
             return;
         }
 
-        $lastPhase = $this->supporter->storage['phases'][count($this->supporter->storage['phases']) - 1];
+        $lastPhase = $supporter->storage['phases'][count($supporter->storage['phases']) - 1];
         if ($lastPhase === 'askingStart') {
             if ($message['type'] !== 'text') {
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return;
             }
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する') {
-                if ($this->storeOrAskAgain('出舎日', $message))
+                if (self::storeOrAskAgain($supporter, '出舎日', $message))
                     return;
             }
 
             // 質問
             $year = date('Y');
-            $this->supporter->pushText("帰舎日を4桁(年無し)または8桁(年有り)で入力してください。\n例:0903、{$year}0903", true);
+            $supporter->pushText("帰舎日を4桁(年無し)または8桁(年有り)で入力してください。\n例:0903、{$year}0903", true);
 
             // 選択肢
-            $startDate = stringToDate($this->supporter->storage['unsavedAnswers']['出舎日']);
+            $startDate = stringToDate($supporter->storage['unsavedAnswers']['出舎日']);
             $nextWeek = array_map(function ($i) use ($startDate) {
                 return dateToDateStringWithDay(strtotime("+{$i} day", $startDate));
             }, range(1, 7));
-            $this->supporter->pushOptions($nextWeek);
-            $this->supporter->pushUnsavedAnswerOption('帰舎日'); // ラベル変更
-            $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions($nextWeek);
+            $supporter->pushUnsavedAnswerOption('帰舎日'); // ラベル変更
+            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingEnd';
+            $supporter->storage['phases'][] = 'askingEnd';
         } else if ($lastPhase === 'askingEnd') {
             if ($message['type'] !== 'text') {
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return;
             }
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する') {
-                switch ($this->storeOrAskAgain('帰舎日', $message)) {
+                switch (self::storeOrAskAgain($supporter, '帰舎日', $message)) {
                     case '':
                         break;
                     case 'booking':
-                        $this->supporter->storage['phases'][] = 'confirmingPeriod';
+                        $supporter->storage['phases'][] = 'confirmingPeriod';
                     default:
                         return;
                 }
             }
 
             // 質問
-            $this->supporter->pushText("外泊理由を選んでください。", true);
+            $supporter->pushText("外泊理由を選んでください。", true);
 
             // 選択肢
-            $this->supporter->pushOptions(['帰省', '合宿', '旅行', 'その他'], true);
-            $this->supporter->pushUnsavedAnswerOption('外泊理由');
-            $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions(['帰省', '合宿', '旅行', 'その他'], true);
+            $supporter->pushUnsavedAnswerOption('外泊理由');
+            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingReason';
+            $supporter->storage['phases'][] = 'askingReason';
         } else if ($lastPhase === 'confirmingPeriod') {
             if ($message['type'] !== 'text') {
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return;
             }
             $message = $message['text'];
@@ -95,109 +96,109 @@ class Chokigaihaku extends FormTemplate
                 case 'はい':
                     break;
                 default:
-                    $this->supporter->askAgainBecauseWrongReply();
+                    $supporter->askAgainBecauseWrongReply();
                     return;
             }
 
             // 質問
-            $this->supporter->pushText("外泊理由を選んでください。", true);
+            $supporter->pushText("外泊理由を選んでください。", true);
 
             // 選択肢
-            $this->supporter->pushOptions(['帰省', '合宿', '旅行', 'その他'], true);
-            $this->supporter->pushUnsavedAnswerOption('外泊理由');
-            $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions(['帰省', '合宿', '旅行', 'その他'], true);
+            $supporter->pushUnsavedAnswerOption('外泊理由');
+            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
             // askingEndの方で質問する
-            array_pop($this->supporter->storage['phases']);
-            $this->supporter->storage['phases'][] = 'askingReason';
+            array_pop($supporter->storage['phases']);
+            $supporter->storage['phases'][] = 'askingReason';
         } else if ($lastPhase === 'askingReason') {
             if ($message['type'] !== 'text') {
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return;
             }
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する') {
-                if ($this->storeOrAskAgain('外泊理由', $message))
+                if (self::storeOrAskAgain($supporter, '外泊理由', $message))
                     return;
             }
 
             // 質問
-            $this->supporter->pushText("外泊理由の詳細を入力してください。\n※延泊の場合は延泊である旨も記載してください。\n例:サークルの合宿で福島に行ってまいります。", true);
+            $supporter->pushText("外泊理由の詳細を入力してください。\n※延泊の場合は延泊である旨も記載してください。\n例:サークルの合宿で福島に行ってまいります。", true);
 
             // 選択肢
-            $this->supporter->pushUnsavedAnswerOption('外泊理由の詳細');
-            $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushUnsavedAnswerOption('外泊理由の詳細');
+            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingDetailedReason';
+            $supporter->storage['phases'][] = 'askingDetailedReason';
         } else if ($lastPhase === 'askingDetailedReason') {
             if ($message['type'] !== 'text') {
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return;
             }
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する')
-                $this->supporter->storage['unsavedAnswers']['外泊理由の詳細'] = $message;
+                $supporter->storage['unsavedAnswers']['外泊理由の詳細'] = $message;
 
             // 質問
-            $this->supporter->pushText("滞在先住所を入力してください。\n例:108-8345 東京都港区三田2-15-45", true);
+            $supporter->pushText("滞在先住所を入力してください。\n例:108-8345 東京都港区三田2-15-45", true);
 
             // 選択肢
-            $this->supporter->pushPreviousAnswerOptions('滞在先住所');
-            $this->supporter->pushUnsavedAnswerOption('滞在先住所');
-            $this->supporter->pushLocaleOptions();
-            $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushPreviousAnswerOptions('滞在先住所');
+            $supporter->pushUnsavedAnswerOption('滞在先住所');
+            $supporter->pushLocaleOptions();
+            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingAddress';
+            $supporter->storage['phases'][] = 'askingAddress';
         } else if ($lastPhase === 'askingAddress') {
             if ($message['type'] === 'text') {
                 $message = $message['text'];
                 if ($message !== '前の項目を修正する')
-                    $this->supporter->storage['unsavedAnswers']['滞在先住所'] = $message;
+                    $supporter->storage['unsavedAnswers']['滞在先住所'] = $message;
             } else {
-                if ($this->storeOrAskAgain('滞在先住所', $message))
+                if (self::storeOrAskAgain($supporter, '滞在先住所', $message))
                     return;
             }
 
             // 質問
-            $this->supporter->pushText("連絡先電話番号を入力してください。\n例:09011223344", true);
+            $supporter->pushText("連絡先電話番号を入力してください。\n例:09011223344", true);
 
             // 選択肢
-            $this->supporter->pushPreviousAnswerOptions('連絡先電話番号');
-            $this->supporter->pushUnsavedAnswerOption('連絡先電話番号');
-            $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushPreviousAnswerOptions('連絡先電話番号');
+            $supporter->pushUnsavedAnswerOption('連絡先電話番号');
+            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingTel';
+            $supporter->storage['phases'][] = 'askingTel';
         } else if ($lastPhase === 'askingTel') {
             if ($message['type'] !== 'text') {
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return;
             }
             $message = $message['text'];
 
-            if ($this->storeOrAskAgain('連絡先電話番号', $message))
+            if (self::storeOrAskAgain($supporter, '連絡先電話番号', $message))
                 return;
 
             // 質問・選択肢
-            $this->confirm();
+            self::confirm($supporter,);
 
-            $this->supporter->storage['phases'][] = 'confirming';
+            $supporter->storage['phases'][] = 'confirming';
         } else {
             if ($message['type'] !== 'text') {
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return;
             }
             $message = $message['text'];
 
             // 質問・選択肢
-            $this->confirming($message);
+            self::confirming($supporter, $message);
         }
     }
 
-    protected function submitForm(): void
+    protected static function submitForm(KishukushaReportSupporter $supporter): void
     {
-        $answers = $this->supporter->storage['unsavedAnswers'];
+        $answers = $supporter->storage['unsavedAnswers'];
         $answersForSheets = array_values($answers);
 
         // 日付の曜日を取る
@@ -208,14 +209,14 @@ class Chokigaihaku extends FormTemplate
         $answersForSheets[6] = "'" . $answersForSheets[6];
 
         // 申請
-        $this->supporter->submitForm($answers, $answersForSheets, true);
+        $supporter->submitForm($answers, $answersForSheets, true);
 
         // 次回のための回答の記録
-        $this->supporter->pushPreviousAnswer('滞在先住所', $answers['滞在先住所']);
-        $this->supporter->pushPreviousAnswer('連絡先電話番号', $answers['連絡先電話番号']);
+        $supporter->pushPreviousAnswer('滞在先住所', $answers['滞在先住所']);
+        $supporter->pushPreviousAnswer('連絡先電話番号', $answers['連絡先電話番号']);
     }
 
-    public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
+    public static function pushAdminMessages(KishukushaReportSupporter $supporter, array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
         $startDate = stringToDate($answers['出舎日']);
         $endDate = stringToDate($answers['帰舎日']);
@@ -236,7 +237,7 @@ class Chokigaihaku extends FormTemplate
         }
 
         // 行事と被っていないか調べる
-        $conflictingEvents = $this->getConflictingEvents($startDate, $endDate);
+        $conflictingEvents = self::getConflictingEvents($supporter, $startDate, $endDate);
         if ($conflictingEvents  !== '') {
             $messageAboutDate = "※行事{$conflictingEvents}と被っています！";
         } else {
@@ -244,12 +245,12 @@ class Chokigaihaku extends FormTemplate
         }
 
         // 任期内か調べる
-        $isDateInTerm = $this->supporter->checkInTerm($endDate);
+        $isDateInTerm = $supporter->checkInTerm($endDate);
         if (!$isDateInTerm)
             $messageAboutDate = "※任期外の日付を含んでいます！\n{$messageAboutDate}";
 
         if ($conflictingEvents !== '' || !$isDateInTerm) {
-            $this->supporter->pushText(
+            $supporter->pushText(
                 "{$answers['氏名']}(`{$profile['displayName']}`)が長期外泊届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
@@ -271,11 +272,11 @@ class Chokigaihaku extends FormTemplate
                 true,
                 ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
             );
-            $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
+            $supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
             return true;
         }
 
-        $this->supporter->pushText(
+        $supporter->pushText(
             "{$answers['氏名']}(`{$profile['displayName']}`)が長期外泊届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
@@ -295,11 +296,11 @@ class Chokigaihaku extends FormTemplate
             true,
             ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
         );
-        $this->supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
+        $supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
         return true;
     }
 
-    protected function storeOrAskAgain(string $type, string|array $message): string
+    protected static function storeOrAskAgain(KishukushaReportSupporter $supporter, string $type, string|array $message): string
     {
         switch ($type) {
             case '出舎日':
@@ -308,45 +309,45 @@ class Chokigaihaku extends FormTemplate
                 if ($date === false) {
                     $year = date('Y');
                     if ($type === '出舎日') {
-                        $this->supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な日付です。\n「0731」または「{$year}0731」のように4桁または8桁で入力してください。");
+                        $supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な日付です。\n「0731」または「{$year}0731」のように4桁または8桁で入力してください。");
                     } else {
-                        $this->supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な日付です。\n「0903」または「{$year}0903」のように4桁または8桁で入力してください。");
+                        $supporter->askAgainBecauseWrongReply("入力の形式が違うか、無効な日付です。\n「0903」または「{$year}0903」のように4桁または8桁で入力してください。");
                     }
                     return 'wrong-reply';
                 }
 
                 $dateString = dateToDateStringWithDay($date);
-                $this->supporter->pushText("{$type}:{$dateString}");
+                $supporter->pushText("{$type}:{$dateString}");
 
                 if ($type === '出舎日') {
                     $today = getDateAt0AM();
                     if ($date < $today) {
-                        $this->supporter->askAgainBecauseWrongReply('今日以降の日付を入力してください。');
+                        $supporter->askAgainBecauseWrongReply('今日以降の日付を入力してください。');
                         return 'wrong-reply';
                     }
 
-                    $this->supporter->storage['unsavedAnswers']['出舎日'] = $dateString;
+                    $supporter->storage['unsavedAnswers']['出舎日'] = $dateString;
                     return '';
                 }
 
                 // 出舎日の1日後から有効
-                $startDate = stringToDate($this->supporter->storage['unsavedAnswers']['出舎日']);
+                $startDate = stringToDate($supporter->storage['unsavedAnswers']['出舎日']);
                 $oneDayAfterStartDay = strtotime('+1 day', $startDate);
                 if ($date < $oneDayAfterStartDay) {
-                    $this->supporter->askAgainBecauseWrongReply("出舎日の1日後以降の日付を入力してください。\nなお、24時を2回周らない外泊の場合は申請不要です。");
+                    $supporter->askAgainBecauseWrongReply("出舎日の1日後以降の日付を入力してください。\nなお、24時を2回周らない外泊の場合は申請不要です。");
                     return 'wrong-reply';
                 }
-                $this->supporter->storage['unsavedAnswers']['帰舎日'] = $dateString;
+                $supporter->storage['unsavedAnswers']['帰舎日'] = $dateString;
 
                 // 出舎日と帰舎日のデータがそろった
                 // 行事と被ってないか調べる
                 $endDate = $date;
-                $conflictingEvents = $this->getConflictingEvents($startDate, $endDate);
+                $conflictingEvents = self::getConflictingEvents($supporter, $startDate, $endDate);
                 if ($conflictingEvents !== '') {
-                    $this->supporter->pushText("その期間は行事{$conflictingEvents}と被っています。
+                    $supporter->pushText("その期間は行事{$conflictingEvents}と被っています。
 よろしいですか？
 ※委員会行事を欠席または遅刻、早退する場合は舎生大会・諸行事届の届け出が必要になります。", true);
-                    $this->supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);
 
                     return 'booking';
                 }
@@ -358,43 +359,43 @@ class Chokigaihaku extends FormTemplate
                     case '合宿':
                     case '旅行':
                     case 'その他':
-                        $this->supporter->storage['unsavedAnswers']['外泊理由'] = $message;
+                        $supporter->storage['unsavedAnswers']['外泊理由'] = $message;
                         return '';
                 }
                 // 有効でなかった、もう一度質問文送信
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return 'wrong-reply';
             case '滞在先住所':
                 if ($message['type'] !== 'location') {
-                    $this->supporter->askAgainBecauseWrongReply();
+                    $supporter->askAgainBecauseWrongReply();
                     return 'wrong-reply';
                 }
 
                 if (!isset($message['address'])) {
-                    $this->supporter->askAgainBecauseWrongReply("住所がありません。\nもう一度入力して下さい。");
+                    $supporter->askAgainBecauseWrongReply("住所がありません。\nもう一度入力して下さい。");
                     return 'wrong-reply';
                 }
 
                 $address = $message['address'];
                 if (isset($message['title'])) $address .= "({$message['title']})";
-                $this->supporter->pushText("滞在先住所:{$address}");
-                $this->supporter->storage['unsavedAnswers']['滞在先住所'] = $address;
+                $supporter->pushText("滞在先住所:{$address}");
+                $supporter->storage['unsavedAnswers']['滞在先住所'] = $address;
                 return '';
             case '連絡先電話番号':
                 $message = toHalfWidth($message);
                 if (mb_strlen(preg_replace('/\D/', '', $message)) < 10) {
-                    $this->supporter->askAgainBecauseWrongReply("入力が不正です。\n10桁以上の数値を含めてください。");
+                    $supporter->askAgainBecauseWrongReply("入力が不正です。\n10桁以上の数値を含めてください。");
                     return 'wrong-reply';
                 }
-                $this->supporter->storage['unsavedAnswers']['連絡先電話番号'] = $message;
+                $supporter->storage['unsavedAnswers']['連絡先電話番号'] = $message;
                 return '';
         }
     }
 
-    private function getConflictingEvents(int $startDate, int $endDate): string
+    private static function getConflictingEvents(KishukushaReportSupporter $supporter, int $startDate, int $endDate): string
     {
         $conflictingEvents = '';
-        $events = $this->supporter->fetchEvents();
+        $events = $supporter->fetchEvents();
         foreach ($events as $event) {
             if ($endDate < stringToDate($event['開始日']) || $startDate > stringToDate($event['終了日'])) continue;
 
