@@ -124,7 +124,7 @@ class Gaiburaihousha extends SubmittableForm
             $supporter->pushText('最後に、女性の数を入力すると舎生Lineへの告知文を生成します。', true);
 
             // 選択肢
-            $supporter->pushPreviousAnswerOptions('外部来訪者の女性の数');
+            self::pushPreviousAnswerOptions($supporter, '外部来訪者の女性の数');
             $supporter->pushOptions(['キャンセル']);
 
             // 前の項目を修正する対策笑
@@ -225,7 +225,7 @@ class Gaiburaihousha extends SubmittableForm
                 if ($femaleCount) $announcement .= "女性{$femaleCount}名、";
                 $announcement .= "{$supporter->storage['unsavedAnswers']['滞在開始時刻']}~{$supporter->storage['unsavedAnswers']['滞在終了時刻']}です。\nよろしくお願いいたします。";
                 $supporter->pushText($announcement);
-                $supporter->pushPreviousAnswer('外部来訪者の女性の数', $femaleCount . '人');
+                self::pushPreviousAnswer($supporter, '外部来訪者の女性の数', $femaleCount . '人');
                 return '';
             case '来訪日':
                 $date = stringToDate($message);
@@ -272,6 +272,42 @@ class Gaiburaihousha extends SubmittableForm
                     $supporter->storage['unsavedAnswers']['滞在終了時刻'] = $stayTimeString;
                     return '';
                 }
+        }
+    }
+
+    private static function pushPreviousAnswerOptions(KishukushaReportSupporter $supporter, string $type): void
+    {
+        if ($type !== '外部来訪者の女性の数') {
+            $supporter->pushPreviousAnswerOptions($type);
+            return;
+        }
+
+        if (!isset($supporter->storage['previousAnswers'][$type]))
+            return;
+
+        $name = $supporter->storage['unsavedAnswers']['外部来訪者名'];
+        if (isset($supporter->storage['previousAnswers'][$type][$name]))
+            $supporter->pushOptions($supporter->storage['previousAnswers'][$type][$name], false, true);
+    }
+
+    private static function pushPreviousAnswer(KishukushaReportSupporter $supporter, string $type, string $previousAnswer): void
+    {
+        if ($type !== '外部来訪者の女性の数') {
+            $supporter->pushPreviousAnswer($type, $previousAnswer);
+            return;
+        }
+
+        // 初めての回答
+        if (!isset($supporter->storage['previousAnswers'][$type]))
+            $supporter->storage['previousAnswers'][$type] = [];
+
+        // 記録
+        $supporter->storage['previousAnswers'][$type][$supporter->storage['unsavedAnswers']['外部来訪者名']] = [$previousAnswer];
+
+        // もうすでに記録されていない外部来訪者名の女性の数は消す
+        foreach ($supporter->storage['previousAnswers'][$type] as $name => $number) {
+            if (!in_array($name, $supporter->storage['previousAnswers']['外部来訪者名'], true))
+                unset($supporter->storage['previousAnswers'][$type][$name]);
         }
     }
 

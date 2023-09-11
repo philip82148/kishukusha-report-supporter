@@ -1026,16 +1026,7 @@ VERSION\n", true);
         if (!isset($this->storage['previousAnswers'][$type]))
             return;
 
-        switch ($type) {
-            case '外部来訪者の女性の数':
-                $name = $this->storage['unsavedAnswers']['外部来訪者名'];
-                if (isset($this->storage['previousAnswers'][$type][$name]))
-                    $this->pushOptions($this->storage['previousAnswers'][$type][$name], false, true);
-                break;
-            default:
-                $this->pushOptions($this->storage['previousAnswers'][$type], false, true);
-                break;
-        }
+        $this->pushOptions($this->storage['previousAnswers'][$type], false, true);
     }
 
     public function pushPreviousAnswer(string $type, string $previousAnswer): void
@@ -1043,23 +1034,6 @@ VERSION\n", true);
         // 回答が290文字以下の場合のみpush
         // (サロゲートペアは2文字以上とカウントされるので、本来300文字まで許容できるが余裕をもって290文字とする)
         if (mb_strlen($previousAnswer) > 290) return;
-
-        switch ($type) {
-            case '外部来訪者の女性の数':
-                // 初めての回答
-                if (!isset($this->storage['previousAnswers'][$type]))
-                    $this->storage['previousAnswers'][$type] = [];
-
-                // 記録
-                $this->storage['previousAnswers'][$type][$this->storage['unsavedAnswers']['外部来訪者名']] = [$previousAnswer];
-
-                // もうすでに記録されていない外部来訪者名の女性の数は消す
-                foreach ($this->storage['previousAnswers'][$type] as $name => $number) {
-                    if (!in_array($name, $this->storage['previousAnswers']['外部来訪者名'], true))
-                        unset($this->storage['previousAnswers'][$type][$name]);
-                }
-                return;
-        }
 
         // 初めての回答
         if (!isset($this->storage['previousAnswers'][$type])) {
