@@ -54,7 +54,10 @@ class Chokigaihaku extends SubmittableForm
                 return dateToDateStringWithDay(strtotime("+{$i} day", $startDate));
             }, range(1, 7));
             $supporter->pushOptions($nextWeek);
-            $supporter->pushUnsavedAnswerOption('帰舎日'); // ラベル変更
+
+            if (isset($supporter->storage['unsavedAnswers']['帰舎日']) && stringToDate($supporter->storage['unsavedAnswers']['帰舎日']) > $startDate)
+                $supporter->pushUnsavedAnswerOption('帰舎日'); // ラベル変更
+
             $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
             $supporter->storage['phases'][] = 'askingEnd';
