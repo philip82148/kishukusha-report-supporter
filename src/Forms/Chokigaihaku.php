@@ -184,7 +184,7 @@ class Chokigaihaku extends SubmittableForm
                 return;
 
             // 質問・選択肢
-            self::confirm($supporter,);
+            self::confirm($supporter);
 
             $supporter->storage['phases'][] = 'confirming';
         } else {

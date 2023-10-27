@@ -323,7 +323,7 @@ class Shogyoji extends SubmittableForm
             // 質問・選択肢
             unset($supporter->storage['unsavedAnswers']['議決の委任']);
             if ($supporter->storage['unsavedAnswers']['証拠画像'] === '風紀に相談済み') {
-                self::confirm($supporter,);
+                self::confirm($supporter);
             } else {
                 self::confirm($supporter, ['証拠画像' => 'image']);
             }
@@ -342,7 +342,7 @@ class Shogyoji extends SubmittableForm
 
             // 質問・選択肢
             if ($supporter->storage['unsavedAnswers']['証拠画像'] === '風紀に相談済み') {
-                self::confirm($supporter,);
+                self::confirm($supporter);
             } else {
                 self::confirm($supporter, ['証拠画像' => 'image']);
             }

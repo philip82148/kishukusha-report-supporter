@@ -25,6 +25,7 @@ define('BOT_EMAIL', '...');
 define('DEFAULT_CONFIG', [
     // 'password' => 'パスワードをここに設定する(コメントアウト(//を消すこと)すること)',
     'adminId' => 'dummy',
+    'zaimuId' => 'dummy',
     'eventSheetId' => 'dummy',
     'outputSheetId' => 'dummy',
     'shogyojiImageFolderId' => 'dummy',

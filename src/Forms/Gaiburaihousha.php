@@ -113,7 +113,7 @@ class Gaiburaihousha extends SubmittableForm
             if (self::storeOrAskAgain($supporter, '滞在終了時刻', $message))
                 return;
 
-            self::confirm($supporter,);
+            self::confirm($supporter);
 
             $supporter->storage['phases'][] = 'confirming';
         } else if ($lastPhase === 'confirming') {

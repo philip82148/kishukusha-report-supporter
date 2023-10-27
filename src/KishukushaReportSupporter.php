@@ -6,7 +6,7 @@ use KishukushaReportSupporter\Forms;
 
 class KishukushaReportSupporter
 {
-    public const VERSION = '9.2.6';
+    public const VERSION = '1.0.0';
 
     /* 届出を追加する際はここの編集とsrc/Formsフォルダへのファイルの追加が必要 */
     public const FORMS = [
@@ -16,6 +16,7 @@ class KishukushaReportSupporter
         '踊り場私物配備届' => Forms\Odoriba::class,
         '309私物配備届' => Forms\Haibi309::class,
         '自転車・バイク配備届' => Forms\Bikes::class,
+        '滞納届' => Forms\Tainou::class,
         '入力履歴を削除する' => Forms\Nyuryokurireki::class,
         '自分の名前を変更する' => Forms\AskName::class,
         'マニュアルを見る' => Forms\UserManual::class
@@ -27,7 +28,6 @@ class KishukushaReportSupporter
     public JsonDatabase $database;
     public array $config;
     public array $storage;
-    public self $admin;
 
     private string $replyToken;
     private string $pushUserId;
@@ -46,18 +46,12 @@ class KishukushaReportSupporter
     private static string $lastPushUserId;
     private static array $lastPushMessages;
 
-    public function __construct(string $userId, JsonDatabase $database, ?array $config = null, ?self $admin = null)
+    public function __construct(string $userId, JsonDatabase $database, ?array $config = null)
     {
         $this->userId = $userId;
         $this->database = $database;
         $this->restoreConfig($config);
         $this->restoreStorage();
-
-        $this->admin = match (true) {
-            $userId === $this->config['adminId'] => $this,
-            isset($admin) => $admin,
-            default => new self($this->config['adminId'], $this->database, $this->config)
-        };
 
         // storageの方が書き換わっても、setLastQuestions()したときは必ず前回の質問になる
         $this->lastQuestions = $this->storage['lastQuestions'];
@@ -189,7 +183,7 @@ class KishukushaReportSupporter
         // 質問
         $this->pushText("新しくフォームに入力を始める場合は「回答を始める」と入力してください。
 
-このボットを使用した場合、風紀への報告は自動で行われるため不要です。", true);
+このボットを使用した場合、風紀や財務への報告は自動で行われるため不要です。", true);
         $this->pushText("※クイックリプライはスマホでのみ利用できます。
 ※何らかのエラーが起こったときは佐々木に報告して、Google Formsを使用してください。
 
@@ -258,11 +252,12 @@ VERSION\n", true);
                     // 申請した本人への通知
                     $this->initPush($lastPhase['userId']);
                     $adminProfile = $this->fetchProfile();
-                    $this->pushText("届出番号{$lastPhase['receiptNo']}の{$lastPhase['formType']}を風紀は確認しましたが、ボットを使用した承認は行われませんでした。
+                    $adminType = $this->getAdminTypeName();
+                    $this->pushText("届出番号{$lastPhase['receiptNo']}の{$lastPhase['formType']}を{$adminType}は確認しましたが、ボットを使用した承認は行われませんでした。
 
-これについて風紀から直接連絡がなかった場合は手動でスプレッドシートにチェックを入れた可能性があります。
+これについて{$adminType}から直接連絡がなかった場合は手動でスプレッドシートにチェックを入れた可能性があります。
 
-まず、スプレッドシートにチェックが入っているかを確認し、入っていない場合は風紀に直接問い合わせてください。", false, ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com/']);
+まず、スプレッドシートにチェックが入っているかを確認し、入っていない場合は{$adminType}に直接問い合わせてください。", false, ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com/']);
                     $this->pushOptions(['OK']);
                     $this->confirmPush(true);
                 } catch (\Throwable $e) {
@@ -323,62 +318,89 @@ VERSION\n", true);
     private function changeAdminIfPasswordSet(array $message): bool
     {
         // パスワードが登録されている
-        if (!isset($this->config['password'])) return false;
+        if (!isset($this->config['password']) && !isset($this->config['zaimuPassword'])) return false;
 
         // テキストタイプのみ
         if ($message['type'] !== 'text') return false;
         $message = $message['text'];
 
         // パスワードと一致した
-        if ($message !== $this->config['password']) return false;
-
-        // パスワードを打った人を管理者にする
+        if ($message === $this->config['password']) {
+            $admin = $this->createAdmin();
+            $adminType = '管理者';
+        } else if ($message === $this->config['zaimuPassword']) {
+            $admin = $this->createZaimu();
+            $adminType = '財務';
+        } else {
+            return false;
+        }
 
         // ここまでで他に発生したトランザクションについて更新(adminPhase等)
-        $this->admin->restoreStorage(); // 他に発生したトランザクションについて更新
+        $admin->restoreStorage(); // 他に発生したトランザクションについて更新
 
         // configの変更
-        $this->config['adminId'] = $this->userId;
-        unset($this->config['password']);
+        if ($adminType === '管理者') {
+            $this->config['adminId'] = $this->userId;
+            unset($this->config['password']);
+        } else {
+            $this->config['zaimuId'] = $this->userId;
+            unset($this->config['zaimuPassword']);
+        }
         $this->storeConfig();
 
         // なおこれ以降restoreStorageで元管理者のadminPhaseが消え、
         // 新管理者にadminPhaseが現れるようになる
 
         // パスワードを打ったのは元管理者(自分自身)でない
-        if ($this->userId !== $this->admin->userId) {
+        if ($this->userId !== $admin->userId) {
             // 元管理者への通知
             try {
-                $this->admin->initPush();
+                $admin->initPush();
                 $newAdminProfile = $this->fetchProfile();
-                $this->admin->pushText('管理者が変更されました。', false, ['name' => $newAdminProfile['displayName'], 'iconUrl' => $newAdminProfile['pictureUrl'] ?? 'https://dummy.com/']);
-                $this->admin->pushOptions(['OK']);
-                $this->admin->confirmPush(true);
+                $admin->pushText("{$adminType}が変更されました。", false, ['name' => $newAdminProfile['displayName'], 'iconUrl' => $newAdminProfile['pictureUrl'] ?? 'https://dummy.com/']);
+                $admin->pushOptions(['OK']);
+                $admin->confirmPush(true);
+            } catch (\Throwable $e) {
+            }
+        }
+
+        // 財務で、元管理者が風紀でない場合追加で風紀にも通知する
+        if ($adminType === '財務' && !$admin->isThisAdmin() && !$this->isThisAdmin()) {
+            // 風紀への通知
+            try {
+                $fuki = $this->createOrTransferAdmin();
+                $fuki->initPush();
+                $newFukiProfile = $this->fetchProfile();
+                $fuki->pushText("{$adminType}が変更されました。", false, ['name' => $newFukiProfile['displayName'], 'iconUrl' => $newFukiProfile['pictureUrl'] ?? 'https://dummy.com/']);
+                $fuki->pushOptions(['OK']);
+                $fuki->confirmPush(true);
             } catch (\Throwable $e) {
             }
         }
 
         // 新管理者への通知とマニュアルの表示
-        $this->pushText('管理者が変更されました。');
-        $this->pushText(ADMIN_MANUAL);
-        $this->pushText(SERVER_MANUAL);
-        $this->pushText('これらのマニュアルは「管理者設定」>「管理者用マニュアル表示」からいつでも確認できます。');
+        $this->pushText("{$adminType}が変更されました。");
+        if ($adminType === '管理者') {
+            $this->pushText(ADMIN_MANUAL);
+            $this->pushText(SERVER_MANUAL);
+            $this->pushText('これらのマニュアルは「管理者設定」>「管理者用マニュアル表示」からいつでも確認できます。');
+        }
         $this->pushOptions(['OK']);
 
-        // adminPhaseの移動(なおここで$this->adminは元管理者)
-        $adminPhase = $this->admin->storage['adminPhase'];
-        unset($this->admin->storage['adminPhase']);
+        // adminPhaseの移動(なおここで$adminは元管理者)
+        $adminPhase = $admin->storage['adminPhase'];
+        unset($admin->storage['adminPhase']);
         if (!empty($adminPhase)) {
             // adminの前回の質問を引き継ぐ(なおここで'OK'の選択肢は削除される)
-            $this->setLastQuestions($this->admin->storage['lastQuestions'], $this->admin->storage['lastQuickReply']);
+            $this->setLastQuestions($admin->storage['lastQuestions'], $admin->storage['lastQuickReply']);
 
             // adminPhaseの一番最後の質問を元adminに返す
-            $this->admin->storage['lastQuestions'] = $adminPhase[0]['lastQuestions'];
-            $this->admin->storage['lastQuickReply'] = $adminPhase[0]['lastQuickReply'];
+            $admin->storage['lastQuestions'] = $adminPhase[0]['lastQuestions'];
+            $admin->storage['lastQuickReply'] = $adminPhase[0]['lastQuickReply'];
 
             // 元管理者が存在しなければ保存はしない
-            if ($this->admin->doesThisExist())
-                $this->admin->storeStorage();
+            if ($admin->doesThisExist())
+                $admin->storeStorage();
 
             $this->restoreStorage(); // 他に発生したトランザクションについて更新
 
@@ -390,45 +412,23 @@ VERSION\n", true);
             $this->storage['adminPhase'] = array_merge($this->storage['adminPhase'], $adminPhase);
         } else {
             // 元管理者が存在しなければ保存はしない
-            if ($this->admin->doesThisExist())
-                $this->admin->storeStorage();
+            if ($admin->doesThisExist())
+                $admin->storeStorage();
             // このあとstoreすることになるので、ともかくrestoreする
             $this->restoreStorage(); // 他に発生したトランザクションについて更新
         }
 
-        // 変更
-        $this->admin->admin = $this;
-        $this->admin = $this;
-
         return true;
     }
 
-    public function submitForm(array $answers, array $answersForSheets, bool $needCheckbox = false, string $message = ''): void
+    public function submitForm(array $answers, array $answersForSheets, bool $needCheckbox = false, string $message = '', ?self $admin = null): void
     {
-        // 承認が必要な届出だが、管理者の存在が確認できない場合
-        if ($needCheckbox && !$this->isThisAdmin() && !$this->admin->doesThisExist()) {
-            // このユーザーを管理者にする
-            // configの書き換え
-            $this->config['adminId'] = $this->userId;
-            $this->storeConfig();
-
-            // 変更
-            $this->admin->admin = $this;
-            $this->admin = $this;
-
-            // 通知
-            $this->pushText("ボットに登録された管理者のアカウントの存在が確認できませんでした。
-管理者がボットのブロックやLINEアカウントの削除等をした可能性があります。
-管理者のアカウントの存在確認が出来なくなってから初めて承認が必要な届出を行ったあなたのアカウントに管理者権限を移行しました。
-あなたが風紀でない場合は風紀に連絡、あなたが現役舎生でない場合はボットをブロックしてください。");
-        }
-
         try {
             $timeStamp = date('Y/m/d H:i:s');
             $appendRow = array_merge([$timeStamp], $answersForSheets);
             if ($needCheckbox) {
                 // 承認のチェック
-                if ($this->isThisAdmin()) {
+                if ($this->isThisAdmin($admin)) {
                     $appendRow[] = 'TRUE';
                 } else {
                     $appendRow[] = 'FALSE';
@@ -484,29 +484,29 @@ VERSION\n", true);
         }
 
         // 自分が管理者でない、かつ、承認が必要なら、管理者に通知
-        if (!$this->isThisAdmin() && $needCheckbox) {
+        if (!$this->isThisAdmin($admin) && $needCheckbox) {
+            if (!isset($admin)) $admin = $this->createOrTransferAdmin();
+            $adminType = $admin->getAdminTypeName();
             try {
-                $receiptNo = $this->admin->notifySubmittedForm($this, $answers, $timeStamp, $checkboxRange ?? '');
+                $receiptNo = $admin->notifySubmittedForm($this, $answers, $timeStamp, $checkboxRange ?? '');
             } catch (\Throwable $e) {
-                throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書き込みは成功しましたが、風紀への通知中にエラーが発生しました。");
+                throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書き込みは成功しましたが、{$adminType}への通知中にエラーが発生しました。");
             }
         }
 
         // ユーザーへの通知
-        if ($this->isThisAdmin()) {
+        if ($this->isThisAdmin($admin)) {
             if ($needCheckbox) {
                 $this->pushText("{$this->storage['formType']}を提出しました。\n(※承認済み)");
             } else {
-                if ($message !== '')
-                    $message = "\n{$message}";
+                if ($message !== '') $message = "\n{$message}";
                 $this->pushText("{$this->storage['formType']}を提出しました。{$message}");
             }
         } else {
             if ($needCheckbox) {
-                $this->pushText("{$this->storage['formType']}を申請しました。\n風紀の承認をお待ちください。\n(届出番号:{$receiptNo})");
+                $this->pushText("{$this->storage['formType']}を申請しました。\n{$adminType}の承認をお待ちください。\n(届出番号:{$receiptNo})");
             } else {
-                if ($message !== '')
-                    $message = "\n{$message}";
+                if ($message !== '') $message = "\n{$message}";
                 $this->pushText("{$this->storage['formType']}を提出しました。{$message}\n※この届出に風紀の承認はありません。");
             }
         }
@@ -845,10 +845,79 @@ VERSION\n", true);
         return $endOfTermDate;
     }
 
-    public function isThisAdmin(): bool
+    public function createOrTransferAdmin(): self
     {
+        $admin = $this->createAdmin();
+        if ($admin->doesThisExist()) return $admin;
+
+        // 管理者の存在が確認できない場合
+        // このユーザーを管理者にする
+        // configの書き換え
+        $this->config['adminId'] = $this->userId;
+        $this->storeConfig();
+
+        // 通知
+        $this->pushText("ボットに登録された管理者のアカウントの存在が確認できませんでした。
+管理者がボットのブロックやLINEアカウントの削除等をした可能性があります。
+管理者のアカウントの存在確認が出来なくなってから初めて承認が必要な届出を行ったあなたのアカウントに管理者権限を移行しました。
+あなたが風紀でない場合は風紀に連絡、あなたが現役舎生でない場合はボットをブロックしてください。");
+
+        return $this;
+    }
+
+    public function createAdmin(): self
+    {
+        if ($this->isThisAdmin()) return $this;
+
+        return new self($this->config['adminId'], $this->database, $this->config);
+    }
+
+    public function isThisAdmin(?self $admin = null): bool
+    {
+        if (isset($admin)) return $this->userId === $admin->userId;
+
         // configを書き換えるとisThisAdminが効かなくなる
         return $this->userId === $this->config['adminId'];
+    }
+
+    public function createOrTransferZaimu(): self
+    {
+        $zaimu = $this->createZaimu();
+        if ($zaimu->doesThisExist()) return $zaimu;
+
+        // 財務の存在が確認できない場合、風紀を財務にする
+        $admin = $this->createOrTransferAdmin();
+        $this->config['zaimuId'] = $this->config['adminId'];
+        $this->storeConfig();
+
+        return $admin;
+    }
+
+    public function createZaimu(): self
+    {
+        if ($this->isThisZaimu()) return $this;
+
+        return new self($this->config['zaimuId'], $this->database, $this->config);
+    }
+
+    public function isThisZaimu(): bool
+    {
+        // configを書き換えるとisThisZaimuが効かなくなる
+        return $this->userId === $this->config['zaimuId'];
+    }
+
+    public function getAdminTypeName(?string $userId = null): string
+    {
+        if (!isset($userId)) $userId = $this->userId;
+
+        switch ($userId) {
+            case $this->config['adminId']:
+                return '風紀';
+            case $this->config['zaimuId']:
+                return '財務';
+        }
+
+        return '';
     }
 
     public function initReply(?string $replyToken = null): void
@@ -1309,8 +1378,8 @@ VERSION\n", true);
             'lastVersion' => $storage['lastVersion'] ?? ''
         ];
 
-        // 管理者なら
-        if ($this->isThisAdmin()) {
+        // 風紀または財務なら
+        if ($this->isThisAdmin() || $this->isThisZaimu()) {
             $this->storage['adminPhase'] = $storage['adminPhase'] ?? [];
             if (!is_array($this->storage['adminPhase'])) $this->storage['adminPhase'] = []; // 初期化されることが少ないので一応
         }
@@ -1372,6 +1441,7 @@ VERSION\n", true);
 
         $this->config = DEFAULT_CONFIG;
         $this->config['adminId'] = $this->userId;
+        $this->config['zaimuId'] = $this->userId;
 
         $this->storeConfig();
     }

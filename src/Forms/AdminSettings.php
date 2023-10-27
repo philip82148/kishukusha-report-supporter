@@ -26,6 +26,7 @@ class AdminSettings extends UnsubmittableForm
                 '最大外部来訪者数変更',
                 '任期終了日変更',
                 '管理者変更',
+                '財務変更',
                 '行事スプレッドシート変更',
                 '出力先スプレッドシート変更',
                 '舎生大会・諸行事届用画像フォルダ変更',
@@ -103,6 +104,19 @@ https://docs.google.com/spreadsheets/d/{$supporter->config['eventSheetId']}
                     $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
                     $supporter->storage['phases'][] = 'askingPassword';
+                    return;
+                case '財務変更':
+                    // 質問
+                    $password = $supporter->config['zaimuPassword'] ?? 'なし';
+                    $supporter->pushText("新しい財務が入力するための8文字以上の合言葉を入力してください。
+※前後の改行やスペースは無視されます。
+※現在の設定値を削除するには、この画面をキャンセルして財務自身が合言葉を入力してください。
+現在の設定値:{$password}", true);
+
+                    // 選択肢
+                    $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+
+                    $supporter->storage['phases'][] = 'askingZaimuPassword';
                     return;
             }
 
@@ -198,6 +212,13 @@ https://drive.google.com/drive/u/0/folders/{$supporter->config['generalImageFold
             // 返信
             $supporter->pushText("合言葉を設定しました。\n新たな管理者は合言葉をメッセージしてください。");
             $supporter->resetForm();
+        } else if ($lastPhase === 'askingZaimuPassword') {
+            if (self::storeOrAskAgain($supporter, '財務の合言葉', $message))
+                return;
+
+            // 返信
+            $supporter->pushText("合言葉を設定しました。\n新たな財務は合言葉をメッセージしてください。");
+            $supporter->resetForm();
         } else {
             if (self::storeOrAskAgain($supporter, 'Google URL', $message))
                 return;
@@ -216,6 +237,7 @@ https://drive.google.com/drive/u/0/folders/{$supporter->config['generalImageFold
                     case '最大外部来訪者数変更':
                     case '任期終了日変更':
                     case '管理者変更':
+                    case '財務変更':
                     case '行事スプレッドシート変更':
                     case '出力先スプレッドシート変更':
                     case '舎生大会・諸行事届用画像フォルダ変更':
@@ -260,11 +282,16 @@ https://drive.google.com/drive/u/0/folders/{$supporter->config['generalImageFold
                 $supporter->storeConfig();
                 return '';
             case '合言葉':
+            case '財務の合言葉':
                 if (mb_strlen($message) < 8) {
                     $supporter->askAgainBecauseWrongReply('合言葉は8文字以上としてください。');
                     return 'wrong-reply';
                 }
-                $supporter->config['password'] = $message;
+                if ($type === '合言葉') {
+                    $supporter->config['password'] = $message;
+                } else {
+                    $supporter->config['zaimuPassword'] = $message;
+                }
                 $supporter->storeConfig();
                 return '';
             case 'Google URL':
@@ -280,7 +307,7 @@ https://drive.google.com/drive/u/0/folders/{$supporter->config['generalImageFold
                             $supporter->pushText("設定を保存、行事データを更新しました。
 
 読み込まれた行事(開始日順):
-" . self::getEventListString($supporter,));
+" . self::getEventListString($supporter));
                             return '';
                         }
                         $supporter->askAgainBecauseWrongReply("入力されたURLのスプレッドシートにアクセスできませんでした。
