@@ -86,7 +86,7 @@ class Tainou extends SubmittableForm
         $answersForSheets[3] = deleteParentheses($answersForSheets[3]);
 
         // 申請
-        $supporter->submitForm($answers, $answersForSheets, true, '', $supporter->createOrTransferZaimu());
+        $supporter->submitForm($answers, $answersForSheets, true, '', $supporter->createOrTransferZaimu(), '財務');
     }
 
     public static function pushAdminMessages(KishukushaReportSupporter $supporter, array $profile, array $answers, string $timeStamp, string $receiptNo): bool

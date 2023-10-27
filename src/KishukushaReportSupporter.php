@@ -252,12 +252,11 @@ VERSION\n", true);
                     // 申請した本人への通知
                     $this->initPush($lastPhase['userId']);
                     $adminProfile = $this->fetchProfile();
-                    $adminType = $this->getAdminTypeName();
-                    $this->pushText("届出番号{$lastPhase['receiptNo']}の{$lastPhase['formType']}を{$adminType}は確認しましたが、ボットを使用した承認は行われませんでした。
+                    $this->pushText("届出番号{$lastPhase['receiptNo']}の{$lastPhase['formType']}を{$lastPhase['adminType']}は確認しましたが、ボットを使用した承認は行われませんでした。
 
-これについて{$adminType}から直接連絡がなかった場合は手動でスプレッドシートにチェックを入れた可能性があります。
+これについて{$lastPhase['adminType']}から直接連絡がなかった場合は手動でスプレッドシートにチェックを入れた可能性があります。
 
-まず、スプレッドシートにチェックが入っているかを確認し、入っていない場合は{$adminType}に直接問い合わせてください。", false, ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com/']);
+まず、スプレッドシートにチェックが入っているかを確認し、入っていない場合は{$lastPhase['adminType']}に直接問い合わせてください。", false, ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com/']);
                     $this->pushOptions(['OK']);
                     $this->confirmPush(true);
                 } catch (\Throwable $e) {
@@ -421,7 +420,7 @@ VERSION\n", true);
         return true;
     }
 
-    public function submitForm(array $answers, array $answersForSheets, bool $needCheckbox = false, string $message = '', ?self $admin = null): void
+    public function submitForm(array $answers, array $answersForSheets, bool $needCheckbox = false, string $message = '', ?self $admin = null, string $adminType = '風紀'): void
     {
         try {
             $timeStamp = date('Y/m/d H:i:s');
@@ -486,9 +485,8 @@ VERSION\n", true);
         // 自分が管理者でない、かつ、承認が必要なら、管理者に通知
         if (!$this->isThisAdmin($admin) && $needCheckbox) {
             if (!isset($admin)) $admin = $this->createOrTransferAdmin();
-            $adminType = $admin->getAdminTypeName();
             try {
-                $receiptNo = $admin->notifySubmittedForm($this, $answers, $timeStamp, $checkboxRange ?? '');
+                $receiptNo = $admin->notifySubmittedForm($this, $answers, $timeStamp, $checkboxRange ?? '', $adminType);
             } catch (\Throwable $e) {
                 throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書き込みは成功しましたが、{$adminType}への通知中にエラーが発生しました。");
             }
@@ -507,7 +505,7 @@ VERSION\n", true);
                 $this->pushText("{$this->storage['formType']}を申請しました。\n{$adminType}の承認をお待ちください。\n(届出番号:{$receiptNo})");
             } else {
                 if ($message !== '') $message = "\n{$message}";
-                $this->pushText("{$this->storage['formType']}を提出しました。{$message}\n※この届出に風紀の承認はありません。");
+                $this->pushText("{$this->storage['formType']}を提出しました。{$message}\n※この届出に{$adminType}の承認はありません。");
             }
         }
     }
@@ -605,7 +603,7 @@ VERSION\n", true);
         return null;
     }
 
-    private function notifySubmittedForm(self $supporter, array $answers, string $timeStamp, string $checkboxRange): string
+    private function notifySubmittedForm(self $supporter, array $answers, string $timeStamp, string $checkboxRange, string $adminType): string
     {
         $timeStamp = date('Y/m/d H:i', strtotime($timeStamp));
         $profile = $supporter->fetchProfile();
@@ -630,6 +628,7 @@ VERSION\n", true);
                 'formType' => $supporter->storage['formType'],
                 'receiptNo' => $receiptNo,
                 'checkboxRange' => $checkboxRange,
+                'adminType' => $adminType,
                 'lastQuickReply' => $this->storage['lastQuickReply'],
                 'lastQuestions' => $this->storage['lastQuestions']
             ];
@@ -904,20 +903,6 @@ VERSION\n", true);
     {
         // configを書き換えるとisThisZaimuが効かなくなる
         return $this->userId === $this->config['zaimuId'];
-    }
-
-    public function getAdminTypeName(?string $userId = null): string
-    {
-        if (!isset($userId)) $userId = $this->userId;
-
-        switch ($userId) {
-            case $this->config['adminId']:
-                return '風紀';
-            case $this->config['zaimuId']:
-                return '財務';
-        }
-
-        return '';
     }
 
     public function initReply(?string $replyToken = null): void
