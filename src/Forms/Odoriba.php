@@ -2,97 +2,98 @@
 
 namespace KishukushaReportSupporter\Forms;
 
-use KishukushaReportSupporter\FormTemplate;
+use KishukushaReportSupporter\KishukushaReportSupporter;
+use KishukushaReportSupporter\SubmittableForm;
 
-class Odoriba extends FormTemplate
+class Odoriba extends SubmittableForm
 {
     public const HEADER = ['氏名', '保管品', '保管品の画像'];
 
-    public function form(array $message): void
+    public static function form(KishukushaReportSupporter $supporter, array $message): void
     {
         // 一番最初
-        if (count($this->supporter->storage['phases']) === 0) {
-            $this->supporter->storage['unsavedAnswers']['氏名'] = $this->supporter->storage['userName'];
+        if (count($supporter->storage['phases']) === 0) {
+            $supporter->storage['unsavedAnswers']['氏名'] = $supporter->storage['userName'];
 
             // 質問
-            $this->supporter->pushText("保管品を入力してください。\n例:赤いハードキャリーケース", true);
+            $supporter->pushText("保管品を入力してください。\n例:赤いハードキャリーケース", true);
 
             // 選択肢
-            $this->supporter->pushUnsavedAnswerOption('保管品');
-            $this->supporter->pushOptions(['キャンセル']);
+            $supporter->pushUnsavedAnswerOption('保管品');
+            $supporter->pushOptions(['キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingItem';
+            $supporter->storage['phases'][] = 'askingItem';
             return;
         }
 
-        $lastPhase = $this->supporter->storage['phases'][count($this->supporter->storage['phases']) - 1];
+        $lastPhase = $supporter->storage['phases'][count($supporter->storage['phases']) - 1];
         if ($lastPhase === 'askingItem') {
             if ($message['type'] !== 'text') {
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return;
             }
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する')
-                $this->supporter->storage['unsavedAnswers']['保管品'] = $message;
+                $supporter->storage['unsavedAnswers']['保管品'] = $message;
 
             // 質問
-            $this->supporter->pushText("保管品の画像を送ってください。", true);
+            $supporter->pushText("保管品の画像を送ってください。", true);
 
             // 選択肢
-            $this->supporter->pushUnsavedAnswerOption('保管品の画像', 'image');
-            $this->supporter->pushImageOption();
-            $this->supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushUnsavedAnswerOption('保管品の画像', 'image');
+            $supporter->pushImageOption();
+            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
-            $this->supporter->storage['phases'][] = 'askingImage';
+            $supporter->storage['phases'][] = 'askingImage';
         } else if ($lastPhase === 'askingImage') {
             if ($message['type'] === 'image') {
-                if ($this->storeOrAskAgain('保管品の画像', $message))
+                if (self::storeOrAskAgain($supporter, '保管品の画像', $message))
                     return;
             } else {
                 if ($message['type'] !== 'text' || $message['text'] !== '最後に送信した画像') {
-                    $this->supporter->askAgainBecauseWrongReply();
+                    $supporter->askAgainBecauseWrongReply();
                     return;
-                } else if (!isset($this->supporter->storage['unsavedAnswers']['保管品の画像'])) {
-                    $this->supporter->askAgainBecauseWrongReply();
+                } else if (!isset($supporter->storage['unsavedAnswers']['保管品の画像'])) {
+                    $supporter->askAgainBecauseWrongReply();
                     return;
                 }
             }
 
             // 質問・選択肢
-            $this->confirm(['保管品の画像' => 'image']);
+            self::confirm($supporter, ['保管品の画像' => 'image']);
 
-            $this->supporter->storage['phases'][] = 'confirming';
+            $supporter->storage['phases'][] = 'confirming';
         } else {
             if ($message['type'] !== 'text') {
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return;
             }
             $message = $message['text'];
 
             // 質問・選択肢
-            $this->confirming($message);
+            self::confirming($supporter, $message);
         }
     }
 
-    protected function submitForm(): void
+    protected static function submitForm(KishukushaReportSupporter $supporter): void
     {
-        $answers = $this->supporter->storage['unsavedAnswers'];
+        $answers = $supporter->storage['unsavedAnswers'];
 
         // ドライブに保存
         $imageFileName = $answers['保管品の画像'];
         $itemName = mb_substr($answers['保管品'], 0, 15);
-        $driveFileName = "踊り場_{$this->supporter->storage['userName']}_{$itemName}.jpg";
-        $answers['保管品の画像'] = $this->supporter->saveToDrive($imageFileName, $driveFileName, $this->supporter->config['generalImageFolderId'], '踊り場私物配備届');
+        $driveFileName = "踊り場_{$supporter->storage['userName']}_{$itemName}.jpg";
+        $answers['保管品の画像'] = $supporter->saveToDrive($imageFileName, $driveFileName, $supporter->config['generalImageFolderId'], '踊り場私物配備届');
         $answersForSheets = array_values($answers);
 
         // 申請
-        $this->supporter->submitForm($answers, $answersForSheets, false, '保管品はロビーの踊り場私物配備許可証を記入の上貼り付けて保管してください。');
+        $supporter->submitForm($answers, $answersForSheets, false, '保管品はロビーの踊り場私物配備許可証を記入の上貼り付けて保管してください。');
     }
 
-    public function pushAdminMessages(array $profile, array $answers, string $timeStamp, string $receiptNo): bool
+    public static function pushAdminMessages(KishukushaReportSupporter $supporter, array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
-        $this->supporter->pushText(
+        $supporter->pushText(
             "{$answers['氏名']}(`{$profile['displayName']}`)が踊り場私物配備届を提出しました。
 (TS:{$timeStamp})
 
@@ -106,21 +107,21 @@ class Odoriba extends FormTemplate
             false,
             ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
         );
-        $this->supporter->setLastQuestions();
+        $supporter->setLastQuestions();
         return false;
     }
 
-    protected function storeOrAskAgain(string $type, string|array $message): string
+    protected static function storeOrAskAgain(KishukushaReportSupporter $supporter, string $type, string|array $message): string
     {
         switch ($type) {
             case '保管品の画像':
-                $fileName = $this->supporter->downloadContent($message);
-                $this->supporter->storage['unsavedAnswers'][$type] = $fileName;
+                $fileName = $supporter->downloadContent($message);
+                $supporter->storage['unsavedAnswers'][$type] = $fileName;
 
                 // 将来的にゴミ箱へ移動するための予約
-                if (!isset($this->supporter->storage['cache']['一時ファイル']))
-                    $this->supporter->storage['cache']['一時ファイル'] = [];
-                $this->supporter->storage['cache']['一時ファイル'][] = $fileName;
+                if (!isset($supporter->storage['cache']['一時ファイル']))
+                    $supporter->storage['cache']['一時ファイル'] = [];
+                $supporter->storage['cache']['一時ファイル'][] = $fileName;
                 return '';
         }
     }

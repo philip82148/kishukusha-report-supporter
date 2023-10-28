@@ -25,6 +25,7 @@ define('BOT_EMAIL', '...');
 define('DEFAULT_CONFIG', [
     // 'password' => 'パスワードをここに設定する(コメントアウト(//を消すこと)すること)',
     'adminId' => 'dummy',
+    'zaimuId' => 'dummy',
     'eventSheetId' => 'dummy',
     'outputSheetId' => 'dummy',
     'shogyojiImageFolderId' => 'dummy',
@@ -36,24 +37,6 @@ define('DEFAULT_CONFIG', [
 
 /* 以下は基本的に変更しなくてよい --------------------------------------------------------- */
 
-// MySQLデータベースの設定(変更しなくてもよいもの)
-define('DB_CHARSET', 'utf8');
-define('MAIN_TABLE_NAME', 'bot_objects');
-define('LOG_TABLE_NAME', 'bot_logs');
-
-// Googleアカウントボットの設定
-define('CREDENTIALS_PATH', __DIR__ . '/credentials.json');
-
-// 画像用フォルダ
-define('IMAGE_FOLDER_PATH', __DIR__ . '/image/');
-define('IMAGE_FOLDER_URL', WEBHOOK_PARENT_URL . '/image/');
-
-// Googleドライブへアップロードできるかを試すテスト画像
-define('TEST_IMAGE_FILENAME', 'user-manual.jpg');
-
-// 佐々木の情報
-define('SSK_EMAIL', '...');
-
 // デバッグ時はtrue
-define('DEBUGGING', false);
-define('ENABLE_LOGGING', false);
+define('DEBUGGING', true);
+define('ENABLE_LOGGING', true);

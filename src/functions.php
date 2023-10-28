@@ -42,6 +42,23 @@ function stringToTime(string $string, string $date = '2022/1/1'): int | false
     return $time;
 }
 
+function stringToMonth(string $string): int | false
+{
+    $string = toHalfWidth($string);
+    $matches = [];
+    if (preg_match('/(?<year>(\d{4})?)\/?(?<month>\d{1,2})/', $string, $matches) === 0)
+        return false;
+
+    if ($matches['year'] === '') {
+        // 年の入力なし
+        $time = strtotime(date('Y') . "/{$matches['month']}/01");
+    } else {
+        $time = strtotime("{$matches['year']}/{$matches['month']}/01");
+    }
+
+    return $time;
+}
+
 function dateToDateStringWithDay(?int $date = null): string
 {
     if (!isset($date))
@@ -79,9 +96,22 @@ function dateToDay(int $date): string
     }
 }
 
+function monthToString(?int $month = null): string
+{
+    if (!isset($month))
+        $month = time();
+
+    return date('Y/m', $month);
+}
+
 function getDateAt0AM(?int $time = null): int|false
 {
     return strtotime(date('Y/m/d', $time));
+}
+
+function getMonthOn1st(?int $time = null): int|false
+{
+    return strtotime(date('Y/m/01', $time));
 }
 
 function toHalfWidth(string $string): string

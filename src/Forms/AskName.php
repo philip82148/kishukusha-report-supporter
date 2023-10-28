@@ -2,63 +2,64 @@
 
 namespace KishukushaReportSupporter\Forms;
 
-use KishukushaReportSupporter\FormTemplateBasic;
+use KishukushaReportSupporter\KishukushaReportSupporter;
+use KishukushaReportSupporter\UnsubmittableForm;
 
-class AskName extends FormTemplateBasic
+class AskName extends UnsubmittableForm
 {
-    public function form(array $message): void
+    public static function form(KishukushaReportSupporter $supporter, array $message): void
     {
         if ($message === []) {
             $message = '';
         } else {
             if ($message['type'] !== 'text') {
-                $this->supporter->askAgainBecauseWrongReply();
+                $supporter->askAgainBecauseWrongReply();
                 return;
             }
             $message = $message['text'];
         }
 
         // 一番最初
-        if (count($this->supporter->storage['phases']) === 0) {
+        if (count($supporter->storage['phases']) === 0) {
             // 質問文送信
-            if ($this->supporter->storage['userName'] === '') {
+            if ($supporter->storage['userName'] === '') {
                 // 名前がまだ登録されていない
-                $this->supporter->pushText("あなたの名前を和文フルネームで入力してください。
+                $supporter->pushText("あなたの名前を和文フルネームで入力してください。
 (初回のみ)
 例:山田 太郎
 ※スマホでLINE名が和文フルネームの場合はクイックリプライが使用できます。", true);
             } else {
                 // 名前が過去に登録されたことがある
-                $this->supporter->pushText("あなたの名前を和文フルネームで入力してください。
+                $supporter->pushText("あなたの名前を和文フルネームで入力してください。
 例:山田 太郎
-現在の登録名:{$this->supporter->storage['userName']}", true);
+現在の登録名:{$supporter->storage['userName']}", true);
             }
 
             // 選択肢表示
-            $profile = $this->supporter->fetchProfile();
+            $profile = $supporter->fetchProfile();
             if (isset($profile['displayName']))
-                $this->supporter->pushOptions(['(LINE名より)' => $profile['displayName']]);
-            $this->supporter->pushUnsavedAnswerOption('名前');
-            if ($this->supporter->storage['userName'] !== '') {
+                $supporter->pushOptions(['(LINE名より)' => $profile['displayName']]);
+            $supporter->pushUnsavedAnswerOption('名前');
+            if ($supporter->storage['userName'] !== '') {
                 // すでに一度登録済みなら、キャンセルを用意しておく
-                $this->supporter->pushOptions(['キャンセル']);
+                $supporter->pushOptions(['キャンセル']);
             }
 
-            $this->supporter->storage['phases'][] = 'askingName';
+            $supporter->storage['phases'][] = 'askingName';
             return;
         }
 
-        $lastPhase = $this->supporter->storage['phases'][count($this->supporter->storage['phases']) - 1];
+        $lastPhase = $supporter->storage['phases'][count($supporter->storage['phases']) - 1];
         if ($lastPhase === 'askingName') {
-            if ($this->storeOrAskAgain('ユーザー名', $message))
+            if (self::storeOrAskAgain($supporter, 'ユーザー名', $message))
                 return;
 
             // 質問
-            $name = $this->supporter->storage['unsavedAnswers']['名前'];
+            $name = $supporter->storage['unsavedAnswers']['名前'];
             // 質問文送信
-            if ($this->supporter->storage['userName'] === '') {
+            if ($supporter->storage['userName'] === '') {
                 // 名前がまだ登録されていない
-                $this->supporter->pushText("届出の際に使用する名前を以下で登録します。
+                $supporter->pushText("届出の際に使用する名前を以下で登録します。
 よろしいですか？
 (初回のみ)
 ※和文フルネームであることを確認してください。
@@ -68,7 +69,7 @@ class AskName extends FormTemplateBasic
 届出者氏名:{$name}", true);
             } else {
                 // 名前が過去に登録されたことがある
-                $this->supporter->pushText("届出の際に使用する名前を以下で登録します。
+                $supporter->pushText("届出の際に使用する名前を以下で登録します。
 よろしいですか？
 ※和文フルネームであることを確認してください。
 
@@ -76,40 +77,40 @@ class AskName extends FormTemplateBasic
             }
 
             // 選択肢
-            $this->supporter->pushOptions(['はい', '前の項目を修正する']);
-            if ($this->supporter->storage['userName'] !== '') {
+            $supporter->pushOptions(['はい', '前の項目を修正する']);
+            if ($supporter->storage['userName'] !== '') {
                 // 名前が登録されているときだけキャンセルを用意
-                $this->supporter->pushOptions(['キャンセル']);
+                $supporter->pushOptions(['キャンセル']);
             }
 
-            $this->supporter->storage['phases'][] = 'confirming';
+            $supporter->storage['phases'][] = 'confirming';
         } else {
             // 確認
             switch ($message) {
                 case 'はい':
-                    $this->supporter->storage['userName'] = $this->supporter->storage['unsavedAnswers']['名前'];
-                    $this->supporter->pushText('名前を登録しました。');
-                    $this->supporter->resetForm();
+                    $supporter->storage['userName'] = $supporter->storage['unsavedAnswers']['名前'];
+                    $supporter->pushText('名前を登録しました。');
+                    $supporter->resetForm();
                     return;
                 default:
-                    $this->supporter->askAgainBecauseWrongReply();
+                    $supporter->askAgainBecauseWrongReply();
                     return;
             }
         }
     }
 
-    protected function storeOrAskAgain(string $type, string|array $message): string
+    protected static function storeOrAskAgain(KishukushaReportSupporter $supporter, string $type, string|array $message): string
     {
         switch ($type) {
             case 'ユーザー名':
                 switch ($message) {
                     case 'はい':
                     case 'いいえ':
-                        $this->supporter->askAgainBecauseWrongReply();
+                        $supporter->askAgainBecauseWrongReply();
                         return 'wrong-reply';
                     default:
                         $message = preg_replace('/[\x00\s]++/u', ' ', $message);
-                        $this->supporter->storage['unsavedAnswers']['名前'] = $message;
+                        $supporter->storage['unsavedAnswers']['名前'] = $message;
                         return '';
                 }
         }
