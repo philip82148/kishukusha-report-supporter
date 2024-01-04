@@ -188,7 +188,43 @@ class Shogyoji extends SubmittableForm
             $message = $message['text'];
 
             if ($message !== '前の項目を修正する') {
-                if (self::storeOrAskAgain($supporter, '開催日(手動入力)', $message))
+                switch (self::storeOrAskAgain($supporter, '開催日(手動入力)', $message)) {
+                    case '':
+                        break;
+                    case 'past-date':
+                        $supporter->storage['phases'][] = 'confirmingStart';
+                    default:
+                        return;
+                }
+            }
+
+            // 質問
+            $supporter->pushText('出欠の種類を選択してください。', true);
+
+            // 選択肢
+            $supporter->pushOptions([
+                '欠席',
+                '遅刻',
+                '早退',
+                '遅刻と早退'
+            ], true);
+            $supporter->pushUnsavedAnswerOption('出欠');
+            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+
+            $supporter->storage['phases'][] = 'askingAttendance';
+            return;
+        } else if ($lastPhase === 'confirmingStart') {
+            if ($message['type'] !== 'text') {
+                $supporter->askAgainBecauseWrongReply();
+                return;
+            }
+            $message = $message['text'];
+
+            switch ($message) {
+                case 'はい':
+                    break;
+                default:
+                    $supporter->askAgainBecauseWrongReply();
                     return;
             }
 
@@ -205,6 +241,7 @@ class Shogyoji extends SubmittableForm
             $supporter->pushUnsavedAnswerOption('出欠');
             $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
 
+            array_pop($supporter->storage['phases']);
             $supporter->storage['phases'][] = 'askingAttendance';
             return;
         } else if ($lastPhase === 'askingAttendance') {
@@ -523,6 +560,16 @@ class Shogyoji extends SubmittableForm
                 $dateString = dateToDateStringWithDay($date);
                 $supporter->pushText("開催日:{$dateString}");
                 $supporter->storage['unsavedAnswers']['開催日'] = $dateString;
+
+                $today = getDateAt0AM();
+                if ($date < $today) {
+                    $supporter->pushText("過去の日付です。
+よろしいですか？", true);
+                    $supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);
+
+                    return 'past-date';
+                }
+
                 return '';
             case '出欠':
                 switch ($message) {
