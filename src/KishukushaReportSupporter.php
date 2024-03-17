@@ -223,7 +223,7 @@ VERSION\n", true);
                         ['valueInputOption' => 'USER_ENTERED']
                     );
                 } catch (\Throwable $e) {
-                    throw new ExceptionWrapper($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nシートが削除されたか、ボットに編集権限がない可能性があります。");
+                    throw new ExceptionWrapper($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nGoogleのサービスが一時的に利用できなかったか、シートが削除された、またはボットに編集権限がない可能性があります。");
                 }
 
                 try {
@@ -480,7 +480,7 @@ VERSION\n", true);
                 );
             }
         } catch (\Throwable $e) {
-            throw new ExceptionWrapper($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nシートが削除されたか、ボットに編集権限がない可能性があります。");
+            throw new ExceptionWrapper($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nGoogleのサービスが一時的に利用できなかったか、ボットに指定のシートの編集権限がない可能性があります。");
         }
 
         // 自分が管理者でない、かつ、承認が必要なら、管理者に通知
@@ -694,7 +694,7 @@ VERSION\n", true);
 
             return $this->googleIdToUrl($file->getId());
         } catch (\Throwable $e) {
-            throw new ExceptionWrapper($e, "画像のドライブへの保存に失敗しました。\nボットに指定のフォルダへのファイル追加権限がない可能性があります。");
+            throw new ExceptionWrapper($e, "画像のGoogleドライブへの保存に失敗しました。\nGoogleのサービスが一時的に利用できなかったか、ボットに指定のフォルダへのファイル追加権限がない可能性があります。");
         }
     }
 
