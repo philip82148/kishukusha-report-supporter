@@ -191,7 +191,7 @@ class KishukushaReportSupporter
         $this->pushText('新しくフォームに入力を始める場合は「回答を始める」と入力してください。
 
 ※クイックリプライはスマホでのみ利用できます。
-※このボットの利用を続けることで利用規約(https://github.com/philip82148/kishukusha-report-supporter/blob/main/terms-of-use.md)に同意したものとみなされます。
+※利用規約: https://github.com/philip82148/kishukusha-report-supporter/blob/main/terms-of-use.md
 
 (現在のバージョン:' . self::VERSION . ')', true);
         $this->pushOptions(['回答を始める']);
