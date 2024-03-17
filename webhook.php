@@ -59,7 +59,7 @@ foreach ($events as $event) {
     }
 
     // エラーメールの送信
-    if ($errorMessage) {
+    if (DEBUGGING && $errorMessage) {
         $to = SSK_EMAIL;
         $subject = '【寄宿舎届出サポート】エラーが発生しました。送信/返信が行われていない可能性があります。';
         $message = "<Error Message>

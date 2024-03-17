@@ -76,7 +76,7 @@ class KishukushaReportSupporter
             $this->storeStorage();
         } catch (\Throwable $e) {
             $msg = $e->getMessage();
-            $this->pushText("【エラー発生】
+            $this->pushText("【エラーが発生しました】
 {$msg}
 
 エラーが発生しました。
@@ -182,13 +182,11 @@ class KishukushaReportSupporter
         $this->resetStorage();
 
         // 質問
-        $this->pushText("新しくフォームに入力を始める場合は「回答を始める」と入力してください。
+        $this->pushText('新しくフォームに入力を始める場合は「回答を始める」と入力してください。
 
-このボットを使用した場合、風紀や財務への報告は自動で行われるため不要です。", true);
-        $this->pushText("※クイックリプライはスマホでのみ利用できます。
-※何らかのエラーが起こったときは佐々木に報告して、Google Formsを使用してください。
+※クイックリプライはスマホでのみ利用できます。
 
-VERSION\n", true);
+(現在のバージョン:' . self::VERSION . ')', true);
         $this->pushOptions(['回答を始める']);
     }
 
@@ -1255,10 +1253,6 @@ VERSION\n", true);
         // クイックリプライの追加
         if (isset($this->quickReply))
             $this->messages[$lastIndex]['quickReply'] = $this->quickReply;
-
-        // バージョン部分の書き換え
-        if (isset($this->messages[$lastIndex]['text']))
-            $this->messages[$lastIndex]['text'] = preg_replace('/VERSION\n$/', '(現在のバージョン:' . self::VERSION . ')', $this->messages[$lastIndex]['text']);
 
         // 質問があり、deleteStorage()されていなければ保存
         if ($this->questions !== [] && $this->storage !== []) {
