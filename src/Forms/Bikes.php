@@ -202,7 +202,7 @@ class Bikes extends SubmittableForm
         switch ($answers['車体の種類']) {
             case '自転車':
                 $supporter->pushText(
-                    "{$answers['届出提出者名']}(`{$profile['displayName']}`)が自転車・バイク配備届を提出しました。
+                    "{$answers['届出提出者名']}({$profile['displayName']})が自転車・バイク配備届を提出しました。
 (TS:{$timeStamp})
 
 チェック済み:
@@ -222,7 +222,7 @@ class Bikes extends SubmittableForm
             case 'バイク':
             case '原付':
                 $supporter->pushText(
-                    "{$answers['届出提出者名']}(`{$profile['displayName']}`)が自転車・バイク配備届を提出しました。
+                    "{$answers['届出提出者名']}({$profile['displayName']})が自転車・バイク配備届を提出しました。
 (TS:{$timeStamp})
 
 チェック済み:

@@ -20,9 +20,7 @@ class Chokigaihaku extends SubmittableForm
             $supporter->pushText("出舎日を4桁(年無し)または8桁(年有り)で入力してください。\n例:0731、{$year}0731", true);
 
             // 選択肢
-            $nextWeek = array_map(function ($i) {
-                return dateToDateStringWithDay(strtotime("+{$i} day"));
-            }, range(0, 6));
+            $nextWeek = array_map(fn ($i) => dateToDateStringWithDay(strtotime("+{$i} day")), range(0, 6));
             $supporter->pushOptions($nextWeek);
             $supporter->pushUnsavedAnswerOption('出舎日'); // ラベル変更
             $supporter->pushOptions(['キャンセル']);
@@ -50,9 +48,7 @@ class Chokigaihaku extends SubmittableForm
 
             // 選択肢
             $startDate = stringToDate($supporter->storage['unsavedAnswers']['出舎日']);
-            $nextWeek = array_map(function ($i) use ($startDate) {
-                return dateToDateStringWithDay(strtotime("+{$i} day", $startDate));
-            }, range(1, 7));
+            $nextWeek = array_map(fn ($i) => dateToDateStringWithDay(strtotime("+{$i} day", $startDate)), range(1, 7));
             $supporter->pushOptions($nextWeek);
 
             if (isset($supporter->storage['unsavedAnswers']['帰舎日']) && stringToDate($supporter->storage['unsavedAnswers']['帰舎日']) > $startDate)
@@ -254,7 +250,7 @@ class Chokigaihaku extends SubmittableForm
 
         if ($conflictingEvents !== '' || !$isDateInTerm) {
             $supporter->pushText(
-                "{$answers['氏名']}(`{$profile['displayName']}`)が長期外泊届を提出しました。
+                "{$answers['氏名']}({$profile['displayName']})が長期外泊届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
 (届出番号:{$receiptNo})
@@ -280,7 +276,7 @@ class Chokigaihaku extends SubmittableForm
         }
 
         $supporter->pushText(
-            "{$answers['氏名']}(`{$profile['displayName']}`)が長期外泊届を提出しました。
+            "{$answers['氏名']}({$profile['displayName']})が長期外泊届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
 (届出番号:{$receiptNo})
