@@ -37,7 +37,7 @@ class KishukushaReportSupporter
     private array $uniqueTextOptions;
     private array $lastQuestions;
     private ?array $lastQuickReply;
-    private static \Google_Client $googleClient;
+    private static \Google\Client $googleClient;
 
     // getEventInfo()用
     private array $lastEvent;
@@ -211,13 +211,13 @@ VERSION\n", true);
         switch ($message) {
             case '承認する':
                 try {
-                    $spreadsheetService = new \Google_Service_Sheets(self::getGoogleClient());
+                    $spreadsheetService = new \Google\Service\Sheets(self::getGoogleClient());
 
                     // 書き込み
                     $spreadsheetService->spreadsheets_values->update(
                         $this->config['outputSheetId'],
                         $lastPhase['checkboxRange'],
-                        new \Google_Service_Sheets_ValueRange([
+                        new \Google\Service\Sheets\ValueRange([
                             'values' => [['TRUE']]
                         ]),
                         ['valueInputOption' => 'USER_ENTERED']
@@ -360,7 +360,7 @@ VERSION\n", true);
                 $admin->pushText("{$adminType}が変更されました。", false, ['name' => $newAdminProfile['displayName'], 'iconUrl' => $newAdminProfile['pictureUrl'] ?? 'https://dummy.com/']);
                 $admin->pushOptions(['OK']);
                 $admin->confirmPush(true);
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
             }
         }
 
@@ -374,7 +374,7 @@ VERSION\n", true);
                 $fuki->pushText("{$adminType}が変更されました。", false, ['name' => $newFukiProfile['displayName'], 'iconUrl' => $newFukiProfile['pictureUrl'] ?? 'https://dummy.com/']);
                 $fuki->pushOptions(['OK']);
                 $fuki->confirmPush(true);
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
             }
         }
 
@@ -436,7 +436,7 @@ VERSION\n", true);
             }
 
             // スプレッドシートに書き込み
-            $spreadsheetService = new \Google_Service_Sheets(self::getGoogleClient());
+            $spreadsheetService = new \Google\Service\Sheets(self::getGoogleClient());
 
             // 結果を追加
             $response = $this->appendToResultSheets($this->storage['formType'], $appendRow, $spreadsheetService);
@@ -458,7 +458,7 @@ VERSION\n", true);
                 // チェックボックス追加
                 $spreadsheetService->spreadsheets->batchUpdate(
                     $this->config['outputSheetId'],
-                    new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
+                    new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
                         'requests' => [
                             'setDataValidation' => [
                                 'range' =>  [
@@ -511,7 +511,7 @@ VERSION\n", true);
         }
     }
 
-    private function appendToResultSheets(string $formType, array $row, \Google_Service_Sheets $spreadsheetService, string $resultSheetId = null): \Google_Service_Sheets_AppendValuesResponse
+    private function appendToResultSheets(string $formType, array $row, \Google\Service\Sheets $spreadsheetService, string $resultSheetId = null): \Google\Service\Sheets\AppendValuesResponse
     {
         if (!isset($resultSheetId))
             $resultSheetId = $this->config['outputSheetId'];
@@ -525,7 +525,7 @@ VERSION\n", true);
             $response = $spreadsheetService->spreadsheets_values->append(
                 $resultSheetId,
                 "'{$formType}'!A1",
-                new \Google_Service_Sheets_ValueRange([
+                new \Google\Service\Sheets\ValueRange([
                     'values' => [$row]
                 ]),
                 ['valueInputOption' => 'USER_ENTERED']
@@ -537,7 +537,7 @@ VERSION\n", true);
         // シートが存在しない->作成
         $response = $spreadsheetService->spreadsheets->batchUpdate(
             $resultSheetId,
-            new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
+            new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
                 'requests' => [
                     'addSheet' => [
                         'properties' => [
@@ -553,9 +553,9 @@ VERSION\n", true);
         $header = array_merge(['タイムスタンプ'], self::FORMS[$formType]::HEADER);
         $spreadsheetService->spreadsheets->batchUpdate(
             $this->config['outputSheetId'],
-            new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
+            new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
                 'requests' => [
-                    new \Google_Service_Sheets_Request([
+                    new \Google\Service\Sheets\Request([
                         'update_sheet_properties' => [
                             'properties' => [
                                 'sheet_id' => $sheetId,
@@ -564,7 +564,7 @@ VERSION\n", true);
                             'fields' => 'gridProperties.frozenRowCount'
                         ],
                     ]),
-                    new \Google_Service_Sheets_Request([
+                    new \Google\Service\Sheets\Request([
                         'updateDimensionProperties' => [
                             'range' =>  [
                                 'sheetId' => $sheetId,
@@ -586,7 +586,7 @@ VERSION\n", true);
         $response = $spreadsheetService->spreadsheets_values->append(
             $resultSheetId,
             "'{$formType}'!A1",
-            new \Google_Service_Sheets_ValueRange([
+            new \Google\Service\Sheets\ValueRange([
                 'values' => [$header, $row]
             ]),
             ['valueInputOption' => 'USER_ENTERED']
@@ -595,7 +595,7 @@ VERSION\n", true);
         return $response;
     }
 
-    private function getSheetId(\Google_Service_Sheets_Spreadsheet $spreadsheet, string $sheetName): ?int
+    private function getSheetId(\Google\Service\Sheets\Spreadsheet $spreadsheet, string $sheetName): ?int
     {
         foreach ($spreadsheet->getSheets() as $sheet) {
             if ($sheet['properties']['title'] !== $sheetName) continue;
@@ -646,7 +646,7 @@ VERSION\n", true);
     {
         try {
             // ドライブに保存
-            $driveService = new \Google_Service_Drive(self::getGoogleClient());
+            $driveService = new \Google\Service\Drive(self::getGoogleClient());
 
             // フォルダー名がある場合は検索、無い場合は作成する
             if (isset($folderName)) {
@@ -665,7 +665,7 @@ VERSION\n", true);
                     $parentFolderId = $driveFiles[0]->getId();
                 } else {
                     // ない->作成
-                    $file = $driveService->files->create(new \Google_Service_Drive_DriveFile([
+                    $file = $driveService->files->create(new \Google\Service\Drive\DriveFile([
                         'name' => $folderName, // なんかバリデーションは要らないらしい
                         'mimeType' => 'application/vnd.google-apps.folder',
                         'parents' => [$folderId],
@@ -679,7 +679,7 @@ VERSION\n", true);
                 $parentFolderId = $folderId;
             }
 
-            $file = $driveService->files->create(new \Google_Service_Drive_DriveFile([
+            $file = $driveService->files->create(new \Google\Service\Drive\DriveFile([
                 'name' => $driveFilename, // なんかバリデーションは要らないらしい
                 'parents' => [$parentFolderId],
             ]), [
@@ -715,7 +715,7 @@ VERSION\n", true);
         try {
             // データベースに無かった
             // スプレッドシートから取得
-            $spreadsheetService = new \Google_Service_Sheets(self::getGoogleClient());
+            $spreadsheetService = new \Google\Service\Sheets(self::getGoogleClient());
 
             // 読み取り
             $valueRange = $spreadsheetService->spreadsheets_values->get($this->config['eventSheetId'], "'行事'!A1:C", [
@@ -773,7 +773,7 @@ VERSION\n", true);
             switch ($type) {
                 case 'eventSheetId':
                 case 'outputSheetId':
-                    $spreadsheetService = new \Google_Service_Sheets(self::getGoogleClient());
+                    $spreadsheetService = new \Google\Service\Sheets(self::getGoogleClient());
                     if ($type === 'eventSheetId') {
                         // 読み取り
                         $valueRange = $spreadsheetService->spreadsheets_values->get($id, "'行事'!A1:C");
@@ -787,7 +787,7 @@ VERSION\n", true);
                     break;
                 case 'shogyojiImageFolderId':
                     $fileId = $this->saveToDrive(TEST_IMAGE_FILENAME, 'テスト', $id, null, true);
-                    $driveService = new \Google_Service_Drive(self::getGoogleClient());
+                    $driveService = new \Google\Service\Drive(self::getGoogleClient());
                     $driveService->files->delete($fileId, ['supportsAllDrives' => true]);
                     break;
                 case 'generalImageFolderId':
@@ -795,18 +795,18 @@ VERSION\n", true);
                     break;
             }
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
     }
 
-    public static function getGoogleClient(): \Google_Client
+    public static function getGoogleClient(): \Google\Client
     {
         if (!isset(self::$googleClient)) {
-            self::$googleClient = new \Google_Client();
+            self::$googleClient = new \Google\Client();
             self::$googleClient->setScopes([
-                \Google_Service_Sheets::SPREADSHEETS, // スプレッドシート
-                \Google_Service_Sheets::DRIVE, // ドライブ
+                \Google\Service\Sheets::SPREADSHEETS, // スプレッドシート
+                \Google\Service\Sheets::DRIVE, // ドライブ
             ]);
             self::$googleClient->setAuthConfig(CREDENTIALS_PATH);
         }

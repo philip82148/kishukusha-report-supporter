@@ -649,7 +649,7 @@ class Shogyoji extends SubmittableForm
         $database->store('shogyojiImages', $shogyojiImages);
 
         // 削除
-        $drive = new \Google_Service_Drive(KishukushaReportSupporter::getGoogleClient());
+        $drive = new \Google\Service\Drive(KishukushaReportSupporter::getGoogleClient());
         $deletedFileUrls = 'Nothing';
         $failureMessage = '';
         foreach ($idsToDelete as $i => $id) {
