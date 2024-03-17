@@ -10,7 +10,8 @@ class UserManual extends UnsubmittableForm
     public static function form(KishukushaReportSupporter $supporter, array $message): void
     {
         $supporter->pushText(USER_MANUAL);
-        $supporter->pushImage(USER_MANUAL_PHOTO_URL);
+        $url = $supporter->openAccessToImage(USER_MANUAL_PHOTO_FILENAME);
+        $supporter->pushImage($url);
         $supporter->resetForm();
     }
 }

@@ -77,9 +77,7 @@ class Shogyoji extends SubmittableForm
                     // 選択肢
                     // 取得した行事を選択肢に加える(ただし、舎生大会と委員会は除く)
                     $events = array_keys($supporter->storage['cache']['passedEventsToDates']);
-                    $events = array_filter($events, function ($event) {
-                        return $event !== '舎生大会' && $event !== '委員会';
-                    });
+                    $events = array_filter($events, fn ($event) => $event !== '舎生大会' && $event !== '委員会');
                     $events = array_slice($events, 0, 10);
 
                     $supporter->pushUnsavedAnswerOption('委員会行事');
@@ -489,7 +487,7 @@ class Shogyoji extends SubmittableForm
 
         // 全文生成
         if ($messageAboutDate !== '' || $messageAboutEvent !== '') {
-            $message = "{$answers['氏名']}(`{$profile['displayName']}`)が舎生大会・諸行事届を提出しました。
+            $message = "{$answers['氏名']}({$profile['displayName']})が舎生大会・諸行事届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
 (届出番号:{$receiptNo})
@@ -503,7 +501,7 @@ class Shogyoji extends SubmittableForm
 
 未チェックの項目:";
         } else {
-            $message = "{$answers['氏名']}(`{$profile['displayName']}`)が舎生大会・諸行事届を提出しました。
+            $message = "{$answers['氏名']}({$profile['displayName']})が舎生大会・諸行事届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
 (届出番号:{$receiptNo})
@@ -649,7 +647,7 @@ class Shogyoji extends SubmittableForm
         $database->store('shogyojiImages', $shogyojiImages);
 
         // 削除
-        $drive = new \Google_Service_Drive(KishukushaReportSupporter::getGoogleClient());
+        $drive = new \Google\Service\Drive(KishukushaReportSupporter::getGoogleClient());
         $deletedFileUrls = 'Nothing';
         $failureMessage = '';
         foreach ($idsToDelete as $i => $id) {

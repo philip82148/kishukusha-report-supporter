@@ -6,7 +6,7 @@ use KishukushaReportSupporter\Forms;
 
 class KishukushaReportSupporter
 {
-    public const VERSION = '1.0.2';
+    public const VERSION = '1.1.0';
 
     /* 届出を追加する際はここの編集とsrc/Formsフォルダへのファイルの追加が必要 */
     public const FORMS = [
@@ -31,13 +31,18 @@ class KishukushaReportSupporter
 
     private string $replyToken;
     private string $pushUserId;
+
     private array $messages;
     private array $questions;
     private ?array $quickReply;
+    private array $imagesToOpenAccess;
     private array $uniqueTextOptions;
+
     private array $lastQuestions;
     private ?array $lastQuickReply;
-    private static \Google_Client $googleClient;
+    private array $lastImagesToOpenAccess;
+
+    private static \Google\Client $googleClient;
 
     // getEventInfo()用
     private array $lastEvent;
@@ -56,6 +61,7 @@ class KishukushaReportSupporter
         // storageの方が書き換わっても、setLastQuestions()したときは必ず前回の質問になる
         $this->lastQuestions = $this->storage['lastQuestions'];
         $this->lastQuickReply = $this->storage['lastQuickReply'];
+        $this->lastImagesToOpenAccess = $this->storage['lastImagesToOpenAccess'];
 
         // getEventInfo()用
         $this->lastStorageUpdatedTime = $this->getLastStorageUpdatedTime();
@@ -75,16 +81,17 @@ class KishukushaReportSupporter
             $this->confirmReply();
             $this->storeStorage();
         } catch (\Throwable $e) {
-            $this->pushText("エラー内容:
-{$e}
+            $msg = $e->getMessage();
+            $this->pushText("【エラーが発生しました】
+{$msg}
 
 エラーが発生しました。
-もう一度試してください。
-何度試してもエラーになる場合はGoogle Formsを使用し、エラーの発生を佐々木に報告してください。");
+もう一度試してください。");
             $this->setLastQuestions();
             $this->confirmReply();
             // storageは保存しない
-            throw new \RuntimeException('メッセージの送信は完了しています。');
+
+            throw $e;
         } finally {
             $this->lastEvent = $event;
         }
@@ -181,13 +188,12 @@ class KishukushaReportSupporter
         $this->resetStorage();
 
         // 質問
-        $this->pushText("新しくフォームに入力を始める場合は「回答を始める」と入力してください。
+        $this->pushText('新しくフォームに入力を始める場合は「回答を始める」と入力してください。
 
-このボットを使用した場合、風紀や財務への報告は自動で行われるため不要です。", true);
-        $this->pushText("※クイックリプライはスマホでのみ利用できます。
-※何らかのエラーが起こったときは佐々木に報告して、Google Formsを使用してください。
+※クイックリプライはスマホでのみ利用できます。
+※このボットの利用を続けることで利用規約(https://github.com/philip82148/kishukusha-report-supporter/blob/main/terms-of-use.md)に同意したものとみなされます。
 
-VERSION\n", true);
+(現在のバージョン:' . self::VERSION . ')', true);
         $this->pushOptions(['回答を始める']);
     }
 
@@ -210,19 +216,19 @@ VERSION\n", true);
         switch ($message) {
             case '承認する':
                 try {
-                    $spreadsheetService = new \Google_Service_Sheets(self::getGoogleClient());
+                    $spreadsheetService = new \Google\Service\Sheets(self::getGoogleClient());
 
                     // 書き込み
                     $spreadsheetService->spreadsheets_values->update(
                         $this->config['outputSheetId'],
                         $lastPhase['checkboxRange'],
-                        new \Google_Service_Sheets_ValueRange([
+                        new \Google\Service\Sheets\ValueRange([
                             'values' => [['TRUE']]
                         ]),
                         ['valueInputOption' => 'USER_ENTERED']
                     );
                 } catch (\Throwable $e) {
-                    throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nシートが削除されたか、ボットに編集権限がない可能性があります。");
+                    throw new ExceptionWrapper($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nGoogleのサービスが一時的に利用できなかったか、シートが削除された、またはボットに編集権限がない可能性があります。");
                 }
 
                 try {
@@ -234,13 +240,13 @@ VERSION\n", true);
                     $this->confirmPush(true);
                 } catch (\Throwable $e) {
                     $this->initReply();
-                    throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書き込みは成功しましたが、本人への通知中にエラーが発生しました。\nもう一度「承認する」を押すと本人への通知のみを再試行します。");
+                    throw new ExceptionWrapper($e, "スプレッドシートへの書き込みは成功しましたが、本人への通知中にエラーが発生しました。\nもう一度「承認する」を押すと本人への通知のみを再試行します。");
                 }
 
                 $this->restoreStorage();
                 if (count($this->storage['adminPhase']) !== $unapprovedFormCount) {
                     $e = new \RuntimeException('New form submitted during approval');
-                    throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書きこみ及び本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の承認操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認してください(再度書きこみと通知が行われます)。");
+                    throw new ExceptionWrapper($e, "スプレッドシートへの書きこみ及び本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の承認操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認してください(再度書きこみと通知が行われます)。");
                 }
 
                 // 管理者への通知
@@ -268,7 +274,7 @@ VERSION\n", true);
                 $this->restoreStorage();
                 if (count($this->storage['adminPhase']) !== $unapprovedFormCount) {
                     $e = new \RuntimeException('New form submitted during approval');
-                    throw new BottomMessageExceptionWrapper($e, "本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認/非承認を行ってください(再度通知が行われます)。");
+                    throw new ExceptionWrapper($e, "本人への通知に成功しましたが、その最中に新たな申請がありました。\nデータの衝突を避けるために今回の操作は記録されません。\n届出番号{$lastPhase['receiptNo']}の{$lastPhase['userName']}の{$lastPhase['formType']}は後でもう一度承認/非承認を行ってください(再度通知が行われます)。");
                 }
 
                 // 管理者への通知
@@ -285,16 +291,18 @@ VERSION\n", true);
                 }
 
                 // 次に最後の質問を聞く
-                $this->setLastQuestions($lastPhase['lastQuestions'], $lastPhase['lastQuickReply']);
+                $this->setLastQuestions($lastPhase['lastQuestions'], $lastPhase['lastQuickReply'], $lastPhase['lastImagesToOpenAccess']);
                 array_pop($this->storage['adminPhase']);
 
                 // adminPhaseの一番最後の質問の保持
                 $lastLastQuestions = $this->storage['adminPhase'][0]['lastQuestions'];
                 $lastLastQuickReply = $this->storage['adminPhase'][0]['lastQuickReply'];
+                $lastLastImagesToOpenAccess = $this->storage['adminPhase'][0]['lastImagesToOpenAccess'];
 
                 // この前に聞いた質問を一番最初へ
                 $this->storage['adminPhase'][0]['lastQuestions'] = $this->storage['lastQuestions'];
                 $this->storage['adminPhase'][0]['lastQuickReply'] = $this->storage['lastQuickReply'];
+                $this->storage['adminPhase'][0]['lastImagesToOpenAccess'] = $this->storage['lastImagesToOpenAccess'];
 
                 // この前に聞いた質問の答えをそれよりも前へ
                 array_unshift($this->storage['adminPhase'], $lastPhase);
@@ -302,13 +310,15 @@ VERSION\n", true);
                 // adminPhaseの一番最後の質問を戻す
                 $this->storage['adminPhase'][0]['lastQuestions'] = $lastLastQuestions;
                 $this->storage['adminPhase'][0]['lastQuickReply'] = $lastLastQuickReply;
+                $this->storage['adminPhase'][0]['lastImagesToOpenAccess'] = $lastLastImagesToOpenAccess;
+
                 return true;
             default:
                 $this->askAgainBecauseWrongReply();
                 return true;
         }
         // 管理者への通知(続き)
-        $this->setLastQuestions($lastPhase['lastQuestions'], $lastPhase['lastQuickReply']);
+        $this->setLastQuestions($lastPhase['lastQuestions'], $lastPhase['lastQuickReply'], $lastPhase['lastImagesToOpenAccess']);
         array_pop($this->storage['adminPhase']);
 
         return true;
@@ -359,7 +369,7 @@ VERSION\n", true);
                 $admin->pushText("{$adminType}が変更されました。", false, ['name' => $newAdminProfile['displayName'], 'iconUrl' => $newAdminProfile['pictureUrl'] ?? 'https://dummy.com/']);
                 $admin->pushOptions(['OK']);
                 $admin->confirmPush(true);
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
             }
         }
 
@@ -373,7 +383,7 @@ VERSION\n", true);
                 $fuki->pushText("{$adminType}が変更されました。", false, ['name' => $newFukiProfile['displayName'], 'iconUrl' => $newFukiProfile['pictureUrl'] ?? 'https://dummy.com/']);
                 $fuki->pushOptions(['OK']);
                 $fuki->confirmPush(true);
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
             }
         }
 
@@ -391,11 +401,12 @@ VERSION\n", true);
         unset($admin->storage['adminPhase']);
         if (!empty($adminPhase)) {
             // adminの前回の質問を引き継ぐ(なおここで'OK'の選択肢は削除される)
-            $this->setLastQuestions($admin->storage['lastQuestions'], $admin->storage['lastQuickReply']);
+            $this->setLastQuestions($admin->storage['lastQuestions'], $admin->storage['lastQuickReply'], $admin->storage['lastImagesToOpenAccess']);
 
             // adminPhaseの一番最後の質問を元adminに返す
             $admin->storage['lastQuestions'] = $adminPhase[0]['lastQuestions'];
             $admin->storage['lastQuickReply'] = $adminPhase[0]['lastQuickReply'];
+            $admin->storage['lastImagesToOpenAccess'] = $adminPhase[0]['lastImagesToOpenAccess'];
 
             // 元管理者が存在しなければ保存はしない
             if ($admin->doesThisExist())
@@ -407,6 +418,7 @@ VERSION\n", true);
             // 新adminのlastQuestionsは上のsetLastQuestionsでこの後書き換えられる
             $adminPhase[0]['lastQuestions'] = $this->storage['lastQuestions'];
             $adminPhase[0]['lastQuickReply'] = $this->storage['lastQuickReply'];
+            $adminPhase[0]['lastImagesToOpenAccess'] = $this->storage['lastImagesToOpenAccess'];
 
             $this->storage['adminPhase'] = array_merge($this->storage['adminPhase'], $adminPhase);
         } else {
@@ -435,7 +447,7 @@ VERSION\n", true);
             }
 
             // スプレッドシートに書き込み
-            $spreadsheetService = new \Google_Service_Sheets(self::getGoogleClient());
+            $spreadsheetService = new \Google\Service\Sheets(self::getGoogleClient());
 
             // 結果を追加
             $response = $this->appendToResultSheets($this->storage['formType'], $appendRow, $spreadsheetService);
@@ -457,7 +469,7 @@ VERSION\n", true);
                 // チェックボックス追加
                 $spreadsheetService->spreadsheets->batchUpdate(
                     $this->config['outputSheetId'],
-                    new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
+                    new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
                         'requests' => [
                             'setDataValidation' => [
                                 'range' =>  [
@@ -479,7 +491,7 @@ VERSION\n", true);
                 );
             }
         } catch (\Throwable $e) {
-            throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nシートが削除されたか、ボットに編集権限がない可能性があります。");
+            throw new ExceptionWrapper($e, "スプレッドシートへの書き込み中にエラーが発生しました。\nGoogleのサービスが一時的に利用できなかったか、ボットに指定のシートの編集権限がない可能性があります。");
         }
 
         // 自分が管理者でない、かつ、承認が必要なら、管理者に通知
@@ -488,7 +500,7 @@ VERSION\n", true);
             try {
                 $receiptNo = $admin->notifySubmittedForm($this, $answers, $timeStamp, $checkboxRange ?? '', $adminType);
             } catch (\Throwable $e) {
-                throw new BottomMessageExceptionWrapper($e, "スプレッドシートへの書き込みは成功しましたが、{$adminType}への通知中にエラーが発生しました。");
+                throw new ExceptionWrapper($e, "スプレッドシートへの書き込みは成功しましたが、{$adminType}への通知中にエラーが発生しました。");
             }
         }
 
@@ -510,7 +522,7 @@ VERSION\n", true);
         }
     }
 
-    private function appendToResultSheets(string $formType, array $row, \Google_Service_Sheets $spreadsheetService, string $resultSheetId = null): \Google_Service_Sheets_AppendValuesResponse
+    private function appendToResultSheets(string $formType, array $row, \Google\Service\Sheets $spreadsheetService, string $resultSheetId = null): \Google\Service\Sheets\AppendValuesResponse
     {
         if (!isset($resultSheetId))
             $resultSheetId = $this->config['outputSheetId'];
@@ -524,7 +536,7 @@ VERSION\n", true);
             $response = $spreadsheetService->spreadsheets_values->append(
                 $resultSheetId,
                 "'{$formType}'!A1",
-                new \Google_Service_Sheets_ValueRange([
+                new \Google\Service\Sheets\ValueRange([
                     'values' => [$row]
                 ]),
                 ['valueInputOption' => 'USER_ENTERED']
@@ -536,7 +548,7 @@ VERSION\n", true);
         // シートが存在しない->作成
         $response = $spreadsheetService->spreadsheets->batchUpdate(
             $resultSheetId,
-            new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
+            new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
                 'requests' => [
                     'addSheet' => [
                         'properties' => [
@@ -552,9 +564,9 @@ VERSION\n", true);
         $header = array_merge(['タイムスタンプ'], self::FORMS[$formType]::HEADER);
         $spreadsheetService->spreadsheets->batchUpdate(
             $this->config['outputSheetId'],
-            new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest([
+            new \Google\Service\Sheets\BatchUpdateSpreadsheetRequest([
                 'requests' => [
-                    new \Google_Service_Sheets_Request([
+                    new \Google\Service\Sheets\Request([
                         'update_sheet_properties' => [
                             'properties' => [
                                 'sheet_id' => $sheetId,
@@ -563,7 +575,7 @@ VERSION\n", true);
                             'fields' => 'gridProperties.frozenRowCount'
                         ],
                     ]),
-                    new \Google_Service_Sheets_Request([
+                    new \Google\Service\Sheets\Request([
                         'updateDimensionProperties' => [
                             'range' =>  [
                                 'sheetId' => $sheetId,
@@ -585,7 +597,7 @@ VERSION\n", true);
         $response = $spreadsheetService->spreadsheets_values->append(
             $resultSheetId,
             "'{$formType}'!A1",
-            new \Google_Service_Sheets_ValueRange([
+            new \Google\Service\Sheets\ValueRange([
                 'values' => [$header, $row]
             ]),
             ['valueInputOption' => 'USER_ENTERED']
@@ -594,7 +606,7 @@ VERSION\n", true);
         return $response;
     }
 
-    private function getSheetId(\Google_Service_Sheets_Spreadsheet $spreadsheet, string $sheetName): ?int
+    private function getSheetId(\Google\Service\Sheets\Spreadsheet $spreadsheet, string $sheetName): ?int
     {
         foreach ($spreadsheet->getSheets() as $sheet) {
             if ($sheet['properties']['title'] !== $sheetName) continue;
@@ -630,7 +642,8 @@ VERSION\n", true);
                 'checkboxRange' => $checkboxRange,
                 'adminType' => $adminType,
                 'lastQuickReply' => $this->storage['lastQuickReply'],
-                'lastQuestions' => $this->storage['lastQuestions']
+                'lastQuestions' => $this->storage['lastQuestions'],
+                'lastImagesToOpenAccess' => $this->storage['lastImagesToOpenAccess']
             ];
             $this->confirmPush(true);
             $this->storeStorage();
@@ -645,7 +658,7 @@ VERSION\n", true);
     {
         try {
             // ドライブに保存
-            $driveService = new \Google_Service_Drive(self::getGoogleClient());
+            $driveService = new \Google\Service\Drive(self::getGoogleClient());
 
             // フォルダー名がある場合は検索、無い場合は作成する
             if (isset($folderName)) {
@@ -664,7 +677,7 @@ VERSION\n", true);
                     $parentFolderId = $driveFiles[0]->getId();
                 } else {
                     // ない->作成
-                    $file = $driveService->files->create(new \Google_Service_Drive_DriveFile([
+                    $file = $driveService->files->create(new \Google\Service\Drive\DriveFile([
                         'name' => $folderName, // なんかバリデーションは要らないらしい
                         'mimeType' => 'application/vnd.google-apps.folder',
                         'parents' => [$folderId],
@@ -678,7 +691,7 @@ VERSION\n", true);
                 $parentFolderId = $folderId;
             }
 
-            $file = $driveService->files->create(new \Google_Service_Drive_DriveFile([
+            $file = $driveService->files->create(new \Google\Service\Drive\DriveFile([
                 'name' => $driveFilename, // なんかバリデーションは要らないらしい
                 'parents' => [$parentFolderId],
             ]), [
@@ -693,7 +706,7 @@ VERSION\n", true);
 
             return $this->googleIdToUrl($file->getId());
         } catch (\Throwable $e) {
-            throw new BottomMessageExceptionWrapper($e, "画像のドライブへの保存に失敗しました。\nボットに指定のフォルダへのファイル追加権限がない可能性があります。");
+            throw new ExceptionWrapper($e, "画像のGoogleドライブへの保存に失敗しました。\nGoogleのサービスが一時的に利用できなかったか、ボットに指定のフォルダへのファイル追加権限がない可能性があります。");
         }
     }
 
@@ -714,7 +727,7 @@ VERSION\n", true);
         try {
             // データベースに無かった
             // スプレッドシートから取得
-            $spreadsheetService = new \Google_Service_Sheets(self::getGoogleClient());
+            $spreadsheetService = new \Google\Service\Sheets(self::getGoogleClient());
 
             // 読み取り
             $valueRange = $spreadsheetService->spreadsheets_values->get($this->config['eventSheetId'], "'行事'!A1:C", [
@@ -749,7 +762,7 @@ VERSION\n", true);
 
             return $events;
         } catch (\Throwable $e) {
-            throw new BottomMessageExceptionWrapper($e, '行事データの読み込みに失敗しました。');
+            throw new ExceptionWrapper($e, '行事データの読み込みに失敗しました。');
         }
     }
 
@@ -772,7 +785,7 @@ VERSION\n", true);
             switch ($type) {
                 case 'eventSheetId':
                 case 'outputSheetId':
-                    $spreadsheetService = new \Google_Service_Sheets(self::getGoogleClient());
+                    $spreadsheetService = new \Google\Service\Sheets(self::getGoogleClient());
                     if ($type === 'eventSheetId') {
                         // 読み取り
                         $valueRange = $spreadsheetService->spreadsheets_values->get($id, "'行事'!A1:C");
@@ -786,7 +799,7 @@ VERSION\n", true);
                     break;
                 case 'shogyojiImageFolderId':
                     $fileId = $this->saveToDrive(TEST_IMAGE_FILENAME, 'テスト', $id, null, true);
-                    $driveService = new \Google_Service_Drive(self::getGoogleClient());
+                    $driveService = new \Google\Service\Drive(self::getGoogleClient());
                     $driveService->files->delete($fileId, ['supportsAllDrives' => true]);
                     break;
                 case 'generalImageFolderId':
@@ -794,18 +807,18 @@ VERSION\n", true);
                     break;
             }
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
     }
 
-    public static function getGoogleClient(): \Google_Client
+    public static function getGoogleClient(): \Google\Client
     {
         if (!isset(self::$googleClient)) {
-            self::$googleClient = new \Google_Client();
+            self::$googleClient = new \Google\Client();
             self::$googleClient->setScopes([
-                \Google_Service_Sheets::SPREADSHEETS, // スプレッドシート
-                \Google_Service_Sheets::DRIVE, // ドライブ
+                \Google\Service\Sheets::SPREADSHEETS, // スプレッドシート
+                \Google\Service\Sheets::DRIVE, // ドライブ
             ]);
             self::$googleClient->setAuthConfig(CREDENTIALS_PATH);
         }
@@ -928,6 +941,7 @@ VERSION\n", true);
         $this->messages = [];
         $this->questions = [];
         $this->quickReply = null;
+        $this->imagesToOpenAccess = [];
         $this->uniqueTextOptions = [];
     }
 
@@ -1145,7 +1159,7 @@ VERSION\n", true);
         $this->setLastQuestions();
     }
 
-    public function setLastQuestions(?array $questions = null, ?array $quickReply = null): void
+    public function setLastQuestions(?array $questions = null, ?array $quickReply = null, ?array $imagesToOpenAccess = null): void
     {
         // confirmReply/Push後に呼び出されるとstorageの方は書き変わっている可能性があるので、
         // プロパティを使う。これで確実に前回の質問
@@ -1153,9 +1167,14 @@ VERSION\n", true);
             $questions = $this->lastQuestions;
         if (!isset($quickReply))
             $quickReply = $this->lastQuickReply;
+        if (!isset($imagesToOpenAccess))
+            $imagesToOpenAccess = $this->lastImagesToOpenAccess;
 
         $this->questions = $questions;
         $this->quickReply = $quickReply;
+
+        $this->imagesToOpenAccess = [];
+        array_walk($imagesToOpenAccess, fn ($expirationTime, $filename) => $this->openAccessToImage($filename));
     }
 
     public function confirmReply(): void
@@ -1189,7 +1208,7 @@ VERSION\n", true);
             // 400番台のエラーは再試行しても変わらないのでthrow
             if (++$retryCount >= 4 || ($statusCode >= 400 && $statusCode < 500)) {
                 $e = new \RuntimeException(curl_error($ch) . "\nRetry Count:{$retryCount}\n{$response}");
-                throw new BottomMessageExceptionWrapper($e, "返信処理に失敗しました。");
+                throw new ExceptionWrapper($e, "返信処理に失敗しました。");
             }
 
             sleep(2 ** $retryCount);
@@ -1255,14 +1274,11 @@ VERSION\n", true);
         if (isset($this->quickReply))
             $this->messages[$lastIndex]['quickReply'] = $this->quickReply;
 
-        // バージョン部分の書き換え
-        if (isset($this->messages[$lastIndex]['text']))
-            $this->messages[$lastIndex]['text'] = preg_replace('/VERSION\n$/', '(現在のバージョン:' . self::VERSION . ')', $this->messages[$lastIndex]['text']);
-
         // 質問があり、deleteStorage()されていなければ保存
         if ($this->questions !== [] && $this->storage !== []) {
             $this->storage['lastQuestions'] = $this->questions;
-            $this->storage['lastQuickReply'] = $this->quickReply ?? null;
+            $this->storage['lastQuickReply'] = $this->quickReply;
+            $this->storage['lastImagesToOpenAccess'] = $this->imagesToOpenAccess;
         }
 
         return true;
@@ -1286,7 +1302,7 @@ VERSION\n", true);
 
         if ($errno !== CURLE_OK) {
             $e = new \RuntimeException($error);
-            throw new BottomMessageExceptionWrapper($e, '画像処理に失敗しました。');
+            throw new ExceptionWrapper($e, '画像処理に失敗しました。');
         }
 
         // ファイル書き込み
@@ -1294,10 +1310,22 @@ VERSION\n", true);
         return $filename;
     }
 
-    public function getImageUrl(string $filename): string
+    public function openAccessToImage($filename): string
     {
-        // imageの取得に署名が必要になったらphpで処理する
-        return IMAGE_FOLDER_URL . $filename;
+        $this->imagesToOpenAccess[$filename] = date("Y/m/d H:i:s", strtotime("+1 minute"));
+
+        return WEBHOOK_PARENT_URL . "/image.php?userId={$this->userId}&filename={$filename}";
+    }
+
+    public function isAccessibleImage($filename): bool
+    {
+        if (!isset($this->storage['lastImagesToOpenAccess'][$filename])) return false;
+
+        $now = time();
+        $expirationTime = $this->storage['lastImagesToOpenAccess'][$filename];
+        if ($now >= $expirationTime) return false;
+
+        return true;
     }
 
     private function fetchPushMessageCount(): int|false
@@ -1356,6 +1384,7 @@ VERSION\n", true);
             'formType' => $storage['formType'] ?? '',
             'unsavedAnswers' => $storage['unsavedAnswers'] ?? [],
             'lastQuickReply' => $storage['lastQuickReply'] ?? null,
+            'lastImagesToOpenAccess' => $storage['lastImagesToOpenAccess'] ?? [],
             'phases' => $storage['phases'] ?? [],
             'cache' => $storage['cache'] ?? [],
             'userName' => $storage['userName'] ?? '',
