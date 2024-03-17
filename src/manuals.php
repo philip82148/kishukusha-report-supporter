@@ -21,7 +21,7 @@ define(
 9.ボットをブロックするとボットに登録された全ての情報が消える。"
 );
 
-define('USER_MANUAL_PHOTO_URL', IMAGE_FOLDER_URL . 'user-manual.jpg');
+define('USER_MANUAL_PHOTO_FILENAME', 'user-manual.jpg');
 
 define(
     'ADMIN_MANUAL',

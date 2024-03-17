@@ -51,8 +51,10 @@ abstract class SubmittableForm
         $supporter->pushText($reply, true);
 
         // 画像があれば画像も送信
-        foreach ($images as $filename)
-            $supporter->pushImage($supporter->getImageUrl($filename), true);
+        foreach ($images as $filename) {
+            $url = $supporter->openAccessToImage($filename);
+            $supporter->pushImage($url, true);
+        }
 
         // 選択肢
         $supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);

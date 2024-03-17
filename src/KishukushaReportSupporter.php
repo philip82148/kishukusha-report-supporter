@@ -31,12 +31,17 @@ class KishukushaReportSupporter
 
     private string $replyToken;
     private string $pushUserId;
+
     private array $messages;
     private array $questions;
     private ?array $quickReply;
+    private array $imagesToOpenAccess;
     private array $uniqueTextOptions;
+
     private array $lastQuestions;
     private ?array $lastQuickReply;
+    private array $lastImagesToOpenAccess;
+
     private static \Google\Client $googleClient;
 
     // getEventInfo()用
@@ -56,6 +61,7 @@ class KishukushaReportSupporter
         // storageの方が書き換わっても、setLastQuestions()したときは必ず前回の質問になる
         $this->lastQuestions = $this->storage['lastQuestions'];
         $this->lastQuickReply = $this->storage['lastQuickReply'];
+        $this->lastImagesToOpenAccess = $this->storage['lastImagesToOpenAccess'];
 
         // getEventInfo()用
         $this->lastStorageUpdatedTime = $this->getLastStorageUpdatedTime();
@@ -284,16 +290,18 @@ class KishukushaReportSupporter
                 }
 
                 // 次に最後の質問を聞く
-                $this->setLastQuestions($lastPhase['lastQuestions'], $lastPhase['lastQuickReply']);
+                $this->setLastQuestions($lastPhase['lastQuestions'], $lastPhase['lastQuickReply'], $lastPhase['lastImagesToOpenAccess']);
                 array_pop($this->storage['adminPhase']);
 
                 // adminPhaseの一番最後の質問の保持
                 $lastLastQuestions = $this->storage['adminPhase'][0]['lastQuestions'];
                 $lastLastQuickReply = $this->storage['adminPhase'][0]['lastQuickReply'];
+                $lastLastImagesToOpenAccess = $this->storage['adminPhase'][0]['lastImagesToOpenAccess'];
 
                 // この前に聞いた質問を一番最初へ
                 $this->storage['adminPhase'][0]['lastQuestions'] = $this->storage['lastQuestions'];
                 $this->storage['adminPhase'][0]['lastQuickReply'] = $this->storage['lastQuickReply'];
+                $this->storage['adminPhase'][0]['lastImagesToOpenAccess'] = $this->storage['lastImagesToOpenAccess'];
 
                 // この前に聞いた質問の答えをそれよりも前へ
                 array_unshift($this->storage['adminPhase'], $lastPhase);
@@ -301,13 +309,15 @@ class KishukushaReportSupporter
                 // adminPhaseの一番最後の質問を戻す
                 $this->storage['adminPhase'][0]['lastQuestions'] = $lastLastQuestions;
                 $this->storage['adminPhase'][0]['lastQuickReply'] = $lastLastQuickReply;
+                $this->storage['adminPhase'][0]['lastImagesToOpenAccess'] = $lastLastImagesToOpenAccess;
+
                 return true;
             default:
                 $this->askAgainBecauseWrongReply();
                 return true;
         }
         // 管理者への通知(続き)
-        $this->setLastQuestions($lastPhase['lastQuestions'], $lastPhase['lastQuickReply']);
+        $this->setLastQuestions($lastPhase['lastQuestions'], $lastPhase['lastQuickReply'], $lastPhase['lastImagesToOpenAccess']);
         array_pop($this->storage['adminPhase']);
 
         return true;
@@ -390,11 +400,12 @@ class KishukushaReportSupporter
         unset($admin->storage['adminPhase']);
         if (!empty($adminPhase)) {
             // adminの前回の質問を引き継ぐ(なおここで'OK'の選択肢は削除される)
-            $this->setLastQuestions($admin->storage['lastQuestions'], $admin->storage['lastQuickReply']);
+            $this->setLastQuestions($admin->storage['lastQuestions'], $admin->storage['lastQuickReply'], $admin->storage['lastImagesToOpenAccess']);
 
             // adminPhaseの一番最後の質問を元adminに返す
             $admin->storage['lastQuestions'] = $adminPhase[0]['lastQuestions'];
             $admin->storage['lastQuickReply'] = $adminPhase[0]['lastQuickReply'];
+            $admin->storage['lastImagesToOpenAccess'] = $adminPhase[0]['lastImagesToOpenAccess'];
 
             // 元管理者が存在しなければ保存はしない
             if ($admin->doesThisExist())
@@ -406,6 +417,7 @@ class KishukushaReportSupporter
             // 新adminのlastQuestionsは上のsetLastQuestionsでこの後書き換えられる
             $adminPhase[0]['lastQuestions'] = $this->storage['lastQuestions'];
             $adminPhase[0]['lastQuickReply'] = $this->storage['lastQuickReply'];
+            $adminPhase[0]['lastImagesToOpenAccess'] = $this->storage['lastImagesToOpenAccess'];
 
             $this->storage['adminPhase'] = array_merge($this->storage['adminPhase'], $adminPhase);
         } else {
@@ -629,7 +641,8 @@ class KishukushaReportSupporter
                 'checkboxRange' => $checkboxRange,
                 'adminType' => $adminType,
                 'lastQuickReply' => $this->storage['lastQuickReply'],
-                'lastQuestions' => $this->storage['lastQuestions']
+                'lastQuestions' => $this->storage['lastQuestions'],
+                'lastImagesToOpenAccess' => $this->storage['lastImagesToOpenAccess']
             ];
             $this->confirmPush(true);
             $this->storeStorage();
@@ -927,6 +940,7 @@ class KishukushaReportSupporter
         $this->messages = [];
         $this->questions = [];
         $this->quickReply = null;
+        $this->imagesToOpenAccess = [];
         $this->uniqueTextOptions = [];
     }
 
@@ -1144,7 +1158,7 @@ class KishukushaReportSupporter
         $this->setLastQuestions();
     }
 
-    public function setLastQuestions(?array $questions = null, ?array $quickReply = null): void
+    public function setLastQuestions(?array $questions = null, ?array $quickReply = null, ?array $imagesToOpenAccess = null): void
     {
         // confirmReply/Push後に呼び出されるとstorageの方は書き変わっている可能性があるので、
         // プロパティを使う。これで確実に前回の質問
@@ -1152,9 +1166,14 @@ class KishukushaReportSupporter
             $questions = $this->lastQuestions;
         if (!isset($quickReply))
             $quickReply = $this->lastQuickReply;
+        if (!isset($imagesToOpenAccess))
+            $imagesToOpenAccess = $this->lastImagesToOpenAccess;
 
         $this->questions = $questions;
         $this->quickReply = $quickReply;
+
+        $this->imagesToOpenAccess = [];
+        array_walk($imagesToOpenAccess, fn ($expirationTime, $filename) => $this->openAccessToImage($filename));
     }
 
     public function confirmReply(): void
@@ -1257,7 +1276,8 @@ class KishukushaReportSupporter
         // 質問があり、deleteStorage()されていなければ保存
         if ($this->questions !== [] && $this->storage !== []) {
             $this->storage['lastQuestions'] = $this->questions;
-            $this->storage['lastQuickReply'] = $this->quickReply ?? null;
+            $this->storage['lastQuickReply'] = $this->quickReply;
+            $this->storage['lastImagesToOpenAccess'] = $this->imagesToOpenAccess;
         }
 
         return true;
@@ -1289,10 +1309,22 @@ class KishukushaReportSupporter
         return $filename;
     }
 
-    public function getImageUrl(string $filename): string
+    public function openAccessToImage($filename): string
     {
-        // imageの取得に署名が必要になったらphpで処理する
-        return IMAGE_FOLDER_URL . $filename;
+        $this->imagesToOpenAccess[$filename] = date("Y/m/d H:i:s", strtotime("+1 minute"));
+
+        return WEBHOOK_PARENT_URL . "/image.php?userId={$this->userId}&filename={$filename}";
+    }
+
+    public function isAccessibleImage($filename): bool
+    {
+        if (!isset($this->storage['lastImagesToOpenAccess'][$filename])) return false;
+
+        $now = time();
+        $expirationTime = $this->storage['lastImagesToOpenAccess'][$filename];
+        if ($now >= $expirationTime) return false;
+
+        return true;
     }
 
     private function fetchPushMessageCount(): int|false
@@ -1351,6 +1383,7 @@ class KishukushaReportSupporter
             'formType' => $storage['formType'] ?? '',
             'unsavedAnswers' => $storage['unsavedAnswers'] ?? [],
             'lastQuickReply' => $storage['lastQuickReply'] ?? null,
+            'lastImagesToOpenAccess' => $storage['lastImagesToOpenAccess'] ?? [],
             'phases' => $storage['phases'] ?? [],
             'cache' => $storage['cache'] ?? [],
             'userName' => $storage['userName'] ?? '',

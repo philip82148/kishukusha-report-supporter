@@ -1,5 +1,5 @@
 order allow,deny
-# webhook.phpと.jpgファイルのみアクセス可とする
-<Files ~ "^webhook\.php$|\.jpg$">
+# webhook.phpとimage.phpのみアクセス可とする
+<Files ~ "^(webhook|image)\.php$">
 allow from all
 </Files>

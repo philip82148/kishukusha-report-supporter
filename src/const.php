@@ -10,7 +10,6 @@ define('CREDENTIALS_PATH', dirname(__DIR__) . '/credentials.json');
 
 // 画像用フォルダ
 define('IMAGE_FOLDER_PATH', dirname(__DIR__) . '/images/');
-define('IMAGE_FOLDER_URL', WEBHOOK_PARENT_URL . '/images/');
 
 // Googleドライブへアップロードできるかを試すテスト画像
 define('TEST_IMAGE_FILENAME', 'user-manual.jpg');
