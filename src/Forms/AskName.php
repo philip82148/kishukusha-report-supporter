@@ -29,7 +29,7 @@ class AskName extends UnsubmittableForm
 例:山田 太郎
 ※スマホでLINE名が和文フルネームの場合はクイックリプライが使用できます。
 
-※このボットの利用を続けることで、利用規約(https://github.com/philip82148/kishukusha-report-supporter/blob/main/terms-of-use.md)に同意したものとみなされます。
+※このボットの利用を続けることで利用規約(https://github.com/philip82148/kishukusha-report-supporter/blob/main/terms-of-use.md)に同意したものとみなされます。
 同意しない場合はボットをブロックしてください。", true);
             } else {
                 // 名前が過去に登録されたことがある
