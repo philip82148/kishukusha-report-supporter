@@ -1533,7 +1533,7 @@ class KishukushaReportSupporter
 
                 if (isset($message['sender'])) {
                     $sender = $message['sender'];
-                    $replies .= " as '{$sender['name']}'({$sender['iconUrl']})";
+                    $replies .= " as `{$sender['name']}`({$sender['iconUrl']})";
                 }
 
                 if (isset($message['quickReply'])) {
