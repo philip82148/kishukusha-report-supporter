@@ -22,7 +22,7 @@ class AdminSettings extends UnsubmittableForm
             // 選択肢
             $supporter->pushOptions([
                 '管理者用マニュアル表示',
-                '行事データ再読み込み',
+                '行事データ再読み込み(編集)',
                 '最大外部来訪者数変更',
                 '任期終了日変更',
                 '管理者変更',
@@ -51,20 +51,21 @@ class AdminSettings extends UnsubmittableForm
                     $supporter->pushText(SERVER_MANUAL);
                     $supporter->resetForm();
                     return;
-                case '行事データ再読み込み':
+                case '行事データ再読み込み(編集)':
                     // 質問
-                    $supporter->pushText("行事データの再読み込みを行いますか？
-※開始日(B列)が日付の形式でない行、終了日(C列)が設定されている行で、終了日が開始日より前の行はスキップされます。
-再読み込み後に全ての行事が読み込まれているか確認してください。
+                    $supporter->pushText("下記のスプレッドシートを編集したのち、「再読み込み」と入力してください。
 
-読み込み先のスプレッドシート:
+行事スプレッドシート:
 https://docs.google.com/spreadsheets/d/{$supporter->config['eventSheetId']}
+
+※開始日(B列)が日付の形式でない行、終了日(C列)が設定されている行で、終了日が開始日より前の行はスキップされます。
+読み込み後に全ての行事が読み込まれているか確認してください。
 
 現在読み込まれている行事(開始日順):
 " . self::getEventListString($supporter), true);
 
                     // 選択肢
-                    $supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions(['再読み込み', '前の項目を修正する', 'キャンセル']);
 
                     $supporter->storage['phases'][] = 'confirmingReloadEvents';
                     return;
@@ -175,7 +176,7 @@ https://drive.google.com/drive/u/0/folders/{$supporter->config['generalImageFold
             $supporter->storage['phases'][] = 'askingGoogleUrl';
         } else if ($lastPhase === 'confirmingReloadEvents') {
             switch ($message) {
-                case 'はい':
+                case '再読み込み':
                     // 再読み込み
                     $supporter->fetchEvents(true);
 
@@ -233,7 +234,7 @@ https://drive.google.com/drive/u/0/folders/{$supporter->config['generalImageFold
             case '設定項目':
                 switch ($message) {
                     case '管理者用マニュアル表示':
-                    case '行事データ再読み込み':
+                    case '行事データ再読み込み(編集)':
                     case '最大外部来訪者数変更':
                     case '任期終了日変更':
                     case '管理者変更':
