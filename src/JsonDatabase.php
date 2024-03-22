@@ -16,10 +16,10 @@ class JsonDatabase
         mysqli_query(
             $this->link,
             "CREATE TABLE IF NOT EXISTS `{$tableName}` (
-                `key` varchar(200) NOT null,
-                `object_json` varchar(21640) NOT null,
-                `created_at` datetime NOT null DEFAULT CURRENT_TIMESTAMP,
-                `updated_at` datetime NOT null DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                `key` VARCHAR(200) NOT NULL,
+                `object_json` VARCHAR(21640) NOT NULL,
+                `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 UNIQUE KEY (`key`)
             ) DEFAULT CHARSET=" . DB_CHARSET . ";"
         );
