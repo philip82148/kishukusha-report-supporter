@@ -23,7 +23,7 @@ define('BOT_EMAIL', '...');
 // サーバー移動後、最初にボットにメッセージを送った人が管理者となる
 // 管理者権限を強制的に移す場合は、以下に'password'を設定しておき、ボットの入力に打ち込む
 define('DEFAULT_CONFIG', [
-    // 'password' => 'パスワードをここに設定する(コメントアウト(//を消すこと)すること)',
+    // 'password' => 'パスワードをここに設定する(コメントアウト(//)を消すこと)',
     'adminId' => 'dummy',
     'zaimuId' => 'dummy',
     'eventSheetId' => 'dummy',
