@@ -6,7 +6,7 @@ use KishukushaReportSupporter\Forms;
 
 class KishukushaReportSupporter
 {
-    public const VERSION = '1.1.4';
+    public const VERSION = '1.1.5';
 
     /* 届出を追加する際はここの編集とsrc/Formsフォルダへのファイルの追加が必要 */
     public const FORMS = [
@@ -190,7 +190,7 @@ class KishukushaReportSupporter
         // 質問
         $this->pushText('新しくフォームに入力を始める場合は「回答を始める」と入力してください。
 
-※クイックリプライはスマホでのみ利用できます。
+※クイックリプライはスマホと一部のパソコンでのみ利用できます。
 ※利用規約: https://github.com/philip82148/kishukusha-report-supporter/blob/main/terms-of-use.md
 
 (現在のバージョン:' . self::VERSION . ')', true);
