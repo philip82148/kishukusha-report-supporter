@@ -27,7 +27,7 @@ class AskName extends UnsubmittableForm
                 $supporter->pushText("あなたの名前を和文フルネームで入力してください。
 (初回のみ)
 例:山田 太郎
-※スマホでLINE名が和文フルネームの場合はクイックリプライが使用できます。
+※LINE名が和文フルネームの場合はスマホと一部のパソコンでクイックリプライが使用できます。
 
 ※このボットの利用を続けることで利用規約(https://github.com/philip82148/kishukusha-report-supporter/blob/main/terms-of-use.md)に同意したものとみなされます。
 同意しない場合はボットをブロックしてください。", true);
@@ -67,7 +67,7 @@ class AskName extends UnsubmittableForm
 (初回のみ)
 ※和文フルネームであることを確認してください。
 ※後で変更できます。
-※クイックリプライはスマホでのみ利用できます。
+※クイックリプライはスマホと一部のパソコンでのみ利用できます。
 
 届出者氏名:{$name}", true);
             } else {
