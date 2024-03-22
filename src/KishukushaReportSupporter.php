@@ -1479,29 +1479,29 @@ class KishukushaReportSupporter
         }
 
         if ($this->lastEvent['type'] === 'follow') {
-            $whatUserDid = 'Followed me';
+            $whatUserDid = 'followed me';
         } else if ($this->lastEvent['type'] === 'message') {
             $message = $this->lastEvent['message'];
             switch ($message['type']) {
                 case 'text';
-                    $whatUserDid = "Messaged '{$message['text']}'";
+                    $whatUserDid = "messaged '{$message['text']}'";
                     break;
                 case 'location':
-                    $whatUserDid = "Sent a {$message['type']}(Title:'{$message['title']}', Addr.:'{$message['address']}', Lat.:{$message['latitude']}, Lng.:{$message['longitude']})";
+                    $whatUserDid = "sent a {$message['type']}(Title:'{$message['title']}', Addr.:'{$message['address']}', Lat.:{$message['latitude']}, Lng.:{$message['longitude']})";
                     break;
                 case 'sticker':
-                    $whatUserDid = "Sent a {$message['type']}(Pack. ID:{$message['packageId']}, Sti. ID:{$message['stickerId']})";
+                    $whatUserDid = "sent a {$message['type']}(Pack. ID:{$message['packageId']}, Sti. ID:{$message['stickerId']})";
                     break;
                 case 'image':
                 case 'audio':
-                    $whatUserDid = "Sent an {$message['type']}(Msg. ID:{$message['id']})";
+                    $whatUserDid = "sent an {$message['type']}(Msg. ID:{$message['id']})";
                     break;
                 default:
-                    $whatUserDid = "Sent a {$message['type']}(Msg. ID:{$message['id']})";
+                    $whatUserDid = "sent a {$message['type']}(Msg. ID:{$message['id']})";
                     break;
             }
         } else if ($this->lastEvent['type'] === 'unfollow') {
-            $whatUserDid = 'Unfollowed me';
+            $whatUserDid = 'unfollowed me';
         } else {
             $whatUserDid = "{$this->lastEvent['type']}";
         }
@@ -1552,16 +1552,16 @@ class KishukushaReportSupporter
                             $quickReply[] = "{$label}({$action})";
                         }
                     }
-                    $replies .= '(QuickReply:' . implode(', ', $quickReply) . ')';
+                    $replies .= '(Quick Replies:' . implode(', ', $quickReply) . ')';
                 }
             }
 
             if ($replyType === 'push') {
                 $pushUserId = self::$lastPushUserId;
                 $pushUserDisplayName = $this->fetchProfile($pushUserId)['displayName'] ?? '';
-                $whatIDid[] = "Pushed(tried to Push) to `{$pushUserDisplayName}`({$pushUserId}) {$replies}";
+                $whatIDid[] = "pushed(tried to push) to `{$pushUserDisplayName}`({$pushUserId}) {$replies}";
             } else {
-                $whatIDid[] .= "Replied {$replies}";
+                $whatIDid[] .= "replied {$replies}";
             }
         }
 
