@@ -487,7 +487,7 @@ class Shogyoji extends SubmittableForm
 
         // 全文生成
         if ($messageAboutDate !== '' || $messageAboutEvent !== '') {
-            $message = "{$answers['氏名']}({$profile['displayName']})が舎生大会・諸行事届を提出しました。
+            $message = "{$answers['氏名']}が舎生大会・諸行事届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
 (届出番号:{$receiptNo})
@@ -501,7 +501,7 @@ class Shogyoji extends SubmittableForm
 
 未チェックの項目:";
         } else {
-            $message = "{$answers['氏名']}({$profile['displayName']})が舎生大会・諸行事届を提出しました。
+            $message = "{$answers['氏名']}が舎生大会・諸行事届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
 (届出番号:{$receiptNo})

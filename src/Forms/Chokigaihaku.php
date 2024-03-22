@@ -250,7 +250,7 @@ class Chokigaihaku extends SubmittableForm
 
         if ($conflictingEvents !== '' || !$isDateInTerm) {
             $supporter->pushText(
-                "{$answers['氏名']}({$profile['displayName']})が長期外泊届を提出しました。
+                "{$answers['氏名']}が長期外泊届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
 (届出番号:{$receiptNo})
@@ -276,7 +276,7 @@ class Chokigaihaku extends SubmittableForm
         }
 
         $supporter->pushText(
-            "{$answers['氏名']}({$profile['displayName']})が長期外泊届を提出しました。
+            "{$answers['氏名']}が長期外泊届を提出しました。
 承認しますか？
 (TS:{$timeStamp})
 (届出番号:{$receiptNo})

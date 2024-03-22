@@ -38,5 +38,5 @@ define('DEFAULT_CONFIG', [
 /* 以下は基本的に変更しなくてよい --------------------------------------------------------- */
 
 // デバッグ時はtrue
-define('DEBUGGING', true);
-define('ENABLE_LOGGING', true);
+define('DEBUGGING', false);
+define('ENABLE_LOGGING', false);
