@@ -157,7 +157,7 @@ class Gaiburaihousha extends SubmittableForm
     public static function pushAdminMessages(KishukushaReportSupporter $supporter, array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
         $supporter->pushText(
-            "{$answers['関係舎生の氏名']}({$profile['displayName']})が外部来訪者届を提出しました。
+            "{$answers['関係舎生の氏名']}が外部来訪者届を提出しました。
 (TS:{$timeStamp})
 
 チェック済み:

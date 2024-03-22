@@ -94,7 +94,7 @@ class Haibi309 extends SubmittableForm
     public static function pushAdminMessages(KishukushaReportSupporter $supporter, array $profile, array $answers, string $timeStamp, string $receiptNo): bool
     {
         $supporter->pushText(
-            "{$answers['氏名']}({$profile['displayName']})が309私物配備届を提出しました。
+            "{$answers['氏名']}が309私物配備届を提出しました。
 (TS:{$timeStamp})
 
 チェック済み:
