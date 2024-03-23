@@ -6,7 +6,7 @@ use KishukushaReportSupporter\Forms;
 
 class KishukushaReportSupporter
 {
-    public const VERSION = '1.1.6';
+    public const VERSION = '1.1.7';
 
     /* 届出を追加する際はここの編集とsrc/Formsフォルダへのファイルの追加が必要 */
     public const FORMS = [
