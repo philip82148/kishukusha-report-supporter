@@ -1001,7 +1001,7 @@ class KishukushaReportSupporter
 
             // $optionを290文字以下にカット
             // (サロゲートペアは2文字以上とカウントされるので、本来300文字まで許容できるが余裕をもって290文字とする)
-            if (mb_strlen($option) > 290) $option = mb_substr($option, 0, 260) . "…\n\n送信する文字数が多すぎるため、残りの文字が省略されました。";
+            if (mb_strlen($option) > 290) $option = mb_substr($option, 0, 270) . "…\n\nクイックリプライの文字数が多すぎます。";
 
             // まだ追加したことがない選択肢である
             if (!isset($this->uniqueTextOptions[$option])) {
