@@ -22,7 +22,7 @@ class KishukushaReportSupporter
         'マニュアルを見る' => Forms\UserManual::class
     ];
 
-    public const MAX_PREVIOUS_ANSWERS = 5;
+    public const MAX_PREVIOUS_ANSWERS = 7;
 
     public string $userId;
     public JsonDatabase $database;
