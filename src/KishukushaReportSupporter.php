@@ -983,19 +983,13 @@ class KishukushaReportSupporter
         }
     }
 
-    public function pushOptions(array $options, bool $ifDisplayInMessage = false, bool $isInputHistory = false): void
+    public function pushOptions(array $options, bool $displayInMessage = false, bool $isInputHistory = false): void
     {
         if (!isset($this->quickReply))
             $this->quickReply = ['items' =>  []];
 
         foreach ($options as $labelSuffix => $option) {
-            if (!is_string($labelSuffix)) {
-                if ($isInputHistory) {
-                    $labelSuffix = '(履歴)';
-                } else {
-                    $labelSuffix = '';
-                }
-            }
+            if (!is_string($labelSuffix)) $labelSuffix = $isInputHistory ? '(履歴)' : '';
 
             // ラベル作成
             $suffixLength = mb_strlen($labelSuffix);
@@ -1005,7 +999,9 @@ class KishukushaReportSupporter
                 $label = mb_substr($option, 0, 19 - $suffixLength) . '…' . $labelSuffix;
             }
 
-            // なお$optionは300文字以下とすること(ここでカットは行わない)
+            // $optionを290文字以下にカット
+            // (サロゲートペアは2文字以上とカウントされるので、本来300文字まで許容できるが余裕をもって290文字とする)
+            if (mb_strlen($option) > 290) $option = mb_substr($option, 0, 260) . "…\n\n送信する文字数が多すぎるため、残りの文字が省略されました。";
 
             // まだ追加したことがない選択肢である
             if (!isset($this->uniqueTextOptions[$option])) {
@@ -1021,7 +1017,7 @@ class KishukushaReportSupporter
                         'text' => $option
                     ]
                 ];
-                if ($ifDisplayInMessage && count($this->questions))
+                if ($displayInMessage && count($this->questions))
                     $this->questions[count($this->questions) - 1]['text'] .= "\n・{$option}";
 
                 $this->uniqueTextOptions[$option] = $addedIndex;
