@@ -20,7 +20,7 @@ class Odoriba extends SubmittableForm
 
             // 選択肢
             $supporter->pushUnsavedAnswerOption('保管品');
-            $supporter->pushOptions(['キャンセル']);
+            $supporter->pushOptions([キャンセル]);
 
             $supporter->storage['phases'][] = 'askingItem';
             return;
@@ -34,7 +34,7 @@ class Odoriba extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する')
+            if ($message !== 前の項目を修正する)
                 $supporter->storage['unsavedAnswers']['保管品'] = $message;
 
             // 質問
@@ -43,7 +43,7 @@ class Odoriba extends SubmittableForm
             // 選択肢
             $supporter->pushUnsavedAnswerOption('保管品の画像', 'image');
             $supporter->pushImageOption();
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingImage';
         } else if ($lastPhase === 'askingImage') {

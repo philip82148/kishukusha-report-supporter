@@ -45,7 +45,7 @@ class AskName extends UnsubmittableForm
             $supporter->pushUnsavedAnswerOption('名前');
             if ($supporter->storage['userName'] !== '') {
                 // すでに一度登録済みなら、キャンセルを用意しておく
-                $supporter->pushOptions(['キャンセル']);
+                $supporter->pushOptions([キャンセル]);
             }
 
             $supporter->storage['phases'][] = 'askingName';
@@ -80,17 +80,17 @@ class AskName extends UnsubmittableForm
             }
 
             // 選択肢
-            $supporter->pushOptions(['はい', '前の項目を修正する']);
+            $supporter->pushOptions([はい, 前の項目を修正する]);
             if ($supporter->storage['userName'] !== '') {
                 // 名前が登録されているときだけキャンセルを用意
-                $supporter->pushOptions(['キャンセル']);
+                $supporter->pushOptions([キャンセル]);
             }
 
             $supporter->storage['phases'][] = 'confirming';
         } else {
             // 確認
             switch ($message) {
-                case 'はい':
+                case はい:
                     $supporter->storage['userName'] = $supporter->storage['unsavedAnswers']['名前'];
                     $supporter->pushText('名前を登録しました。');
                     $supporter->resetForm();
@@ -107,8 +107,8 @@ class AskName extends UnsubmittableForm
         switch ($type) {
             case 'ユーザー名':
                 switch ($message) {
-                    case 'はい':
-                    case 'いいえ':
+                    case はい:
+                    case いいえ:
                         $supporter->askAgainBecauseWrongReply();
                         return 'wrong-reply';
                     default:

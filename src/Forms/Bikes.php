@@ -21,7 +21,7 @@ class Bikes extends SubmittableForm
             // 選択肢
             $supporter->pushOptions(['自転車', 'バイク', '原付'], true);
             $supporter->pushUnsavedAnswerOption('車体の種類');
-            $supporter->pushOptions(['キャンセル']);
+            $supporter->pushOptions([キャンセル]);
 
             $supporter->storage['phases'][] = 'askingItem';
             return;
@@ -35,7 +35,7 @@ class Bikes extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '車体の種類', $message))
                     return;
             }
@@ -60,7 +60,7 @@ class Bikes extends SubmittableForm
             }
 
             // 選択肢
-            $supporter->pushOptions([$supporter->storage['userName'], '前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([$supporter->storage['userName'], 前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingRegistrantName';
         } else if ($lastPhase === 'askingRegistrantName') {
@@ -73,7 +73,7 @@ class Bikes extends SubmittableForm
             // 答えの格納・質問・選択肢
             switch ($supporter->storage['unsavedAnswers']['車体の種類']) {
                 case '自転車':
-                    if ($message !== '前の項目を修正する') {
+                    if ($message !== 前の項目を修正する) {
                         unset($supporter->storage['unsavedAnswers']['名義人名']);
                         insertToAssociativeArray($supporter->storage['unsavedAnswers'], 2, ['防犯登録者名' => $message]);
                     }
@@ -82,7 +82,7 @@ class Bikes extends SubmittableForm
                     break;
                 case 'バイク':
                 case '原付':
-                    if ($message !== '前の項目を修正する') {
+                    if ($message !== 前の項目を修正する) {
                         unset($supporter->storage['unsavedAnswers']['防犯登録者名']);
                         insertToAssociativeArray($supporter->storage['unsavedAnswers'], 2, ['名義人名' => $message]);
                     }
@@ -93,11 +93,11 @@ class Bikes extends SubmittableForm
             }
 
             // 選択肢(続き)
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingNumber';
         } else if ($lastPhase === 'askingNumber') {
-            if ($message['type'] !== 'text' || $message['text'] !== '前の項目を修正する') {
+            if ($message['type'] !== 'text' || $message['text'] !== 前の項目を修正する) {
                 switch ($supporter->storage['unsavedAnswers']['車体の種類']) {
                     case '自転車':
                         if ($message['type'] !== 'text') {
@@ -133,7 +133,7 @@ class Bikes extends SubmittableForm
             // 選択肢
             $supporter->pushUnsavedAnswerOption('車体の画像', 'image');
             $supporter->pushImageOption();
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingImage';
         } else if ($lastPhase === 'askingImage') {

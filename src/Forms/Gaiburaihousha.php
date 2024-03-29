@@ -27,7 +27,7 @@ class Gaiburaihousha extends SubmittableForm
             // 選択肢表示
             $supporter->pushPreviousAnswerOptions('外部来訪者名');
             $supporter->pushUnsavedAnswerOption('外部来訪者名');
-            $supporter->pushOptions(['キャンセル']);
+            $supporter->pushOptions([キャンセル]);
 
             $supporter->storage['phases'][] = 'askingNames';
             return;
@@ -35,7 +35,7 @@ class Gaiburaihousha extends SubmittableForm
 
         $lastPhase = $supporter->storage['phases'][count($supporter->storage['phases']) - 1];
         if ($lastPhase === 'askingNames') {
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '外部来訪者名', $message))
                     return;
             }
@@ -46,11 +46,11 @@ class Gaiburaihousha extends SubmittableForm
             // 選択肢
             $supporter->pushUnsavedAnswerOption('外部来訪者数');
             $supporter->pushOptions(['(自動算出)' => $supporter->storage['cache']['外部来訪者数']]);
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingNumber';
         } else if ($lastPhase === 'askingNumber') {
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '外部来訪者数', $message))
                     return;
             }
@@ -61,11 +61,11 @@ class Gaiburaihousha extends SubmittableForm
 
             // 選択肢
             $supporter->pushUnsavedAnswerOption('来訪日');
-            $supporter->pushOptions([dateToDateStringWithDay(), '前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([dateToDateStringWithDay(), 前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingDay';
         } else if ($lastPhase === 'askingDay') {
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '来訪日', $message))
                     return;
             }
@@ -78,11 +78,11 @@ class Gaiburaihousha extends SubmittableForm
             $now = date('H:i');
             if (self::checkIfGaiburaihouAllowed($now))
                 $supporter->pushOptions([$now]);
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingStart';
         } else if ($lastPhase === 'askingStart') {
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '滞在開始時刻', $message))
                     return;
             }
@@ -106,7 +106,7 @@ class Gaiburaihousha extends SubmittableForm
                     $supporter->pushOptions([$now]);
             }
 
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingEnd';
         } else if ($lastPhase === 'askingEnd') {
@@ -125,7 +125,7 @@ class Gaiburaihousha extends SubmittableForm
 
             // 選択肢
             self::pushPreviousAnswerOptions($supporter, '外部来訪者の女性の数');
-            $supporter->pushOptions(['キャンセル']);
+            $supporter->pushOptions([キャンセル]);
 
             // 前の項目を修正する対策笑
             $supporter->storage['phases'] = ['askingFemale', 'askingFemale', 'askingFemale'];

@@ -21,7 +21,7 @@ class Tamokuteki extends SubmittableForm
             // 選択肢
             $supporter->pushOptions(['309号室', '308号室', '301号室', '209号室', '208号室', '201号室'], true);
             $supporter->pushUnsavedAnswerOption('多目的室の種類');
-            $supporter->pushOptions(['キャンセル']);
+            $supporter->pushOptions([キャンセル]);
 
             $supporter->storage['phases'][] = 'askingWhichRoom';
             return;
@@ -35,7 +35,7 @@ class Tamokuteki extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '多目的室の種類', $message))
                     return;
             }
@@ -46,7 +46,7 @@ class Tamokuteki extends SubmittableForm
 
             // 選択肢
             $supporter->pushUnsavedAnswerOption('使用開始日');
-            $supporter->pushOptions([dateToDateStringWithDay(), '前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([dateToDateStringWithDay(), 前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingDay';
         } else if ($lastPhase === 'askingDay') {
@@ -56,7 +56,7 @@ class Tamokuteki extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '使用開始日', $message))
                     return;
             }
@@ -66,7 +66,7 @@ class Tamokuteki extends SubmittableForm
 
             // 選択肢
             $supporter->pushUnsavedAnswerOption('使用開始時刻');
-            $supporter->pushOptions([date('H:i'), '前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([date('H:i'), 前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingStart';
         } else if ($lastPhase === 'askingStart') {
@@ -76,7 +76,7 @@ class Tamokuteki extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '使用開始時刻', $message))
                     return;
             }
@@ -87,7 +87,7 @@ class Tamokuteki extends SubmittableForm
             // 選択肢
             $supporter->pushPreviousAnswerOptions('目的・備考');
             $supporter->pushUnsavedAnswerOption('目的・備考');
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingPurpose';
         } else if ($lastPhase === 'askingPurpose') {
@@ -97,7 +97,7 @@ class Tamokuteki extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する')
+            if ($message !== 前の項目を修正する)
                 $supporter->storage['unsavedAnswers']['目的・備考'] = $message;
 
             // 質問文送信
@@ -106,7 +106,7 @@ class Tamokuteki extends SubmittableForm
             // 選択肢
             $supporter->pushUnsavedAnswerOption('使用後の状態', 'image');
             $supporter->pushImageOption();
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingImage';
         } else if ($lastPhase === 'askingImage') {
@@ -120,7 +120,7 @@ class Tamokuteki extends SubmittableForm
                 }
                 $message = $message['text'];
 
-                if ($message !== '前の項目を修正する') {
+                if ($message !== 前の項目を修正する) {
                     if ($message !== '最後に送信した画像' || !isset($supporter->storage['unsavedAnswers']['使用後の状態'])) {
                         $supporter->askAgainBecauseWrongReply();
                         return;
@@ -139,7 +139,7 @@ class Tamokuteki extends SubmittableForm
             }
 
             // その他
-            $supporter->pushOptions([date('H:i'), '前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([date('H:i'), 前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingEnd';
         } else if ($lastPhase === 'askingEnd') {

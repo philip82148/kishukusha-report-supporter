@@ -57,13 +57,13 @@ abstract class SubmittableForm
         }
 
         // 選択肢
-        $supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);
+        $supporter->pushOptions([はい, 前の項目を修正する, キャンセル]);
     }
 
     protected static function confirming(KishukushaReportSupporter $supporter, string $message, bool $reset = true): bool
     {
         switch ($message) {
-            case 'はい':
+            case はい:
                 static::submitForm($supporter);
                 if ($reset) $supporter->resetForm();
                 return true;

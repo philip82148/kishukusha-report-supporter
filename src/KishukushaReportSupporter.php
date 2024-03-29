@@ -126,10 +126,10 @@ class KishukushaReportSupporter
         if ($message['type'] === 'text') {
             // テキストタイプに限定
             $text = $message['text'];
-            if ($text === '前の項目を修正する') {
+            if ($text === 前の項目を修正する) {
                 array_pop($this->storage['phases']); // 今聞いている質問をもう一度聞くフェーズへ
                 array_pop($this->storage['phases']); // その前の質問をもう一度聞くフェーズへ
-            } else if ($text === 'キャンセル') {
+            } else if ($text === キャンセル) {
                 if ($this->storage['userName'] !== '') {
                     if ($this->storage['formType'] !== '')
                         $this->pushText('キャンセルしました。');
@@ -139,7 +139,7 @@ class KishukushaReportSupporter
                     // 名前がまだ確定していないとき
                     $this->storage['phases'] = [];
                 }
-            } else if ($text === 'OK') {
+            } else if ($text === OK) {
                 $this->setLastQuestions();
                 return;
             } else {
@@ -162,7 +162,7 @@ class KishukushaReportSupporter
                 $this->pushOptions(array_keys(self::FORMS), true);
                 if ($this->isThisAdmin())
                     $this->pushOptions(['管理者設定'], true);
-                $this->pushOptions(['キャンセル']);
+                $this->pushOptions([キャンセル]);
                 $this->resetStorage();
                 break;
             case '管理者設定':
@@ -214,7 +214,7 @@ class KishukushaReportSupporter
         $unapprovedFormCount = count($this->storage['adminPhase']);
         $lastPhase = $this->storage['adminPhase'][$unapprovedFormCount - 1];
         switch ($message) {
-            case '承認する':
+            case 承認する:
                 try {
                     $spreadsheetService = new \Google\Service\Sheets(self::getGoogleClient());
 
@@ -236,7 +236,7 @@ class KishukushaReportSupporter
                     $this->initPush($lastPhase['userId']);
                     $adminProfile = $this->fetchProfile();
                     $this->pushText("{$lastPhase['formType']}が承認されました。\n(届出番号:{$lastPhase['receiptNo']})", false, ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com/']);
-                    $this->pushOptions(['OK']);
+                    $this->pushOptions([OK]);
                     $this->confirmPush(true);
                 } catch (\Throwable $e) {
                     $this->initReply();
@@ -253,7 +253,7 @@ class KishukushaReportSupporter
                 $this->initReply();
                 $this->pushText("{$lastPhase['userName']}の{$lastPhase['formType']}を承認しました。\nスプレッドシートへのチェックと、本人への通知を行いました。\n(届出番号:{$lastPhase['receiptNo']})");
                 break;
-            case '直接伝えた':
+            case 直接伝えた:
                 try {
                     // 申請した本人への通知
                     $this->initPush($lastPhase['userId']);
@@ -263,7 +263,7 @@ class KishukushaReportSupporter
 これについて{$lastPhase['adminType']}から直接連絡がなかった場合は手動でスプレッドシートにチェックを入れた可能性があります。
 
 まず、スプレッドシートにチェックが入っているかを確認し、入っていない場合は{$lastPhase['adminType']}に直接問い合わせてください。", false, ['name' => $adminProfile['displayName'], 'iconUrl' => $adminProfile['pictureUrl'] ?? 'https://dummy.com/']);
-                    $this->pushOptions(['OK']);
+                    $this->pushOptions([OK]);
                     $this->confirmPush(true);
                 } catch (\Throwable $e) {
                     $this->initReply();
@@ -281,7 +281,7 @@ class KishukushaReportSupporter
                 $this->initReply();
                 $this->pushText("{$lastPhase['userName']}の{$lastPhase['formType']}について、ボットを使用した承認が行われなかった旨を本人へ通知しました。\n(届出番号:{$lastPhase['receiptNo']})");
                 break;
-            case '一番最後に見る':
+            case 一番最後に見る:
                 if (count($this->storage['adminPhase']) === 1) {
                     // 次の質問は承認するかどうかの質問ではない
                     // もう一度同じ質問を聞く
@@ -367,7 +367,7 @@ class KishukushaReportSupporter
                 $admin->initPush();
                 $newAdminProfile = $this->fetchProfile();
                 $admin->pushText("{$adminType}が変更されました。", false, ['name' => $newAdminProfile['displayName'], 'iconUrl' => $newAdminProfile['pictureUrl'] ?? 'https://dummy.com/']);
-                $admin->pushOptions(['OK']);
+                $admin->pushOptions([OK]);
                 $admin->confirmPush(true);
             } catch (\Throwable) {
             }
@@ -381,7 +381,7 @@ class KishukushaReportSupporter
                 $fuki->initPush();
                 $newFukiProfile = $this->fetchProfile();
                 $fuki->pushText("{$adminType}が変更されました。", false, ['name' => $newFukiProfile['displayName'], 'iconUrl' => $newFukiProfile['pictureUrl'] ?? 'https://dummy.com/']);
-                $fuki->pushOptions(['OK']);
+                $fuki->pushOptions([OK]);
                 $fuki->confirmPush(true);
             } catch (\Throwable) {
             }
@@ -394,13 +394,13 @@ class KishukushaReportSupporter
             $this->pushText(SERVER_MANUAL);
             $this->pushText('これらのマニュアルは「管理者設定」>「管理者用マニュアル表示」からいつでも確認できます。');
         }
-        $this->pushOptions(['OK']);
+        $this->pushOptions([OK]);
 
         // adminPhaseの移動(なおここで$adminは元管理者)
         $adminPhase = $admin->storage['adminPhase'];
         unset($admin->storage['adminPhase']);
         if (!empty($adminPhase)) {
-            // adminの前回の質問を引き継ぐ(なおここで'OK'の選択肢は削除される)
+            // adminの前回の質問を引き継ぐ(なおここでOKの選択肢は削除される)
             $this->setLastQuestions($admin->storage['lastQuestions'], $admin->storage['lastQuickReply'], $admin->storage['lastImagesToOpenAccess']);
 
             // adminPhaseの一番最後の質問を元adminに返す
@@ -1126,22 +1126,22 @@ class KishukushaReportSupporter
             $undisplayedOptions = [];
             foreach ($this->storage['lastQuickReply']['items'] ?? [] as $item) {
                 switch ($item['action']['label'] ?? '') {
-                    case 'はい':
+                    case はい:
                         $undisplayedOptions[] = '良い場合は「はい」';
                         break;
-                    case '前の項目を修正する':
+                    case 前の項目を修正する:
                         $undisplayedOptions[] = '前の項目を修正する場合は「前の項目を修正する」';
                         break;
-                    case 'キャンセル':
+                    case キャンセル:
                         $undisplayedOptions[] = '最初からやり直す場合は「キャンセル」';
                         break;
-                    case '承認する':
+                    case 承認する:
                         $undisplayedOptions[] = '承認する場合は「承認する」';
                         break;
-                    case '直接伝えた':
+                    case 直接伝えた:
                         $undisplayedOptions[] = 'スプレッドシートへのチェックを行わない場合は「直接伝えた」';
                         break;
-                    case '一番最後に見る':
+                    case 一番最後に見る:
                         $undisplayedOptions[] = '他の届出を先に見る場合は「一番最後に見る」';
                         break;
                     default:
