@@ -27,7 +27,7 @@ class Tainou extends SubmittableForm
 
             // 選択肢
             $supporter->pushUnsavedAnswerOption('滞納月');
-            $supporter->pushOptions([monthToString(), 'キャンセル']);
+            $supporter->pushOptions([monthToString(), キャンセル]);
 
             $supporter->storage['phases'][] = 'askingMonth';
             return;
@@ -35,7 +35,7 @@ class Tainou extends SubmittableForm
 
         $lastPhase = $supporter->storage['phases'][count($supporter->storage['phases']) - 1];
         if ($lastPhase === 'askingMonth') {
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '滞納月', $message))
                     return;
             }
@@ -45,11 +45,11 @@ class Tainou extends SubmittableForm
 
             // 選択肢
             $supporter->pushUnsavedAnswerOption('理由');
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingReason';
         } else if ($lastPhase === 'askingReason') {
-            if ($message !== '前の項目を修正する')
+            if ($message !== 前の項目を修正する)
                 $supporter->storage['unsavedAnswers']['理由'] = $message;
 
             // 質問
@@ -58,11 +58,11 @@ class Tainou extends SubmittableForm
 
             // 選択肢
             $supporter->pushUnsavedAnswerOption('予定納入日');
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingPlan';
         } else if ($lastPhase === 'askingPlan') {
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '予定納入日', $message))
                     return;
             }
@@ -104,7 +104,7 @@ class Tainou extends SubmittableForm
             true,
             ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
         );
-        $supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
+        $supporter->pushOptions([承認する, 直接伝えた, 一番最後に見る]);
         return true;
     }
 

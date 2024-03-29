@@ -32,7 +32,7 @@ class AdminSettings extends UnsubmittableForm
                 '舎生大会・諸行事届用画像フォルダ変更',
                 'その他届出用画像フォルダ変更',
             ], true);
-            $supporter->pushOptions(['キャンセル']);
+            $supporter->pushOptions([キャンセル]);
 
             $supporter->storage['phases'][] = 'askingSetting';
             return;
@@ -40,7 +40,7 @@ class AdminSettings extends UnsubmittableForm
 
         $lastPhase = $supporter->storage['phases'][count($supporter->storage['phases']) - 1];
         if ($lastPhase === 'askingSetting') {
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '設定項目', $message))
                     return;
             }
@@ -65,7 +65,7 @@ https://docs.google.com/spreadsheets/d/{$supporter->config['eventSheetId']}
 " . self::getEventListString($supporter), true);
 
                     // 選択肢
-                    $supporter->pushOptions(['再読み込み', '前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions(['再読み込み', 前の項目を修正する, キャンセル]);
 
                     $supporter->storage['phases'][] = 'confirmingReloadEvents';
                     return;
@@ -76,7 +76,7 @@ https://docs.google.com/spreadsheets/d/{$supporter->config['eventSheetId']}
 現在の最大外部来訪者数:{$supporter->config['maxGaiburaihoushasuu']}人", true);
 
                     // 選択肢
-                    $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
                     $supporter->storage['phases'][] = 'askingMaxGaiburaihoushasuu';
                     return;
@@ -89,7 +89,7 @@ https://docs.google.com/spreadsheets/d/{$supporter->config['eventSheetId']}
 現在の設定値:{$supporter->config['endOfTerm']}", true);
 
                     // 選択肢
-                    $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
                     $supporter->storage['phases'][] = 'askingEndOfTerm';
                     return;
@@ -102,7 +102,7 @@ https://docs.google.com/spreadsheets/d/{$supporter->config['eventSheetId']}
 現在の設定値:{$password}", true);
 
                     // 選択肢
-                    $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
                     $supporter->storage['phases'][] = 'askingPassword';
                     return;
@@ -115,7 +115,7 @@ https://docs.google.com/spreadsheets/d/{$supporter->config['eventSheetId']}
 現在の設定値:{$password}", true);
 
                     // 選択肢
-                    $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
                     $supporter->storage['phases'][] = 'askingZaimuPassword';
                     return;
@@ -171,7 +171,7 @@ https://drive.google.com/drive/u/0/folders/{$supporter->config['generalImageFold
             }
 
             // 選択肢
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingGoogleUrl';
         } else if ($lastPhase === 'confirmingReloadEvents') {

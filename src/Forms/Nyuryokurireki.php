@@ -21,7 +21,7 @@ class Nyuryokurireki extends UnsubmittableForm
             $supporter->pushText("ボットに保存された入力履歴を削除します。\nよろしいですか？", true);
 
             // 選択肢表示
-            $supporter->pushOptions(['はい', 'キャンセル']);
+            $supporter->pushOptions([はい, キャンセル]);
 
             $supporter->storage['phases'][] = 'confirming';
             return;
@@ -29,7 +29,7 @@ class Nyuryokurireki extends UnsubmittableForm
 
         // 確認
         switch ($message) {
-            case 'はい':
+            case はい:
                 $supporter->storage['previousAnswers'] = [];
                 $supporter->pushText("入力履歴を削除しました。");
                 $supporter->resetForm();

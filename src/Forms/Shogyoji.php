@@ -50,7 +50,7 @@ class Shogyoji extends SubmittableForm
             $events = array_slice(array_keys($unpassedEventsToDates), 0, 11);
             $supporter->pushOptions($events, true);
             $supporter->pushOptions(['その他'], true);
-            $supporter->pushOptions(['キャンセル']);
+            $supporter->pushOptions([キャンセル]);
 
             $supporter->storage['cache']['unpassedEventsToDates'] = $unpassedEventsToDates;
             $supporter->storage['cache']['passedEventsToDates'] = $passedEventsToDates;
@@ -68,7 +68,7 @@ class Shogyoji extends SubmittableForm
             $message = $message['text'];
 
             switch ($message) {
-                case '前の項目を修正する':
+                case 前の項目を修正する:
                     break;
                 case 'その他':
                     // 質問
@@ -82,7 +82,7 @@ class Shogyoji extends SubmittableForm
 
                     $supporter->pushUnsavedAnswerOption('委員会行事');
                     $supporter->pushOptions($events);
-                    $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
                     // 次その他にはならないのでここの質問に戻ってこないようにする
                     array_pop($supporter->storage['phases']);
@@ -103,7 +103,7 @@ class Shogyoji extends SubmittableForm
 
             $supporter->pushOptions($dates, true);
             $supporter->pushOptions(['その他'], true);
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingStart';
             return;
@@ -114,7 +114,7 @@ class Shogyoji extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する')
+            if ($message !== 前の項目を修正する)
                 $supporter->storage['unsavedAnswers']['委員会行事'] = $message;
 
             // 質問
@@ -127,7 +127,7 @@ class Shogyoji extends SubmittableForm
 
             $supporter->pushUnsavedAnswerOption('開催日');
             $supporter->pushOptions($dates);
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingStartManually';
             return;
@@ -139,7 +139,7 @@ class Shogyoji extends SubmittableForm
             $message = $message['text'];
 
             switch ($message) {
-                case '前の項目を修正する':
+                case 前の項目を修正する:
                     break;
                 case 'その他':
                     // 質問
@@ -152,7 +152,7 @@ class Shogyoji extends SubmittableForm
 
                     $supporter->pushUnsavedAnswerOption('開催日');
                     $supporter->pushOptions($dates);
-                    $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
                     // 次その他にはならないのでここの質問に戻ってこないようにする
                     array_pop($supporter->storage['phases']);
@@ -174,7 +174,7 @@ class Shogyoji extends SubmittableForm
                 '遅刻と早退'
             ], true);
             $supporter->pushUnsavedAnswerOption('出欠');
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingAttendance';
             return;
@@ -185,7 +185,7 @@ class Shogyoji extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 switch (self::storeOrAskAgain($supporter, '開催日(手動入力)', $message)) {
                     case '':
                         break;
@@ -207,7 +207,7 @@ class Shogyoji extends SubmittableForm
                 '遅刻と早退'
             ], true);
             $supporter->pushUnsavedAnswerOption('出欠');
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingAttendance';
             return;
@@ -219,7 +219,7 @@ class Shogyoji extends SubmittableForm
             $message = $message['text'];
 
             switch ($message) {
-                case 'はい':
+                case はい:
                     break;
                 default:
                     $supporter->askAgainBecauseWrongReply();
@@ -237,7 +237,7 @@ class Shogyoji extends SubmittableForm
                 '遅刻と早退'
             ], true);
             $supporter->pushUnsavedAnswerOption('出欠');
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             array_pop($supporter->storage['phases']);
             $supporter->storage['phases'][] = 'askingAttendance';
@@ -249,7 +249,7 @@ class Shogyoji extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '出欠', $message))
                     return;
             }
@@ -261,7 +261,7 @@ class Shogyoji extends SubmittableForm
             $supporter->pushOptions(['疾病', '體育會', '冠婚葬祭', '資格試験', '就職活動'], true);
             $supporter->pushOptions(['専門学校の試験', 'サークルの大会および合宿', '大学のカリキュラム', 'その他'], true);
             $supporter->pushUnsavedAnswerOption('理由');
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingReason';
             return;
@@ -272,7 +272,7 @@ class Shogyoji extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '理由', $message))
                     return;
             }
@@ -282,7 +282,7 @@ class Shogyoji extends SubmittableForm
 
             // 選択肢
             $supporter->pushUnsavedAnswerOption('理由の詳細');
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingReasonDetail';
             return;
@@ -293,7 +293,7 @@ class Shogyoji extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '理由の詳細', $message))
                     return;
             }
@@ -309,7 +309,7 @@ class Shogyoji extends SubmittableForm
             if (isset($supporter->storage['unsavedAnswers']['証拠画像']) && $supporter->storage['unsavedAnswers']['証拠画像'] !== '風紀に相談済み')
                 $supporter->pushUnsavedAnswerOption('証拠画像', 'image');
             $supporter->pushImageOption();
-            $supporter->pushOptions(['風紀に相談済み', '前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions(['風紀に相談済み', 前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingEvidence';
             return;
@@ -324,7 +324,7 @@ class Shogyoji extends SubmittableForm
                 }
                 $message = $message['text'];
 
-                if ($message !== '前の項目を修正する') {
+                if ($message !== 前の項目を修正する) {
                     if ($message === '風紀に相談済み') {
                         $supporter->storage['unsavedAnswers']['証拠画像'] = '風紀に相談済み';
                     } else {
@@ -350,7 +350,7 @@ class Shogyoji extends SubmittableForm
 議決の委任に同意しますか？", true);
 
                 // 選択肢
-                $supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);
+                $supporter->pushOptions([はい, 前の項目を修正する, キャンセル]);
                 $supporter->storage['phases'][] = 'askingConsent';
                 return;
             }
@@ -523,7 +523,7 @@ class Shogyoji extends SubmittableForm
         }
 
         $supporter->pushText($message, true, ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']);
-        $supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
+        $supporter->pushOptions([承認する, 直接伝えた, 一番最後に見る]);
         return true;
     }
 
@@ -563,7 +563,7 @@ class Shogyoji extends SubmittableForm
                 if ($date < $today) {
                     $supporter->pushText("過去の日付です。
 よろしいですか？", true);
-                    $supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions([はい, 前の項目を修正する, キャンセル]);
 
                     return 'past-date';
                 }
@@ -610,7 +610,7 @@ class Shogyoji extends SubmittableForm
                 return '';
             case '議決の委任':
                 switch ($message) {
-                    case 'はい':
+                    case はい:
                         $supporter->storage['unsavedAnswers']['議決の委任'] = $message;
                         return '';
                 }

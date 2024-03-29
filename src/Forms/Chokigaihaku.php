@@ -23,7 +23,7 @@ class Chokigaihaku extends SubmittableForm
             $nextWeek = array_map(fn ($i) => dateToDateStringWithDay(strtotime("+{$i} day")), range(0, 6));
             $supporter->pushOptions($nextWeek);
             $supporter->pushUnsavedAnswerOption('出舎日'); // ラベル変更
-            $supporter->pushOptions(['キャンセル']);
+            $supporter->pushOptions([キャンセル]);
 
             $supporter->storage['phases'][] = 'askingStart';
             return;
@@ -37,7 +37,7 @@ class Chokigaihaku extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '出舎日', $message))
                     return;
             }
@@ -54,7 +54,7 @@ class Chokigaihaku extends SubmittableForm
             if (isset($supporter->storage['unsavedAnswers']['帰舎日']) && stringToDate($supporter->storage['unsavedAnswers']['帰舎日']) > $startDate)
                 $supporter->pushUnsavedAnswerOption('帰舎日'); // ラベル変更
 
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingEnd';
         } else if ($lastPhase === 'askingEnd') {
@@ -64,7 +64,7 @@ class Chokigaihaku extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 switch (self::storeOrAskAgain($supporter, '帰舎日', $message)) {
                     case '':
                         break;
@@ -81,7 +81,7 @@ class Chokigaihaku extends SubmittableForm
             // 選択肢
             $supporter->pushOptions(['帰省', '合宿', '旅行', 'その他'], true);
             $supporter->pushUnsavedAnswerOption('外泊理由');
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingReason';
         } else if ($lastPhase === 'confirmingPeriod') {
@@ -92,7 +92,7 @@ class Chokigaihaku extends SubmittableForm
             $message = $message['text'];
 
             switch ($message) {
-                case 'はい':
+                case はい:
                     break;
                 default:
                     $supporter->askAgainBecauseWrongReply();
@@ -105,7 +105,7 @@ class Chokigaihaku extends SubmittableForm
             // 選択肢
             $supporter->pushOptions(['帰省', '合宿', '旅行', 'その他'], true);
             $supporter->pushUnsavedAnswerOption('外泊理由');
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             // askingEndの方で質問する
             array_pop($supporter->storage['phases']);
@@ -117,7 +117,7 @@ class Chokigaihaku extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する') {
+            if ($message !== 前の項目を修正する) {
                 if (self::storeOrAskAgain($supporter, '外泊理由', $message))
                     return;
             }
@@ -127,7 +127,7 @@ class Chokigaihaku extends SubmittableForm
 
             // 選択肢
             $supporter->pushUnsavedAnswerOption('外泊理由の詳細');
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingDetailedReason';
         } else if ($lastPhase === 'askingDetailedReason') {
@@ -137,7 +137,7 @@ class Chokigaihaku extends SubmittableForm
             }
             $message = $message['text'];
 
-            if ($message !== '前の項目を修正する')
+            if ($message !== 前の項目を修正する)
                 $supporter->storage['unsavedAnswers']['外泊理由の詳細'] = $message;
 
             // 質問
@@ -147,13 +147,13 @@ class Chokigaihaku extends SubmittableForm
             $supporter->pushPreviousAnswerOptions('滞在先住所');
             $supporter->pushUnsavedAnswerOption('滞在先住所');
             $supporter->pushLocaleOptions();
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingAddress';
         } else if ($lastPhase === 'askingAddress') {
             if ($message['type'] === 'text') {
                 $message = $message['text'];
-                if ($message !== '前の項目を修正する')
+                if ($message !== 前の項目を修正する)
                     $supporter->storage['unsavedAnswers']['滞在先住所'] = $message;
             } else {
                 if (self::storeOrAskAgain($supporter, '滞在先住所', $message))
@@ -166,7 +166,7 @@ class Chokigaihaku extends SubmittableForm
             // 選択肢
             $supporter->pushPreviousAnswerOptions('連絡先電話番号');
             $supporter->pushUnsavedAnswerOption('連絡先電話番号');
-            $supporter->pushOptions(['前の項目を修正する', 'キャンセル']);
+            $supporter->pushOptions([前の項目を修正する, キャンセル]);
 
             $supporter->storage['phases'][] = 'askingTel';
         } else if ($lastPhase === 'askingTel') {
@@ -271,7 +271,7 @@ class Chokigaihaku extends SubmittableForm
                 true,
                 ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
             );
-            $supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
+            $supporter->pushOptions([承認する, 直接伝えた, 一番最後に見る]);
             return true;
         }
 
@@ -295,7 +295,7 @@ class Chokigaihaku extends SubmittableForm
             true,
             ['name' => $profile['displayName'], 'iconUrl' => $profile['pictureUrl'] ?? 'https://dummy.com/']
         );
-        $supporter->pushOptions(['承認する', '直接伝えた', '一番最後に見る']);
+        $supporter->pushOptions([承認する, 直接伝えた, 一番最後に見る]);
         return true;
     }
 
@@ -346,7 +346,7 @@ class Chokigaihaku extends SubmittableForm
                     $supporter->pushText("その期間は行事{$conflictingEvents}と被っています。
 よろしいですか？
 ※委員会行事を欠席または遅刻、早退する場合は舎生大会・諸行事届の届け出が必要になります。", true);
-                    $supporter->pushOptions(['はい', '前の項目を修正する', 'キャンセル']);
+                    $supporter->pushOptions([はい, 前の項目を修正する, キャンセル]);
 
                     return 'booking';
                 }
