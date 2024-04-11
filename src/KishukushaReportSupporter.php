@@ -81,9 +81,21 @@ class KishukushaReportSupporter
             $this->confirmReply();
             $this->storeStorage();
         } catch (\Throwable $e) {
-            $msg = $e->getMessage();
+            if (DEBUGGING) {
+                $errorMsg = "{$e}";
+            } else {
+                if ($e instanceof ExceptionWrapper) {
+                    $msg = $e->exception->getMessage();
+                    $name = $e->exception::class;
+                    $errorMsg = "{$name}: {$msg}\n{$e->additionalMsg}";
+                } else {
+                    $msg = $e->getMessage();
+                    $name = $e::class;
+                    $errorMsg = "{$name}: {$msg}";
+                }
+            }
             $this->pushText("【エラーが発生しました】
-{$msg}
+{$errorMsg}
 
 エラーが発生しました。
 もう一度試してください。");

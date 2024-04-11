@@ -54,7 +54,7 @@ foreach ($events as $event) {
         $processingTimeMs = (($end - $start) / 1000000);
         $eventInfo = $supporter->getEventInfo();
         $logDatabase = new LogDatabase(LOG_TABLE_NAME);
-        if ($errorMessage) $logDatabase->log("An error occurred:\n" . $errorMessage);
+        if ($errorMessage) $logDatabase->log("An error occurred:\n{$errorMessage}");
         $logDatabase->log("Handled the event in {$processingTimeMs} ms. {$eventInfo}");
     }
 
