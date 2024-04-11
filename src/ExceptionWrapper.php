@@ -4,9 +4,17 @@ namespace KishukushaReportSupporter;
 
 class ExceptionWrapper extends \RuntimeException
 {
+    public \Throwable $exception;
+    public string $additionalMsg;
+
     public function __construct(\Throwable $exception, string $additionalMsg)
     {
-        $msg = DEBUGGING ? $exception : $exception->getMessage();
-        parent::__construct("{$msg}\n{$additionalMsg}", 0, $exception);
+        $this->exception = $exception;
+        $this->additionalMsg = $additionalMsg;
+    }
+
+    public function __toString(): string
+    {
+        return "{$this->exception}\n{$this->additionalMsg}";
     }
 }
