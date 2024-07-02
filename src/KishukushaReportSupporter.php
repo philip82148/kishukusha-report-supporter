@@ -846,7 +846,7 @@ class KishukushaReportSupporter
         return true;
     }
 
-    private function updateEndOfTerm(): int
+    public function updateEndOfTerm(): int
     {
         $endOfTermDate = stringToDate($this->config['endOfTerm']);
         $today = getDateAt0AM();
