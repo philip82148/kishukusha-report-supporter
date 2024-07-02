@@ -6,7 +6,7 @@ use KishukushaReportSupporter\Forms;
 
 class KishukushaReportSupporter
 {
-    public const VERSION = '1.1.9';
+    public const VERSION = '1.2.0';
 
     /* 届出を追加する際はここの編集とsrc/Formsフォルダへのファイルの追加が必要 */
     public const FORMS = [
@@ -846,7 +846,7 @@ class KishukushaReportSupporter
         return true;
     }
 
-    private function updateEndOfTerm(): int
+    public function updateEndOfTerm(): int
     {
         $endOfTermDate = stringToDate($this->config['endOfTerm']);
         $today = getDateAt0AM();
