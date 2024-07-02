@@ -154,7 +154,7 @@ https://docs.google.com/spreadsheets/d/{$supporter->config['outputSheetId']}", t
 " . BOT_EMAIL . "
 
 現在の舎生大会・諸行事届用画像保存先:
-https://drive.google.com/drive/u/0/folders/{$supporter->config['shogyojiImageFolderId']}", true);
+https://drive.google.com/drive/folders/{$supporter->config['shogyojiImageFolderId']}", true);
                     break;
 
                 case 'その他届出用画像保存先変更':
@@ -165,7 +165,7 @@ https://drive.google.com/drive/u/0/folders/{$supporter->config['shogyojiImageFol
 " . BOT_EMAIL . "
 
 現在のその他届出用画像保存先:
-https://drive.google.com/drive/u/0/folders/{$supporter->config['generalImageFolderId']}", true);
+https://drive.google.com/drive/folders/{$supporter->config['generalImageFolderId']}", true);
                     break;
             }
 
