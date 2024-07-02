@@ -40,7 +40,7 @@ define(
 
 define('USER_MANUAL_PHOTO_FILENAME', 'user-manual.jpg');
 
-define('ADMIN_MANUAL_PDF_URL', 'https://github.com/philip82148/kishukusha-report-supporter/blob/develop/admin-manual.pdf');
+define('ADMIN_MANUAL_PDF_URL', 'https://github.com/philip82148/kishukusha-report-supporter/blob/main/admin-manual.pdf');
 
 define(
     'ADMIN_MANUAL',

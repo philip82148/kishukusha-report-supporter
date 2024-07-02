@@ -149,8 +149,6 @@ https://docs.google.com/spreadsheets/d/{$supporter->config['outputSheetId']}", t
 マニュアル: ' . ADMIN_MANUAL_PDF_URL . "
 
 ※プライバシーに関わる画像がアップロードされる可能性があるため、五役とボットのみに共有したフォルダにしてください。
-また、ボットに画像の完全な削除権限を与えるために、ボットにコンテンツ管理者ではなく管理者の権限を与えてください。
-そのためには、個人所有のフォルダをボットに共有するのではなく、ボットとの間に作成した共有ドライブ内のフォルダを使用する必要があります。
 
 ボットのGoogleアカウント:
 " . BOT_EMAIL . "
@@ -351,8 +349,8 @@ https://docs.google.com/spreadsheets/d/{$supporter->config['eventSheetId']}", tr
                             return '';
                         }
                         $supporter->askAgainBecauseWrongReply("入力されたURLのフォルダへのテストファイルのアップロード、またはその削除に失敗しました。
-ボットのGoogleアカウントにフォルダが共有されていないか、管理者権限が与えられていない可能性があります。
-ボットとの間に作成した共有ドライブ内のフォルダを使用し、ボットにコンテンツ管理者ではなく、管理者の権限を与えてください。
+ボットのGoogleアカウントにフォルダが共有されていないか、編集権限が与えられていない可能性があります。
+なお、共有ドライブ上のフォルダを使用する場合は、ボットにコンテンツ管理者ではなく、管理者の権限を与えてください。
 もう一度入力してください。");
                         return 'wrong-reply';
                     case 'その他届出用画像保存先変更':
@@ -365,7 +363,7 @@ https://docs.google.com/spreadsheets/d/{$supporter->config['eventSheetId']}", tr
                             return '';
                         }
                         $supporter->askAgainBecauseWrongReply("入力されたURLのフォルダへのテストファイルのアップロードに失敗しました。
-ボットのGoogleアカウントにフォルダが共有されていないか、ファイルの作成権限が与えられていない可能性があります。
+ボットのGoogleアカウントにフォルダが共有されていないか、編集権限が与えられていない可能性があります。
 もう一度入力してください。");
                         return 'wrong-reply';
                 }
